@@ -23,15 +23,14 @@ class ReportGenerator:
             (user_id, med_id, timestamp, status)
         )
 
-    def get_user_history(self, user_id):
+    def get_user_history(self, user_id=None):
         query = '''
             SELECT l.id, l.user_id, l.medication_id, m.name, l.timestamp, l.status 
             FROM intake_log l
             JOIN medications m ON l.medication_id = m.id
-            WHERE l.user_id = ?
             ORDER BY l.timestamp DESC
         '''
-        rows = self.db.fetch_all(query, (user_id,))
+        rows = self.db.fetch_all(query)
         return [HistoryLog(*row) for row in rows]
 
     def export_to_csv(self, user_id, filepath):

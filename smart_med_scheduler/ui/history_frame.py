@@ -3,9 +3,8 @@ from models.history import ReportGenerator
 import os
 
 class HistoryFrame(ctk.CTkFrame):
-    def __init__(self, master, go_dashboard):
-        super().__init__(master)
-        self.go_dashboard = go_dashboard
+    def __init__(self, master):
+        super().__init__(master, fg_color="transparent")
         self.report_generator = ReportGenerator()
         self.current_user = None
 
@@ -13,19 +12,18 @@ class HistoryFrame(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
 
         # Header
-        self.header = ctk.CTkFrame(self)
-        self.header.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
-        ctk.CTkLabel(self.header, text="Intake History", font=ctk.CTkFont(size=20, weight="bold")).pack(side="left", padx=10, pady=10)
-        ctk.CTkButton(self.header, text="Back to Dashboard", command=self.go_dashboard).pack(side="right", padx=10, pady=10)
+        self.header = ctk.CTkFrame(self, fg_color="transparent")
+        self.header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
+        ctk.CTkLabel(self.header, text="Intake History", font=ctk.CTkFont(size=24, weight="bold")).pack(side="left")
 
         # List
-        self.list_frame = ctk.CTkScrollableFrame(self)
-        self.list_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        self.list_frame = ctk.CTkScrollableFrame(self, fg_color="#1a1a1a")
+        self.list_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
 
         # Footer
-        self.footer = ctk.CTkFrame(self)
-        self.footer.grid(row=2, column=0, sticky="ew", padx=10, pady=10)
-        self.export_btn = ctk.CTkButton(self.footer, text="Export to CSV", command=self.export_csv)
+        self.footer = ctk.CTkFrame(self, fg_color="transparent")
+        self.footer.grid(row=2, column=0, sticky="ew", padx=20, pady=10)
+        self.export_btn = ctk.CTkButton(self.footer, text="Export to CSV", width=200, command=self.export_csv)
         self.export_btn.pack(pady=10)
 
     def refresh(self, user):
@@ -41,14 +39,16 @@ class HistoryFrame(ctk.CTkFrame):
             ctk.CTkLabel(self.list_frame, text="No history found.").pack(pady=10)
         else:
             for log in history:
-                f = ctk.CTkFrame(self.list_frame)
+                f = ctk.CTkFrame(self.list_frame, fg_color="#2a2a2a")
                 f.pack(fill="x", pady=2, padx=5)
-                text = f"{log.timestamp} | {log.med_name} - {log.status}"
-                color = "green" if log.status == "TAKEN" else "red"
-                ctk.CTkLabel(f, text=text, text_color=color).pack(side="left", padx=10, pady=5)
+                
+                info_text = f"{log.med_name} - {log.status}"
+                color = "#2E8B57" if log.status == "TAKEN" else "#DC143C"
+                
+                ctk.CTkLabel(f, text=log.timestamp, text_color="gray").pack(side="left", padx=15, pady=10)
+                ctk.CTkLabel(f, text=info_text, font=ctk.CTkFont(weight="bold"), text_color=color).pack(side="left", padx=15)
 
     def export_csv(self):
         filepath = f"history_export_{self.current_user.username}.csv"
         self.report_generator.export_to_csv(self.current_user.user_id, filepath)
-        # Assuming simple alert
         print(f"Exported to {filepath}")

@@ -32,8 +32,8 @@ class DoseAlert:
         due_meds = []
         now = datetime.now()
         
-        # Get all medications for user
-        meds = self.db.fetch_all("SELECT id, name FROM medications WHERE user_id = ?", (user_id,))
+        # Get all medications
+        meds = self.db.fetch_all("SELECT id, name FROM medications")
         
         for med in meds:
             med_id = med[0]
