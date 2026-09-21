@@ -26,9 +26,21 @@ class DatabaseManager:
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
-                password TEXT NOT NULL
+                password TEXT NOT NULL,
+                name TEXT,
+                email TEXT
             )
         ''')
+
+        # Add name and email to existing databases if missing
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN name TEXT")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN email TEXT")
+        except sqlite3.OperationalError:
+            pass
 
         # Medications table
         cursor.execute('''
