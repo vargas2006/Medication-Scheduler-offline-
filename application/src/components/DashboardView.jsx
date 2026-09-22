@@ -58,7 +58,7 @@ export default function DashboardView({ user, onDataChange }) {
 
   return (
     <div className="p-5 space-y-5 overflow-y-auto h-full pr-6">
-      {/* 4 Stat Cards */}
+      {/* 4 Stat Cards matching project medication reference styling */}
       <div className="grid grid-cols-4 gap-4">
         {/* Card 1: Vibrant Purple Card */}
         <div className="bg-[#6b21a8] border border-[#9333ea] rounded-2xl p-4 h-[110px] flex flex-col justify-between shadow-lg shadow-purple-950/40">

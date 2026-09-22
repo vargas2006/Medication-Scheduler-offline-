@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AppLoadingScreen from './components/AppLoadingScreen';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import LoginModal from './components/LoginModal';
@@ -10,6 +11,7 @@ import SettingsView from './components/SettingsView';
 import { callApi } from './utils/pywebview';
 
 export default function App() {
+  const [appLoading, setAppLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('DashboardFrame');
   const [dataRefreshKey, setDataRefreshKey] = useState(0);
@@ -22,6 +24,10 @@ export default function App() {
   const handleDataChange = () => {
     setDataRefreshKey((prev) => prev + 1);
   };
+
+  if (appLoading) {
+    return <AppLoadingScreen onFinish={() => setAppLoading(false)} />;
+  }
 
   if (!user) {
     return <LoginModal onLoginSuccess={(u) => setUser(u)} />;
