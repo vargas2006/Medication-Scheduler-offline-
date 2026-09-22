@@ -2,8 +2,7 @@ import customtkinter as ctk
 from models.schedule import DoseAlert
 from models.medication import InventoryManager
 from models.history import ReportGenerator
-import time
-import threading
+from ui.skeleton import SkeletonManager
 from datetime import datetime, timedelta
 
 class DashboardFrame(ctk.CTkFrame):
@@ -14,72 +13,12 @@ class DashboardFrame(ctk.CTkFrame):
         self.inventory_manager = InventoryManager()
         self.report_generator = ReportGenerator()
         self.current_user = None
+        self.loaded_user_id = None
+        self.is_loaded = False
 
         # Scrollable outer container so on smaller screen sizes everything fits cleanly
-        self.scroll_container = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        self.scroll_container = ctk.CTkScrollableFrame(self, fg_color="#0d0f17")
         self.scroll_container.pack(fill="both", expand=True, padx=16, pady=12)
-
-        # 1. Top Header with Bordered Title Tag
-        self.header_frame = ctk.CTkFrame(self.scroll_container, fg_color="transparent")
-        self.header_frame.pack(fill="x", pady=(4, 16))
-
-        self.header_left = ctk.CTkFrame(self.header_frame, fg_color="transparent")
-        self.header_left.pack(side="left")
-
-        # Bordered Tag Badge
-        self.tag_badge = ctk.CTkFrame(
-            self.header_left, 
-            fg_color="#181d2e", 
-            border_color="#2f3957", 
-            border_width=1, 
-            corner_radius=6, 
-            height=24
-        )
-        self.tag_badge.pack(anchor="w", pady=(0, 4))
-        self.tag_badge.pack_propagate(False)
-
-        ctk.CTkLabel(
-            self.tag_badge, 
-            text="● REALTIME CARE MONITOR", 
-            font=ctk.CTkFont(size=10, weight="bold"), 
-            text_color="#38bdf8"
-        ).pack(side="left", padx=8)
-
-        self.title_lbl = ctk.CTkLabel(
-            self.header_left, 
-            text="Dashboard Overview", 
-            font=ctk.CTkFont(size=24, weight="bold"), 
-            text_color="#ffffff"
-        )
-        self.title_lbl.pack(anchor="w")
-
-        self.subtitle_lbl = ctk.CTkLabel(
-            self.header_left, 
-            text="Track medication adherence, due alerts, and daily intake statistics.", 
-            font=ctk.CTkFont(size=12), 
-            text_color="#64748b"
-        )
-        self.subtitle_lbl.pack(anchor="w")
-
-        # Header Right: Date Pill
-        self.date_badge = ctk.CTkFrame(
-            self.header_frame, 
-            fg_color="#161926", 
-            border_color="#24293e", 
-            border_width=1, 
-            corner_radius=8, 
-            height=36
-        )
-        self.date_badge.pack(side="right", pady=4)
-        self.date_badge.pack_propagate(False)
-
-        today_str = datetime.now().strftime("%A, %b %d")
-        ctk.CTkLabel(
-            self.date_badge, 
-            text=f"📅 {today_str}", 
-            font=ctk.CTkFont(size=12, weight="bold"), 
-            text_color="#94a3b8"
-        ).pack(side="left", padx=12)
 
         # 2. Stats Row (4 Metric Cards matching reference image styling)
         self.stats_grid = ctk.CTkFrame(self.scroll_container, fg_color="transparent")
@@ -247,7 +186,7 @@ class DashboardFrame(ctk.CTkFrame):
         self.middle_grid.grid_columnconfigure(0, weight=6)
         self.middle_grid.grid_columnconfigure(1, weight=4)
 
-        # Left: Due Right Now Card
+        # Left: Due Right Now Card (Fixed height 280px)
         self.due_container = ctk.CTkFrame(
             self.middle_grid, 
             fg_color="#161926", 
@@ -284,11 +223,11 @@ class DashboardFrame(ctk.CTkFrame):
         )
         self.due_count_badge.pack(side="right")
 
-        # Scrollable list for Due Items
-        self.due_scroll = ctk.CTkScrollableFrame(self.due_container, fg_color="transparent")
+        # Scrollable list for Due Items with solid matching background #161926
+        self.due_scroll = ctk.CTkScrollableFrame(self.due_container, fg_color="#161926")
         self.due_scroll.pack(fill="both", expand=True, padx=14, pady=(0, 10))
 
-        # Right: Weekly Dose Adherence Chart (Inspired by Bar Chart in Reference Image)
+        # Right: Weekly Dose Adherence Chart (Fixed height 280px)
         self.chart_container = ctk.CTkFrame(
             self.middle_grid, 
             fg_color="#161926", 
@@ -333,7 +272,7 @@ class DashboardFrame(ctk.CTkFrame):
 
         self.weekly_data = [0, 0, 0, 0, 0, 0, 0] # Mon to Sun counts
 
-        # 4. Bottom Section: Recent Activity Log
+        # 4. Bottom Section: Recent Activity Log (Fixed height 220px)
         self.recent_container = ctk.CTkFrame(
             self.scroll_container, 
             fg_color="#161926", 
@@ -367,8 +306,13 @@ class DashboardFrame(ctk.CTkFrame):
             pady=3
         ).pack(side="right")
 
-        self.recent_scroll = ctk.CTkScrollableFrame(self.recent_container, fg_color="transparent")
+        # Scrollable list for Recent Logs with solid matching background #161926
+        self.recent_scroll = ctk.CTkScrollableFrame(self.recent_container, fg_color="#161926")
         self.recent_scroll.pack(fill="both", expand=True, padx=14, pady=(0, 10))
+
+        # Skeleton loading managers
+        self.due_skeleton_mgr = SkeletonManager(self.due_scroll)
+        self.recent_skeleton_mgr = SkeletonManager(self.recent_scroll)
 
     def redraw_chart(self):
         w = self.chart_canvas.winfo_width()
@@ -393,7 +337,6 @@ class DashboardFrame(ctk.CTkFrame):
         slot_width = (w - 20) / len(days)
         bar_width = min(22, max(12, int(slot_width * 0.45)))
 
-        # Colors matching the reference chart (gradient-like cyan and purple)
         bar_colors = ["#38bdf8", "#06b6d4", "#22d3ee", "#818cf8", "#a855f7", "#c084fc", "#06b6d4"]
 
         for i, (day, val) in enumerate(zip(days, values)):
@@ -402,7 +345,6 @@ class DashboardFrame(ctk.CTkFrame):
             x1 = cx + bar_width / 2
 
             bar_h = (val / max_val) * chart_height if max_val > 0 else 0
-            # Min visual height for active aesthetic
             if val == 0:
                 bar_h = 6
                 fill_color = "#1f2438"
@@ -412,10 +354,8 @@ class DashboardFrame(ctk.CTkFrame):
             y1 = chart_bottom
             y0 = chart_bottom - bar_h
 
-            # Draw bar
             self.chart_canvas.create_rectangle(x0, y0, x1, y1, fill=fill_color, width=0)
 
-            # Day label below
             self.chart_canvas.create_text(
                 cx, 
                 h - 10, 
@@ -424,31 +364,17 @@ class DashboardFrame(ctk.CTkFrame):
                 font=("Arial", 9)
             )
 
-    def refresh(self, user):
+    def refresh(self, user, force=False):
         self.current_user = user
-        display_name = user.name if hasattr(user, "name") and user.name else user.username
-        self.subtitle_lbl.configure(text=f"Welcome back, {display_name}! Here is your medication schedule today.")
         
-        self.show_skeleton()
-        threading.Thread(target=self.fetch_data_with_delay, daemon=True).start()
+        if not force and self.is_loaded and self.loaded_user_id == user.user_id:
+            return
 
-    def show_skeleton(self):
-        for w in self.due_scroll.winfo_children():
-            w.destroy()
-        for w in self.recent_scroll.winfo_children():
-            w.destroy()
+        self.fetch_data()
+        self.loaded_user_id = user.user_id
+        self.is_loaded = True
 
-        for _ in range(2):
-            skeleton = ctk.CTkFrame(self.due_scroll, fg_color="#1c2033", height=50, corner_radius=8)
-            skeleton.pack(fill="x", pady=4, padx=4)
-
-        for _ in range(3):
-            skeleton = ctk.CTkFrame(self.recent_scroll, fg_color="#1c2033", height=32, corner_radius=6)
-            skeleton.pack(fill="x", pady=3, padx=4)
-
-    def fetch_data_with_delay(self):
-        time.sleep(0.6)
-
+    def fetch_data(self):
         meds = self.inventory_manager.get_user_medications(self.current_user.user_id)
         due_meds = self.dose_alert.get_due_medications(self.current_user.user_id)
         history = self.report_generator.get_user_history(self.current_user.user_id)
@@ -462,9 +388,7 @@ class DashboardFrame(ctk.CTkFrame):
         for log in history:
             if log.status == "TAKEN" and log.timestamp:
                 try:
-                    # format typically YYYY-MM-DD HH:MM:SS
                     dt = datetime.strptime(log.timestamp.split()[0], "%Y-%m-%d")
-                    # weekday: Mon=0, Sun=6
                     weekly_counts[dt.weekday()] += 1
                 except Exception:
                     pass
@@ -475,15 +399,15 @@ class DashboardFrame(ctk.CTkFrame):
 
         recent_history = history[:6]
 
-        try:
-            if self.winfo_exists():
-                self.after(0, lambda: self.render_real_data(
-                    due_meds, recent_history, total_meds, low_stock, doses_taken, adherence_rate, weekly_counts
-                ))
-        except Exception:
-            pass
+        self.render_real_data(
+            due_meds, recent_history, total_meds, low_stock, doses_taken, adherence_rate, weekly_counts
+        )
 
     def render_real_data(self, due_meds, recent_history, total_meds, low_stock, doses_taken, adherence_rate, weekly_counts):
+        # Stop skeleton animations
+        self.due_skeleton_mgr.stop()
+        self.recent_skeleton_mgr.stop()
+
         # Update Stats Cards
         self.lbl_total_meds.configure(text=str(total_meds))
         self.lbl_adherence.configure(text=adherence_rate)
@@ -501,7 +425,7 @@ class DashboardFrame(ctk.CTkFrame):
         self.weekly_data = weekly_counts
         self.redraw_chart()
 
-        # Clear skeletons
+        # Clear existing items
         for w in self.due_scroll.winfo_children():
             w.destroy()
         for w in self.recent_scroll.winfo_children():
@@ -644,4 +568,13 @@ class DashboardFrame(ctk.CTkFrame):
     def take_dose(self, med_id):
         self.inventory_manager.deduct_stock(med_id)
         self.report_generator.log_intake(self.current_user.user_id, med_id, "TAKEN")
-        self.refresh(self.current_user)
+        # Invalidate cache for sibling frames so they reload updated data on next visit
+        try:
+            app = self.winfo_toplevel()
+            if hasattr(app, "content_frames"):
+                for name, frame in app.content_frames.items():
+                    if name != "DashboardFrame" and hasattr(frame, "is_loaded"):
+                        frame.is_loaded = False
+        except Exception:
+            pass
+        self.refresh(self.current_user, force=True)

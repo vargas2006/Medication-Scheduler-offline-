@@ -3,6 +3,7 @@ from tkinter import filedialog
 from PIL import Image
 from models.medication import InventoryManager
 from models.schedule import DoseAlert
+from ui.skeleton import SkeletonManager
 import os
 
 class MedicationFrame(ctk.CTkFrame):
@@ -12,46 +13,12 @@ class MedicationFrame(ctk.CTkFrame):
         self.dose_alert = DoseAlert()
         self.current_user = None
         self.selected_image_path = None
+        self.image_cache = {}
+        self.loaded_user_id = None
+        self.is_loaded = False
 
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure((0, 1), weight=1)
-
-        # Header
-        self.header = ctk.CTkFrame(self, fg_color="transparent")
-        self.header.grid(row=0, column=0, columnspan=2, sticky="ew", padx=20, pady=(20, 10))
-        
-        # Bordered Title Tag Badge
-        self.tag_badge = ctk.CTkFrame(
-            self.header, 
-            fg_color="#181d2e", 
-            border_color="#2f3957", 
-            border_width=1, 
-            corner_radius=6, 
-            height=24
-        )
-        self.tag_badge.pack(anchor="w", pady=(0, 4))
-        self.tag_badge.pack_propagate(False)
-
-        ctk.CTkLabel(
-            self.tag_badge, 
-            text="● INVENTORY MANAGEMENT", 
-            font=ctk.CTkFont(size=10, weight="bold"), 
-            text_color="#38bdf8"
-        ).pack(side="left", padx=8)
-
-        ctk.CTkLabel(
-            self.header, 
-            text="Medication Inventory", 
-            font=ctk.CTkFont(size=24, weight="bold"),
-            text_color="#ffffff"
-        ).pack(anchor="w")
-
-        ctk.CTkLabel(
-            self.header, 
-            text="Register and monitor your medications, stock thresholds, and schedules.", 
-            font=ctk.CTkFont(size=12), 
-            text_color="#64748b"
-        ).pack(anchor="w")
 
         # Form Frame
         self.form_frame = ctk.CTkFrame(
@@ -61,7 +28,7 @@ class MedicationFrame(ctk.CTkFrame):
             border_width=1, 
             corner_radius=14
         )
-        self.form_frame.grid(row=1, column=0, sticky="nsew", padx=(20, 10), pady=10)
+        self.form_frame.grid(row=0, column=0, sticky="nsew", padx=(20, 10), pady=10)
 
         ctk.CTkLabel(self.form_frame, text="Add New Drug", font=ctk.CTkFont(size=18, weight="bold")).grid(row=0, column=0, columnspan=2, pady=15)
         
@@ -120,7 +87,8 @@ class MedicationFrame(ctk.CTkFrame):
             label_text="Your Drugs", 
             fg_color="#161926"
         )
-        self.list_frame.grid(row=1, column=1, sticky="nsew", padx=(0, 20), pady=10)
+        self.list_frame.grid(row=0, column=1, sticky="nsew", padx=(0, 20), pady=10)
+        self.skeleton_mgr = SkeletonManager(self.list_frame)
 
     def upload_image(self):
         filepath = filedialog.askopenfilename(
@@ -140,45 +108,85 @@ class MedicationFrame(ctk.CTkFrame):
         self.selected_image_path = None
         self.img_lbl.configure(image=None, text="No Image")
 
-    def refresh(self, user):
+    def refresh(self, user, force=False):
         self.current_user = user
+        if not force and self.is_loaded and self.loaded_user_id == user.user_id:
+            return
         self.load_medications()
+        self.loaded_user_id = user.user_id
+        self.is_loaded = True
 
-    def load_medications(self):
-        for widget in self.list_frame.winfo_children():
-            widget.destroy()
+    def create_med_card(self, med):
+        f = ctk.CTkFrame(
+            self.list_frame, 
+            fg_color="#1c2033", 
+            border_color="#282f47", 
+            border_width=1, 
+            corner_radius=10
+        )
+        f._med_id = med.med_id
         
-        meds = self.inventory.get_user_medications(self.current_user.user_id)
-        for med in meds:
-            f = ctk.CTkFrame(
-                self.list_frame, 
-                fg_color="#1c2033", 
-                border_color="#282f47", 
-                border_width=1, 
-                corner_radius=10
-            )
-            f.pack(fill="x", pady=5)
-            
-            # Display Image if exists
-            img_container = ctk.CTkLabel(f, text="Img", width=50, height=50, fg_color="#333333", corner_radius=5)
-            img_container.pack(side="left", padx=10, pady=10)
-            
-            if med.image_path and os.path.exists(med.image_path):
+        # Display Image if exists
+        img_container = ctk.CTkLabel(f, text="Img", width=50, height=50, fg_color="#333333", corner_radius=5)
+        img_container.pack(side="left", padx=10, pady=10)
+        
+        if med.image_path and os.path.exists(med.image_path):
+            if med.image_path not in self.image_cache:
                 try:
                     img = Image.open(med.image_path)
-                    ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=(50, 50))
-                    img_container.configure(image=ctk_img, text="")
-                except:
-                    pass
+                    self.image_cache[med.image_path] = ctk.CTkImage(light_image=img, dark_image=img, size=(50, 50))
+                except Exception:
+                    self.image_cache[med.image_path] = None
             
-            info_frame = ctk.CTkFrame(f, fg_color="transparent")
-            info_frame.pack(side="left", padx=10, fill="y")
-            
-            ctk.CTkLabel(info_frame, text=med.name, font=ctk.CTkFont(weight="bold")).pack(anchor="w")
-            ctk.CTkLabel(info_frame, text=f"{med.dosage} | Stock: {med.stock}", text_color="gray").pack(anchor="w")
+            ctk_img = self.image_cache.get(med.image_path)
+            if ctk_img:
+                img_container.configure(image=ctk_img, text="")
+        
+        info_frame = ctk.CTkFrame(f, fg_color="transparent")
+        info_frame.pack(side="left", padx=10, fill="y")
+        
+        ctk.CTkLabel(info_frame, text=med.name, font=ctk.CTkFont(weight="bold")).pack(anchor="w")
+        ctk.CTkLabel(info_frame, text=f"{med.dosage} | Stock: {med.stock}", text_color="gray").pack(anchor="w")
 
-            ctk.CTkButton(f, text="Del", fg_color="#DC143C", hover_color="#8B0000", width=40,
-                          command=lambda m=med.med_id: self.delete_medication(m)).pack(side="right", padx=15)
+        ctk.CTkButton(f, text="Del", fg_color="#DC143C", hover_color="#8B0000", width=40,
+                      command=lambda m=med.med_id: self.delete_medication(m)).pack(side="right", padx=15)
+        
+        return f
+
+    def load_medications(self):
+        self.skeleton_mgr.stop()
+        if not hasattr(self, "med_cards"):
+            self.med_cards = {}
+        
+        meds = self.inventory.get_user_medications(self.current_user.user_id)
+        display_meds = meds[:60]
+        
+        existing_children = [w for w in self.list_frame.winfo_children() if hasattr(w, "_med_id")]
+        
+        # If we have existing cards, reuse/update or sync cleanly
+        new_card_dict = {}
+        for i, med in enumerate(display_meds):
+            if med.med_id in self.med_cards and self.med_cards[med.med_id].winfo_exists():
+                card = self.med_cards[med.med_id]
+                new_card_dict[med.med_id] = card
+            else:
+                card = self.create_med_card(med)
+                card._med_id = med.med_id
+                card.pack(fill="x", pady=5)
+                new_card_dict[med.med_id] = card
+        
+        # Remove cards no longer in display_meds
+        for med_id, card in list(self.med_cards.items()):
+            if med_id not in new_card_dict:
+                if card.winfo_exists():
+                    card.destroy()
+        
+        # Also clean up any orphan children without _med_id
+        for w in self.list_frame.winfo_children():
+            if not hasattr(w, "_med_id"):
+                w.destroy()
+
+        self.med_cards = new_card_dict
 
     def add_medication(self):
         if not self.current_user:
@@ -201,6 +209,28 @@ class MedicationFrame(ctk.CTkFrame):
         
         self.dose_alert.add_schedule(med_id, self.sched_type.get(), self.time_entry.get())
         
+        # In-place single item insertion (React-style 0ms diff update)
+        from models.medication import Medication
+        new_med = Medication(
+            med_id, self.current_user.user_id, self.name_entry.get(),
+            self.dosage_entry.get(), stock, threshold, self.selected_image_path
+        )
+        card = self.create_med_card(new_med)
+        card.pack(fill="x", pady=5)
+        if not hasattr(self, "med_cards"):
+            self.med_cards = {}
+        self.med_cards[med_id] = card
+
+        # Invalidate DashboardFrame cache so metrics update on next visit
+        try:
+            app = self.winfo_toplevel()
+            if hasattr(app, "content_frames"):
+                dash = app.content_frames.get("DashboardFrame")
+                if dash and hasattr(dash, "is_loaded"):
+                    dash.is_loaded = False
+        except Exception:
+            pass
+
         # Clear entries
         self.name_entry.delete(0, 'end')
         self.dosage_entry.delete(0, 'end')
@@ -208,11 +238,25 @@ class MedicationFrame(ctk.CTkFrame):
         self.threshold_entry.delete(0, 'end')
         self.time_entry.delete(0, 'end')
         self.clear_image()
-        
-        self.load_medications()
 
     def delete_medication(self, med_id):
         if not self.current_user:
             return
         self.inventory.delete_medication(med_id)
-        self.load_medications()
+        
+        # Invalidate DashboardFrame cache so metrics update on next visit
+        try:
+            app = self.winfo_toplevel()
+            if hasattr(app, "content_frames"):
+                dash = app.content_frames.get("DashboardFrame")
+                if dash and hasattr(dash, "is_loaded"):
+                    dash.is_loaded = False
+        except Exception:
+            pass
+
+        # In-place single item removal (React-style 0ms diff update)
+        if hasattr(self, "med_cards") and med_id in self.med_cards:
+            self.med_cards[med_id].destroy()
+            del self.med_cards[med_id]
+        else:
+            self.refresh(self.current_user, force=True)

@@ -3,7 +3,7 @@ from models.user import UserManager
 
 class LoginFrame(ctk.CTkFrame):
     def __init__(self, master, on_login_success, user_manager=None):
-        super().__init__(master, fg_color="#000000") # Pure black background
+        super().__init__(master, fg_color="#0d0f17")
         self.on_login_success = on_login_success
         self.user_manager = user_manager if user_manager is not None else UserManager()
 
@@ -18,7 +18,7 @@ class LoginFrame(ctk.CTkFrame):
         # Rounded badge for icon like reference picture
         self.logo_badge = ctk.CTkFrame(
             self.header_frame,
-            fg_color="#ffffff",
+            fg_color="#7c3aed",
             corner_radius=10,
             width=42,
             height=42
@@ -37,15 +37,15 @@ class LoginFrame(ctk.CTkFrame):
             self.header_frame,
             text="Medication Scheduler",
             font=ctk.CTkFont(size=22, weight="bold"),
-            text_color="white"
+            text_color="#ffffff"
         )
         self.logo_title.pack(side="left")
 
         # Main Card Box Container
         self.card_box = ctk.CTkFrame(
             self.center_wrapper, 
-            fg_color="#080808",
-            border_color="#262626", 
+            fg_color="#161926",
+            border_color="#24293e", 
             border_width=1,
             corner_radius=14,
             width=480,
@@ -102,13 +102,13 @@ class LoginFrame(ctk.CTkFrame):
 
         self.login_ident_entry = ctk.CTkEntry(
             self.form_container, 
-            placeholder_text="akosirene@example", 
+            placeholder_text="user@example.com", 
             height=44, 
             corner_radius=8,
-            fg_color="#e8f0fe",
-            border_color="#64748b",
+            fg_color="#1c2033",
+            border_color="#2b324d",
             border_width=1.5,
-            text_color="#000000",
+            text_color="#ffffff",
             placeholder_text_color="#64748b",
             font=ctk.CTkFont(size=14)
         )
@@ -133,10 +133,10 @@ class LoginFrame(ctk.CTkFrame):
             show="*",
             height=44,
             corner_radius=8,
-            fg_color="#e8f0fe",
-            border_color="#64748b",
+            fg_color="#1c2033",
+            border_color="#2b324d",
             border_width=1.5,
-            text_color="#000000",
+            text_color="#ffffff",
             placeholder_text_color="#64748b",
             font=ctk.CTkFont(size=14)
         )
@@ -154,8 +154,8 @@ class LoginFrame(ctk.CTkFrame):
             width=28,
             height=28,
             fg_color="transparent",
-            text_color="#4b5563",
-            hover_color="#dbeafe",
+            text_color="#94a3b8",
+            hover_color="#2b324d",
             font=ctk.CTkFont(size=14),
             command=lambda: self.toggle_eye(self.login_pass_entry)
         )
@@ -176,9 +176,9 @@ class LoginFrame(ctk.CTkFrame):
             text="→ Sign In", 
             height=44,
             corner_radius=8,
-            fg_color="#ffffff",
-            text_color="#000000",
-            hover_color="#e2e8f0",
+            fg_color="#7c3aed",
+            text_color="#ffffff",
+            hover_color="#6d28d9",
             font=ctk.CTkFont(size=14, weight="bold"),
             command=self.do_login
         )
@@ -235,10 +235,10 @@ class LoginFrame(ctk.CTkFrame):
             placeholder_text="Enter your full name", 
             height=40, 
             corner_radius=8,
-            fg_color="#e8f0fe",
-            border_color="#64748b",
+            fg_color="#1c2033",
+            border_color="#2b324d",
             border_width=1.5,
-            text_color="#000000",
+            text_color="#ffffff",
             placeholder_text_color="#64748b",
             font=ctk.CTkFont(size=14)
         )
@@ -256,13 +256,13 @@ class LoginFrame(ctk.CTkFrame):
 
         self.reg_email_entry = ctk.CTkEntry(
             self.form_container, 
-            placeholder_text="example@akosirene", 
+            placeholder_text="user@example.com", 
             height=40, 
             corner_radius=8,
-            fg_color="#e8f0fe",
-            border_color="#64748b",
+            fg_color="#1c2033",
+            border_color="#2b324d",
             border_width=1.5,
-            text_color="#000000",
+            text_color="#ffffff",
             placeholder_text_color="#64748b",
             font=ctk.CTkFont(size=14)
         )
@@ -285,10 +285,10 @@ class LoginFrame(ctk.CTkFrame):
             show="*",
             height=40,
             corner_radius=8,
-            fg_color="#e8f0fe",
-            border_color="#64748b",
+            fg_color="#1c2033",
+            border_color="#2b324d",
             border_width=1.5,
-            text_color="#000000",
+            text_color="#ffffff",
             placeholder_text_color="#64748b",
             font=ctk.CTkFont(size=14)
         )
@@ -306,8 +306,8 @@ class LoginFrame(ctk.CTkFrame):
             width=28,
             height=28,
             fg_color="transparent",
-            text_color="#4b5563",
-            hover_color="#dbeafe",
+            text_color="#94a3b8",
+            hover_color="#2b324d",
             font=ctk.CTkFont(size=14),
             command=lambda: self.toggle_eye(self.reg_pass_entry)
         )
@@ -328,9 +328,9 @@ class LoginFrame(ctk.CTkFrame):
             text="→ Create Account", 
             height=44,
             corner_radius=8,
-            fg_color="#ffffff",
-            text_color="#000000",
-            hover_color="#e2e8f0",
+            fg_color="#7c3aed",
+            text_color="#ffffff",
+            hover_color="#6d28d9",
             font=ctk.CTkFont(size=14, weight="bold"),
             command=self.do_register
         )

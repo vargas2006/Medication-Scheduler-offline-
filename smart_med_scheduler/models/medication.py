@@ -18,7 +18,10 @@ class InventoryManager:
         self.db = DatabaseManager()
 
     def get_user_medications(self, user_id=None):
-        rows = self.db.fetch_all("SELECT id, user_id, name, dosage, stock, refill_threshold, image_path FROM medications")
+        if user_id is not None:
+            rows = self.db.fetch_all("SELECT id, user_id, name, dosage, stock, refill_threshold, image_path FROM medications WHERE user_id = ?", (user_id,))
+        else:
+            rows = self.db.fetch_all("SELECT id, user_id, name, dosage, stock, refill_threshold, image_path FROM medications")
         medications = []
         for row in rows:
             medications.append(Medication(*row))

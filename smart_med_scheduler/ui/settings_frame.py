@@ -5,45 +5,8 @@ class SettingsFrame(ctk.CTkFrame):
         super().__init__(master, fg_color="#0d0f17")
         self.current_user = None
 
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-
-        # Header
-        self.header = ctk.CTkFrame(self, fg_color="transparent")
-        self.header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
-        
-        # Bordered Title Tag Badge
-        self.tag_badge = ctk.CTkFrame(
-            self.header, 
-            fg_color="#181d2e", 
-            border_color="#2f3957", 
-            border_width=1, 
-            corner_radius=6, 
-            height=24
-        )
-        self.tag_badge.pack(anchor="w", pady=(0, 4))
-        self.tag_badge.pack_propagate(False)
-
-        ctk.CTkLabel(
-            self.tag_badge, 
-            text="● SYSTEM CONFIGURATION", 
-            font=ctk.CTkFont(size=10, weight="bold"), 
-            text_color="#38bdf8"
-        ).pack(side="left", padx=8)
-
-        ctk.CTkLabel(
-            self.header, 
-            text="Settings & Preferences", 
-            font=ctk.CTkFont(size=24, weight="bold"),
-            text_color="#ffffff"
-        ).pack(anchor="w")
-
-        ctk.CTkLabel(
-            self.header, 
-            text="Personalize application theme, profile details, and alert notifications.", 
-            font=ctk.CTkFont(size=12), 
-            text_color="#64748b"
-        ).pack(anchor="w")
 
         # Content Box
         self.content = ctk.CTkFrame(
@@ -53,7 +16,7 @@ class SettingsFrame(ctk.CTkFrame):
             border_width=1,
             corner_radius=14
         )
-        self.content.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
+        self.content.grid(row=0, column=0, sticky="nsew", padx=20, pady=10)
 
         # Preferences Section
         ctk.CTkLabel(

@@ -24,54 +24,56 @@ class DoseAlert:
 
     def get_due_medications(self, user_id):
         """
-        Returns a list of medication IDs that are currently due.
-        Simplistic approach:
-        - DAILY_TIME: If current time >= scheduled time and it hasn't been taken today.
-        - INTERVAL: If current time >= last taken time + interval.
+        Returns a list of medication dicts that are currently due for the specific user.
         """
+        if not user_id:
+            return []
+
         due_meds = []
         now = datetime.now()
         
-        # Get all medications
-        meds = self.db.fetch_all("SELECT id, name FROM medications")
+        query = '''
+            SELECT m.id, m.name, m.dosage, s.schedule_type, s.time_value,
+                   (SELECT MAX(timestamp) FROM intake_log WHERE medication_id = m.id AND status = 'TAKEN') as last_taken
+            FROM medications m
+            JOIN schedules s ON m.id = s.medication_id
+            WHERE m.user_id = ?
+        '''
+        rows = self.db.fetch_all(query, (user_id,))
         
-        for med in meds:
-            med_id = med[0]
-            med_name = med[1]
-            schedules = self.get_medication_schedules(med_id)
-            
-            # Get last taken log
-            last_log = self.db.fetch_one(
-                "SELECT timestamp FROM intake_log WHERE medication_id = ? AND status = 'TAKEN' ORDER BY timestamp DESC LIMIT 1",
-                (med_id,)
-            )
-            
+        for med_id, med_name, dosage, sched_type, time_value, last_taken_str in rows:
             last_taken_time = None
-            if last_log:
-                last_taken_time = datetime.strptime(last_log[0], "%Y-%m-%d %H:%M:%S")
+            if last_taken_str:
+                try:
+                    last_taken_time = datetime.strptime(last_taken_str, "%Y-%m-%d %H:%M:%S")
+                except Exception:
+                    pass
 
             is_due = False
-            for sched in schedules:
-                if sched.schedule_type == 'DAILY_TIME':
-                    # Check if time_value (e.g. 08:00) has passed today
-                    sched_time = datetime.strptime(sched.time_value, "%H:%M").time()
+            if sched_type == 'DAILY_TIME':
+                try:
+                    sched_time = datetime.strptime(time_value, "%H:%M").time()
                     if now.time() >= sched_time:
-                        # Check if taken today
                         if not last_taken_time or last_taken_time.date() < now.date():
                             is_due = True
-                            break
-                elif sched.schedule_type == 'INTERVAL':
-                    # Check if interval hours have passed since last taken
-                    hours = int(sched.time_value)
+                except Exception:
+                    pass
+            elif sched_type == 'INTERVAL':
+                try:
+                    hours = int(time_value)
                     if not last_taken_time:
-                        is_due = True # Never taken, so due now
-                        break
-                    else:
-                        if now >= last_taken_time + timedelta(hours=hours):
-                            is_due = True
-                            break
+                        is_due = True
+                    elif now >= last_taken_time + timedelta(hours=hours):
+                        is_due = True
+                except Exception:
+                    pass
             
             if is_due:
-                due_meds.append({"med_id": med_id, "name": med_name})
+                due_meds.append({
+                    "med_id": med_id, 
+                    "name": med_name, 
+                    "dosage": dosage, 
+                    "time_value": time_value
+                })
                 
         return due_meds

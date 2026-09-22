@@ -16,6 +16,7 @@ class App(ctk.CTk):
         
         # Configure main grid
         self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=0, minsize=230)
         self.grid_columnconfigure(1, weight=1)
 
         self.user_manager = UserManager()
@@ -170,15 +171,86 @@ class App(ctk.CTk):
 
         # Content Container (Right side)
         self.content_container = ctk.CTkFrame(self, corner_radius=0, fg_color="#0d0f17")
-        self.content_container.grid_rowconfigure(0, weight=1)
+        self.content_container.grid_rowconfigure(0, weight=0) # Permanent Header
+        self.content_container.grid_rowconfigure(1, weight=1) # Dynamic Body Container
         self.content_container.grid_columnconfigure(0, weight=1)
 
-        # Initialize content frames
+        # Permanent Title & Description Header Panel (Top Right - PERMANENT)
+        self.header_panel = ctk.CTkFrame(self.content_container, fg_color="transparent")
+        self.header_panel.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
+
+        self.header_left = ctk.CTkFrame(self.header_panel, fg_color="transparent")
+        self.header_left.pack(side="left")
+
+        # Bordered Tag Badge
+        self.tag_badge = ctk.CTkFrame(
+            self.header_left, 
+            fg_color="#181d2e", 
+            border_color="#2f3957", 
+            border_width=1, 
+            corner_radius=6, 
+            height=24
+        )
+        self.tag_badge.pack(anchor="w", pady=(0, 4))
+        self.tag_badge.pack_propagate(False)
+
+        self.tag_badge_lbl = ctk.CTkLabel(
+            self.tag_badge, 
+            text="● REALTIME CARE MONITOR", 
+            font=ctk.CTkFont(size=10, weight="bold"), 
+            text_color="#38bdf8"
+        )
+        self.tag_badge_lbl.pack(side="left", padx=8)
+
+        self.title_lbl = ctk.CTkLabel(
+            self.header_left, 
+            text="Dashboard Overview", 
+            font=ctk.CTkFont(size=24, weight="bold"), 
+            text_color="#ffffff"
+        )
+        self.title_lbl.pack(anchor="w")
+
+        self.subtitle_lbl = ctk.CTkLabel(
+            self.header_left, 
+            text="Track medication adherence, due alerts, and daily intake statistics.", 
+            font=ctk.CTkFont(size=12), 
+            text_color="#64748b"
+        )
+        self.subtitle_lbl.pack(anchor="w")
+
+        # Header Right: Permanent Date Pill
+        self.date_badge = ctk.CTkFrame(
+            self.header_panel, 
+            fg_color="#161926", 
+            border_color="#24293e", 
+            border_width=1, 
+            corner_radius=8, 
+            height=36
+        )
+        self.date_badge.pack(side="right", pady=4)
+        self.date_badge.pack_propagate(False)
+
+        from datetime import datetime
+        today_str = datetime.now().strftime("%A, %b %d")
+        ctk.CTkLabel(
+            self.date_badge, 
+            text=f"📅 {today_str}", 
+            font=ctk.CTkFont(size=12, weight="bold"), 
+            text_color="#94a3b8"
+        ).pack(side="left", padx=12)
+
+        # Dynamic Body Container (Row 1 - DYNAMIC)
+        self.body_container = ctk.CTkFrame(self.content_container, corner_radius=0, fg_color="#0d0f17")
+        self.body_container.grid(row=1, column=0, sticky="nsew")
+        self.body_container.grid_rowconfigure(0, weight=1)
+        self.body_container.grid_columnconfigure(0, weight=1)
+
+        # Initialize content frames inside body_container
         self.content_frames = {}
-        self.content_frames["DashboardFrame"] = DashboardFrame(self.content_container)
-        self.content_frames["MedicationFrame"] = MedicationFrame(self.content_container)
-        self.content_frames["HistoryFrame"] = HistoryFrame(self.content_container)
-        self.content_frames["SettingsFrame"] = SettingsFrame(self.content_container)
+        self.content_frames["DashboardFrame"] = DashboardFrame(self.body_container)
+        self.content_frames["MedicationFrame"] = MedicationFrame(self.body_container)
+        self.content_frames["HistoryFrame"] = HistoryFrame(self.body_container)
+        self.content_frames["SettingsFrame"] = SettingsFrame(self.body_container)
 
         self.current_frame_name = None
 
@@ -225,9 +297,34 @@ class App(ctk.CTk):
         self.show_content_frame("DashboardFrame")
 
     def show_content_frame(self, frame_name):
+        if self.current_frame_name == frame_name:
+            return
+
+        old_frame = self.content_frames.get(self.current_frame_name)
         self.current_frame_name = frame_name
 
-        # Update button highlights (Active tab highlight like reference)
+        # 1. Update Title & Description in-place (PERMANENT HEADER STAYS MOUNTED & STILL)
+        user = self.user_manager.current_user
+        display_name = (user.name if hasattr(user, "name") and user.name else user.username) if user else "User"
+
+        if frame_name == "DashboardFrame":
+            self.tag_badge_lbl.configure(text="● REALTIME CARE MONITOR", text_color="#38bdf8")
+            self.title_lbl.configure(text="Dashboard Overview")
+            self.subtitle_lbl.configure(text=f"Welcome back, {display_name}! Here is your medication schedule today.")
+        elif frame_name == "MedicationFrame":
+            self.tag_badge_lbl.configure(text="● INVENTORY MANAGEMENT", text_color="#38bdf8")
+            self.title_lbl.configure(text="Medication Inventory")
+            self.subtitle_lbl.configure(text="Register and monitor your medications, stock thresholds, and schedules.")
+        elif frame_name == "HistoryFrame":
+            self.tag_badge_lbl.configure(text="● AUDIT & INTAKE LOGS", text_color="#c084fc")
+            self.title_lbl.configure(text="Intake History")
+            self.subtitle_lbl.configure(text="Complete historical audit of your medication doses taken and schedule records.")
+        elif frame_name == "SettingsFrame":
+            self.tag_badge_lbl.configure(text="● SYSTEM CONFIGURATION", text_color="#38bdf8")
+            self.title_lbl.configure(text="Settings & Preferences")
+            self.subtitle_lbl.configure(text="Personalize application theme, profile details, and alert notifications.")
+
+        # 2. Update button highlights
         for name, btn in self.nav_buttons.items():
             if name == frame_name:
                 btn.configure(
@@ -243,18 +340,21 @@ class App(ctk.CTk):
                     border_width=0
                 )
 
-        # Hide all content frames
-        for frame in self.content_frames.values():
-            frame.grid_forget()
+        # 3. Swap DYNAMIC BODY FRAME only (Inside body_container)
+        if old_frame:
+            old_frame.grid_forget()
             
-        # Show requested frame
         frame = self.content_frames[frame_name]
         frame.grid(row=0, column=0, sticky="nsew")
         
-        # Refresh data
+        # Refresh dynamic data container only
         if hasattr(frame, "refresh") and self.user_manager.current_user:
             frame.refresh(self.user_manager.current_user)
 
     def logout(self):
+        for frame in self.content_frames.values():
+            if hasattr(frame, "is_loaded"):
+                frame.is_loaded = False
+                frame.loaded_user_id = None
         self.user_manager.logout()
         self.show_login()

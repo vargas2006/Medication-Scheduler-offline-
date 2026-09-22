@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from models.history import ReportGenerator
+from ui.skeleton import SkeletonManager
 import os
 
 class HistoryFrame(ctk.CTkFrame):
@@ -7,46 +8,12 @@ class HistoryFrame(ctk.CTkFrame):
         super().__init__(master, fg_color="#0d0f17")
         self.report_generator = ReportGenerator()
         self.current_user = None
+        self.loaded_user_id = None
+        self.is_loaded = False
 
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=0)
         self.grid_columnconfigure(0, weight=1)
-
-        # Header
-        self.header = ctk.CTkFrame(self, fg_color="transparent")
-        self.header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
-        
-        # Bordered Title Tag Badge
-        self.tag_badge = ctk.CTkFrame(
-            self.header, 
-            fg_color="#181d2e", 
-            border_color="#2f3957", 
-            border_width=1, 
-            corner_radius=6, 
-            height=24
-        )
-        self.tag_badge.pack(anchor="w", pady=(0, 4))
-        self.tag_badge.pack_propagate(False)
-
-        ctk.CTkLabel(
-            self.tag_badge, 
-            text="● AUDIT & INTAKE LOGS", 
-            font=ctk.CTkFont(size=10, weight="bold"), 
-            text_color="#c084fc"
-        ).pack(side="left", padx=8)
-
-        ctk.CTkLabel(
-            self.header, 
-            text="Intake History", 
-            font=ctk.CTkFont(size=24, weight="bold"),
-            text_color="#ffffff"
-        ).pack(anchor="w")
-
-        ctk.CTkLabel(
-            self.header, 
-            text="Complete historical audit of your medication doses taken and schedule records.", 
-            font=ctk.CTkFont(size=12), 
-            text_color="#64748b"
-        ).pack(anchor="w")
 
         # List Frame
         self.list_frame = ctk.CTkScrollableFrame(
@@ -56,11 +23,12 @@ class HistoryFrame(ctk.CTkFrame):
             border_width=1,
             corner_radius=14
         )
-        self.list_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
+        self.list_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=10)
+        self.skeleton_mgr = SkeletonManager(self.list_frame)
 
         # Footer
         self.footer = ctk.CTkFrame(self, fg_color="transparent")
-        self.footer.grid(row=2, column=0, sticky="ew", padx=20, pady=10)
+        self.footer.grid(row=1, column=0, sticky="ew", padx=20, pady=10)
         self.export_btn = ctk.CTkButton(
             self.footer, 
             text="📥 Export to CSV Report", 
@@ -75,16 +43,23 @@ class HistoryFrame(ctk.CTkFrame):
         )
         self.export_btn.pack(pady=10)
 
-    def refresh(self, user):
+    def refresh(self, user, force=False):
         self.current_user = user
+        if not force and self.is_loaded and self.loaded_user_id == user.user_id:
+            return
         self.load_history()
+        self.loaded_user_id = user.user_id
+        self.is_loaded = True
 
     def load_history(self):
+        self.skeleton_mgr.stop()
         for widget in self.list_frame.winfo_children():
             widget.destroy()
 
         history = self.report_generator.get_user_history(self.current_user.user_id)
-        if not history:
+        display_history = history[:60] if history else []
+        
+        if not display_history:
             empty_box = ctk.CTkFrame(self.list_frame, fg_color="transparent")
             empty_box.pack(pady=40)
             ctk.CTkLabel(empty_box, text="📜", font=ctk.CTkFont(size=24)).pack()
@@ -95,7 +70,7 @@ class HistoryFrame(ctk.CTkFrame):
                 text_color="#64748b"
             ).pack(pady=(4, 0))
         else:
-            for log in history:
+            for log in display_history:
                 f = ctk.CTkFrame(
                     self.list_frame, 
                     fg_color="#1c2033", 
