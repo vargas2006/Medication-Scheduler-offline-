@@ -1,0 +1,50 @@
+# React / Node
+node_modules/
+dist/
+build/
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Python build files
+build/
+dist/
+*.egg-info/
+
+# PyInstaller
+*.spec
+*.manifest
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python cache / test
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
