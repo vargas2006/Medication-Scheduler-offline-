@@ -136,6 +136,8 @@ class HistoryFrame(ctk.CTkFrame):
                 ).pack(side="right", padx=15)
 
     def export_csv(self):
+        if not self.current_user:
+            return
         filepath = f"history_export_{self.current_user.username}.csv"
         self.report_generator.export_to_csv(self.current_user.user_id, filepath)
         print(f"Exported to {filepath}")

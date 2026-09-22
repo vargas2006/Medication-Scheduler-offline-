@@ -181,6 +181,9 @@ class MedicationFrame(ctk.CTkFrame):
                           command=lambda m=med.med_id: self.delete_medication(m)).pack(side="right", padx=15)
 
     def add_medication(self):
+        if not self.current_user:
+            return
+
         try:
             stock = int(self.stock_entry.get())
             threshold = int(self.threshold_entry.get())
@@ -209,5 +212,7 @@ class MedicationFrame(ctk.CTkFrame):
         self.load_medications()
 
     def delete_medication(self, med_id):
+        if not self.current_user:
+            return
         self.inventory.delete_medication(med_id)
         self.load_medications()

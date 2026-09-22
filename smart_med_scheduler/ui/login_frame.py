@@ -2,10 +2,10 @@ import customtkinter as ctk
 from models.user import UserManager
 
 class LoginFrame(ctk.CTkFrame):
-    def __init__(self, master, on_login_success):
+    def __init__(self, master, on_login_success, user_manager=None):
         super().__init__(master, fg_color="#000000") # Pure black background
         self.on_login_success = on_login_success
-        self.user_manager = UserManager()
+        self.user_manager = user_manager if user_manager is not None else UserManager()
 
         # Center wrapper to keep logo and login/register box close together and centered
         self.center_wrapper = ctk.CTkFrame(self, fg_color="transparent")

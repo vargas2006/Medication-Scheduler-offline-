@@ -42,9 +42,20 @@ def populate():
     cursor.execute("DELETE FROM medications")
     cursor.execute("DELETE FROM users")
 
-    cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", ("admin", "admin"))
+    # Create target user
+    cursor.execute(
+        "INSERT INTO users (username, password, name, email) VALUES (?, ?, ?, ?)",
+        ("johnleevargas25@gmail.com", "JOHNlee#2006", "John Lee Vargas", "johnleevargas25@gmail.com")
+    )
     user_id = cursor.lastrowid
-    print("Created new user 'admin'")
+    print(f"Created user 'johnleevargas25@gmail.com' with id={user_id}")
+
+    # Also keep admin user for convenience
+    cursor.execute(
+        "INSERT INTO users (username, password, name, email) VALUES (?, ?, ?, ?)",
+        ("admin", "admin", "Administrator", "admin@medscheduler.com")
+    )
+    admin_id = cursor.lastrowid
 
     drugs = [
         "Paracetamol", "Ibuprofen", "Amoxicillin", "Aspirin", "Metformin", 
@@ -63,7 +74,7 @@ def populate():
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
 
-    print("Fetching images and generating 200 medications (this might take a minute)...")
+    print("Generating 200 medications for johnleevargas25@gmail.com...")
     
     # Cache to avoid re-downloading the same drug image
     downloaded_images = {}
@@ -75,13 +86,15 @@ def populate():
         dosage = random.choice(["10mg", "20mg", "50mg", "100mg", "250mg", "500mg"])
         med_name = f"{base_drug} {dosage}"
         
-        # Determine image path
-        if base_drug not in downloaded_images:
+        # Check local image first
+        save_path = os.path.join(img_dir, f"{base_drug.lower()}.png")
+        if os.path.exists(save_path):
+            downloaded_images[base_drug] = save_path
+        elif base_drug not in downloaded_images:
             img_url = get_wiki_image(base_drug)
             if not img_url:
                 img_url = default_img_url
             
-            save_path = os.path.join(img_dir, f"{base_drug.lower()}.png")
             if download_image(img_url, save_path):
                 downloaded_images[base_drug] = save_path
             else:

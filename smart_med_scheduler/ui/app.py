@@ -21,7 +21,7 @@ class App(ctk.CTk):
         self.user_manager = UserManager()
 
         # Login Frame (takes full screen)
-        self.login_frame = LoginFrame(self, self.on_login_success)
+        self.login_frame = LoginFrame(self, self.on_login_success, self.user_manager)
 
         # Sidebar Frame (Only visible when logged in)
         self.sidebar_frame = ctk.CTkFrame(
@@ -211,6 +211,7 @@ class App(ctk.CTk):
         self.login_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
     def on_login_success(self, user):
+        self.user_manager.current_user = user
         self.login_frame.grid_forget()
         
         # Update user profile in sidebar
