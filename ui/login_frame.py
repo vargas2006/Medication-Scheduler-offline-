@@ -102,7 +102,7 @@ class LoginFrame(ctk.CTkFrame):
 
         self.login_ident_entry = ctk.CTkEntry(
             self.form_container, 
-            placeholder_text="admin2@gmail.com", 
+            placeholder_text="akosirene@example", 
             height=44, 
             corner_radius=8,
             fg_color="#e8f0fe",
@@ -126,43 +126,40 @@ class LoginFrame(ctk.CTkFrame):
         )
         self.pass_label.pack(anchor="w", padx=45, pady=(0, 6))
 
-        # Password input container with eye toggle icon
-        self.login_pass_frame = ctk.CTkFrame(
+        # Direct CTkEntry with complete, continuous border
+        self.login_pass_entry = ctk.CTkEntry(
             self.form_container,
+            placeholder_text="••••••••",
+            show="*",
+            height=44,
+            corner_radius=8,
             fg_color="#e8f0fe",
             border_color="#64748b",
             border_width=1.5,
-            corner_radius=8,
-            height=44
-        )
-        self.login_pass_frame.pack(fill="x", padx=45, pady=(0, 4))
-        self.login_pass_frame.pack_propagate(False)
-
-        self.login_pass_entry = ctk.CTkEntry(
-            self.login_pass_frame,
-            placeholder_text="••••••••",
-            show="*",
-            fg_color="transparent",
-            border_width=0,
             text_color="#000000",
             placeholder_text_color="#64748b",
             font=ctk.CTkFont(size=14)
         )
-        self.login_pass_entry.pack(side="left", fill="both", expand=True, padx=(12, 4))
+        self.login_pass_entry.pack(fill="x", padx=45, pady=(0, 4))
         self.login_pass_entry.bind("<Return>", lambda e: self.do_login())
+        try:
+            self.login_pass_entry._entry.grid_configure(padx=(12, 38))
+        except Exception:
+            pass
 
+        # Eye toggle placed inside entry on the right side
         self.login_eye_btn = ctk.CTkButton(
-            self.login_pass_frame,
+            self.login_pass_entry,
             text="👁",
-            width=32,
-            height=32,
+            width=28,
+            height=28,
             fg_color="transparent",
             text_color="#4b5563",
             hover_color="#dbeafe",
             font=ctk.CTkFont(size=14),
             command=lambda: self.toggle_eye(self.login_pass_entry)
         )
-        self.login_eye_btn.pack(side="right", padx=(0, 6))
+        self.login_eye_btn.place(relx=1.0, rely=0.5, x=-6, anchor="e")
 
         # Status / Error Label
         self.status_label = ctk.CTkLabel(
@@ -259,7 +256,7 @@ class LoginFrame(ctk.CTkFrame):
 
         self.reg_email_entry = ctk.CTkEntry(
             self.form_container, 
-            placeholder_text="name@example.com", 
+            placeholder_text="example@akosirene", 
             height=40, 
             corner_radius=8,
             fg_color="#e8f0fe",
@@ -281,42 +278,40 @@ class LoginFrame(ctk.CTkFrame):
         )
         self.reg_pass_label.pack(anchor="w", padx=45, pady=(0, 4))
 
-        self.reg_pass_frame = ctk.CTkFrame(
+        # Direct CTkEntry with complete, continuous border
+        self.reg_pass_entry = ctk.CTkEntry(
             self.form_container,
+            placeholder_text="••••••••",
+            show="*",
+            height=40,
+            corner_radius=8,
             fg_color="#e8f0fe",
             border_color="#64748b",
             border_width=1.5,
-            corner_radius=8,
-            height=40
-        )
-        self.reg_pass_frame.pack(fill="x", padx=45, pady=(0, 4))
-        self.reg_pass_frame.pack_propagate(False)
-
-        self.reg_pass_entry = ctk.CTkEntry(
-            self.reg_pass_frame,
-            placeholder_text="••••••••",
-            show="*",
-            fg_color="transparent",
-            border_width=0,
             text_color="#000000",
             placeholder_text_color="#64748b",
             font=ctk.CTkFont(size=14)
         )
-        self.reg_pass_entry.pack(side="left", fill="both", expand=True, padx=(12, 4))
+        self.reg_pass_entry.pack(fill="x", padx=45, pady=(0, 4))
         self.reg_pass_entry.bind("<Return>", lambda e: self.do_register())
+        try:
+            self.reg_pass_entry._entry.grid_configure(padx=(12, 38))
+        except Exception:
+            pass
 
+        # Eye toggle placed inside entry on the right side
         self.reg_eye_btn = ctk.CTkButton(
-            self.reg_pass_frame,
+            self.reg_pass_entry,
             text="👁",
-            width=32,
-            height=32,
+            width=28,
+            height=28,
             fg_color="transparent",
             text_color="#4b5563",
             hover_color="#dbeafe",
             font=ctk.CTkFont(size=14),
             command=lambda: self.toggle_eye(self.reg_pass_entry)
         )
-        self.reg_eye_btn.pack(side="right", padx=(0, 6))
+        self.reg_eye_btn.place(relx=1.0, rely=0.5, x=-6, anchor="e")
 
         # Status / Error Label
         self.reg_status_label = ctk.CTkLabel(
