@@ -4,7 +4,7 @@ import os
 
 class HistoryFrame(ctk.CTkFrame):
     def __init__(self, master):
-        super().__init__(master, fg_color="transparent")
+        super().__init__(master, fg_color="#0d0f17")
         self.report_generator = ReportGenerator()
         self.current_user = None
 
@@ -14,16 +14,65 @@ class HistoryFrame(ctk.CTkFrame):
         # Header
         self.header = ctk.CTkFrame(self, fg_color="transparent")
         self.header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
-        ctk.CTkLabel(self.header, text="Intake History", font=ctk.CTkFont(size=24, weight="bold")).pack(side="left")
+        
+        # Bordered Title Tag Badge
+        self.tag_badge = ctk.CTkFrame(
+            self.header, 
+            fg_color="#181d2e", 
+            border_color="#2f3957", 
+            border_width=1, 
+            corner_radius=6, 
+            height=24
+        )
+        self.tag_badge.pack(anchor="w", pady=(0, 4))
+        self.tag_badge.pack_propagate(False)
 
-        # List
-        self.list_frame = ctk.CTkScrollableFrame(self, fg_color="#1a1a1a")
+        ctk.CTkLabel(
+            self.tag_badge, 
+            text="● AUDIT & INTAKE LOGS", 
+            font=ctk.CTkFont(size=10, weight="bold"), 
+            text_color="#c084fc"
+        ).pack(side="left", padx=8)
+
+        ctk.CTkLabel(
+            self.header, 
+            text="Intake History", 
+            font=ctk.CTkFont(size=24, weight="bold"),
+            text_color="#ffffff"
+        ).pack(anchor="w")
+
+        ctk.CTkLabel(
+            self.header, 
+            text="Complete historical audit of your medication doses taken and schedule records.", 
+            font=ctk.CTkFont(size=12), 
+            text_color="#64748b"
+        ).pack(anchor="w")
+
+        # List Frame
+        self.list_frame = ctk.CTkScrollableFrame(
+            self, 
+            fg_color="#161926",
+            border_color="#24293e",
+            border_width=1,
+            corner_radius=14
+        )
         self.list_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
 
         # Footer
         self.footer = ctk.CTkFrame(self, fg_color="transparent")
         self.footer.grid(row=2, column=0, sticky="ew", padx=20, pady=10)
-        self.export_btn = ctk.CTkButton(self.footer, text="Export to CSV", width=200, command=self.export_csv)
+        self.export_btn = ctk.CTkButton(
+            self.footer, 
+            text="📥 Export to CSV Report", 
+            width=220, 
+            height=38,
+            corner_radius=8,
+            fg_color="#06b6d4",
+            hover_color="#0891b2",
+            text_color="#000000",
+            font=ctk.CTkFont(size=13, weight="bold"),
+            command=self.export_csv
+        )
         self.export_btn.pack(pady=10)
 
     def refresh(self, user):
@@ -36,17 +85,55 @@ class HistoryFrame(ctk.CTkFrame):
 
         history = self.report_generator.get_user_history(self.current_user.user_id)
         if not history:
-            ctk.CTkLabel(self.list_frame, text="No history found.").pack(pady=10)
+            empty_box = ctk.CTkFrame(self.list_frame, fg_color="transparent")
+            empty_box.pack(pady=40)
+            ctk.CTkLabel(empty_box, text="📜", font=ctk.CTkFont(size=24)).pack()
+            ctk.CTkLabel(
+                empty_box, 
+                text="No history logs found.", 
+                font=ctk.CTkFont(size=13, weight="bold"), 
+                text_color="#64748b"
+            ).pack(pady=(4, 0))
         else:
             for log in history:
-                f = ctk.CTkFrame(self.list_frame, fg_color="#2a2a2a")
-                f.pack(fill="x", pady=2, padx=5)
+                f = ctk.CTkFrame(
+                    self.list_frame, 
+                    fg_color="#1c2033", 
+                    border_color="#272e45", 
+                    border_width=1, 
+                    corner_radius=8
+                )
+                f.pack(fill="x", pady=3, padx=5)
                 
-                info_text = f"{log.med_name} - {log.status}"
-                color = "#2E8B57" if log.status == "TAKEN" else "#DC143C"
+                is_taken = log.status == "TAKEN"
+                color = "#10b981" if is_taken else "#f43f5e"
+                bg_color = "#102d24" if is_taken else "#3d1822"
                 
-                ctk.CTkLabel(f, text=log.timestamp, text_color="gray").pack(side="left", padx=15, pady=10)
-                ctk.CTkLabel(f, text=info_text, font=ctk.CTkFont(weight="bold"), text_color=color).pack(side="left", padx=15)
+                pill = ctk.CTkLabel(
+                    f, 
+                    text=log.status, 
+                    font=ctk.CTkFont(size=10, weight="bold"), 
+                    text_color=color,
+                    fg_color=bg_color,
+                    corner_radius=4,
+                    padx=6,
+                    pady=2
+                )
+                pill.pack(side="left", padx=12, pady=8)
+
+                ctk.CTkLabel(
+                    f, 
+                    text=log.med_name, 
+                    font=ctk.CTkFont(size=13, weight="bold"), 
+                    text_color="#ffffff"
+                ).pack(side="left", padx=8)
+
+                ctk.CTkLabel(
+                    f, 
+                    text=log.timestamp, 
+                    font=ctk.CTkFont(size=11), 
+                    text_color="#64748b"
+                ).pack(side="right", padx=15)
 
     def export_csv(self):
         filepath = f"history_export_{self.current_user.username}.csv"

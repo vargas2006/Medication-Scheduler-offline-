@@ -19,11 +19,49 @@ class MedicationFrame(ctk.CTkFrame):
         # Header
         self.header = ctk.CTkFrame(self, fg_color="transparent")
         self.header.grid(row=0, column=0, columnspan=2, sticky="ew", padx=20, pady=(20, 10))
-        ctk.CTkLabel(self.header, text="Medication Inventory", font=ctk.CTkFont(size=24, weight="bold")).pack(side="left")
+        
+        # Bordered Title Tag Badge
+        self.tag_badge = ctk.CTkFrame(
+            self.header, 
+            fg_color="#181d2e", 
+            border_color="#2f3957", 
+            border_width=1, 
+            corner_radius=6, 
+            height=24
+        )
+        self.tag_badge.pack(anchor="w", pady=(0, 4))
+        self.tag_badge.pack_propagate(False)
+
+        ctk.CTkLabel(
+            self.tag_badge, 
+            text="● INVENTORY MANAGEMENT", 
+            font=ctk.CTkFont(size=10, weight="bold"), 
+            text_color="#38bdf8"
+        ).pack(side="left", padx=8)
+
+        ctk.CTkLabel(
+            self.header, 
+            text="Medication Inventory", 
+            font=ctk.CTkFont(size=24, weight="bold"),
+            text_color="#ffffff"
+        ).pack(anchor="w")
+
+        ctk.CTkLabel(
+            self.header, 
+            text="Register and monitor your medications, stock thresholds, and schedules.", 
+            font=ctk.CTkFont(size=12), 
+            text_color="#64748b"
+        ).pack(anchor="w")
 
         # Form Frame
-        self.form_frame = ctk.CTkFrame(self, fg_color="#1a1a1a")
-        self.form_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
+        self.form_frame = ctk.CTkFrame(
+            self, 
+            fg_color="#161926", 
+            border_color="#24293e", 
+            border_width=1, 
+            corner_radius=14
+        )
+        self.form_frame.grid(row=1, column=0, sticky="nsew", padx=(20, 10), pady=10)
 
         ctk.CTkLabel(self.form_frame, text="Add New Drug", font=ctk.CTkFont(size=18, weight="bold")).grid(row=0, column=0, columnspan=2, pady=15)
         
@@ -64,11 +102,24 @@ class MedicationFrame(ctk.CTkFrame):
         self.time_entry = ctk.CTkEntry(self.form_frame, placeholder_text="e.g. 08:00 or 6")
         self.time_entry.grid(row=form_start_row+5, column=1, padx=10, pady=5, sticky="w")
 
-        self.add_btn = ctk.CTkButton(self.form_frame, text="Save Medication", command=self.add_medication)
+        self.add_btn = ctk.CTkButton(
+            self.form_frame, 
+            text="Save Medication", 
+            height=38, 
+            corner_radius=8, 
+            fg_color="#7c3aed", 
+            hover_color="#6d28d9", 
+            font=ctk.CTkFont(weight="bold"), 
+            command=self.add_medication
+        )
         self.add_btn.grid(row=form_start_row+6, column=0, columnspan=2, pady=25)
 
         # List Frame
-        self.list_frame = ctk.CTkScrollableFrame(self, label_text="Your Drugs", fg_color="#1a1a1a")
+        self.list_frame = ctk.CTkScrollableFrame(
+            self, 
+            label_text="Your Drugs", 
+            fg_color="#161926"
+        )
         self.list_frame.grid(row=1, column=1, sticky="nsew", padx=(0, 20), pady=10)
 
     def upload_image(self):
@@ -99,7 +150,13 @@ class MedicationFrame(ctk.CTkFrame):
         
         meds = self.inventory.get_user_medications(self.current_user.user_id)
         for med in meds:
-            f = ctk.CTkFrame(self.list_frame, fg_color="#2a2a2a")
+            f = ctk.CTkFrame(
+                self.list_frame, 
+                fg_color="#1c2033", 
+                border_color="#282f47", 
+                border_width=1, 
+                corner_radius=10
+            )
             f.pack(fill="x", pady=5)
             
             # Display Image if exists
