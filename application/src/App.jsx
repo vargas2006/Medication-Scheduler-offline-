@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Bell, X } from 'lucide-react';
 import AppLoadingScreen from './components/AppLoadingScreen';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -15,10 +16,48 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('DashboardFrame');
   const [dataRefreshKey, setDataRefreshKey] = useState(0);
+  const [activeAlert, setActiveAlert] = useState(null);
+
+  useEffect(() => {
+    const handleDueAlert = (e) => {
+      if (e.detail) {
+        setActiveAlert(e.detail);
+      }
+    };
+    window.addEventListener('medication-due-alert', handleDueAlert);
+    return () => window.removeEventListener('medication-due-alert', handleDueAlert);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const savedSession = localStorage.getItem('med_user_session');
+      if (savedSession) {
+        const { user: savedUser, expiry } = JSON.parse(savedSession);
+        if (savedUser && expiry && expiry > Date.now()) {
+          setUser(savedUser);
+          callApi('set_active_user', savedUser.user_id);
+        } else {
+          localStorage.removeItem('med_user_session');
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load saved session:', e);
+    }
+  }, []);
 
   const handleLogout = async () => {
+    localStorage.removeItem('med_user_session');
     await callApi('logout');
     setUser(null);
+  };
+
+  const handleLoginSuccess = async (u) => {
+    setUser(u);
+    try {
+      await callApi('set_active_user', u.user_id);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleDataChange = () => {
@@ -30,7 +69,7 @@ export default function App() {
   }
 
   if (!user) {
-    return <LoginModal onLoginSuccess={(u) => setUser(u)} />;
+    return <LoginModal onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
@@ -67,6 +106,47 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {/* Global In-App Medication Due Alert Banner */}
+      {activeAlert && (
+        <div className="fixed top-5 right-5 z-[9999] max-w-sm bg-[#161926] border-2 border-emerald-500/80 rounded-2xl p-4 shadow-2xl shadow-black/80 flex items-start gap-3 backdrop-blur-md">
+          <div className="p-2 bg-emerald-500/20 rounded-xl text-emerald-400 shrink-0">
+            <Bell className="w-5 h-5 animate-pulse" />
+          </div>
+          <div className="flex-1 text-xs">
+            <div className="flex items-center justify-between mb-1">
+              <span className="font-bold text-white text-xs">{activeAlert.title}</span>
+              <button
+                type="button"
+                onClick={() => setActiveAlert(null)}
+                className="text-slate-400 hover:text-white p-0.5"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <p className="text-slate-300 leading-snug mb-3 text-[11px]">{activeAlert.message}</p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveAlert(null);
+                  setActiveTab('IntakeFrame');
+                }}
+                className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg text-[11px] transition-colors"
+              >
+                Take Dose Now
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveAlert(null)}
+                className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[11px] transition-colors"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

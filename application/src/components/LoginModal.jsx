@@ -5,8 +5,9 @@ import { callApi } from '../utils/pywebview';
 export default function LoginModal({ onLoginSuccess }) {
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState('');
-  const [identifier, setIdentifier] = useState('johnleevargas25@gmail.com');
-  const [password, setPassword] = useState('JOHNlee#2006');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [message, setMessage] = useState({ text: '', isError: false });
   const [loading, setLoading] = useState(false);
 
@@ -27,6 +28,12 @@ export default function LoginModal({ onLoginSuccess }) {
       } else {
         const res = await callApi('login', identifier, password);
         if (res.success) {
+          if (rememberMe) {
+            const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
+            localStorage.setItem('med_user_session', JSON.stringify({ user: res.user, expiry }));
+          } else {
+            localStorage.removeItem('med_user_session');
+          }
           onLoginSuccess(res.user);
         } else {
           setMessage({ text: res.message || 'Invalid username/password.', isError: true });
@@ -132,6 +139,20 @@ export default function LoginModal({ onLoginSuccess }) {
               />
             </div>
           </div>
+
+          {!isRegister && (
+            <div className="flex items-center justify-between text-xs pt-0.5">
+              <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white transition-colors">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-[#272e45] bg-[#161926] text-[#7c3aed] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#7c3aed]"
+                />
+                <span className="select-none font-medium">Remember me for 30 days</span>
+              </label>
+            </div>
+          )}
 
           <button
             type="submit"

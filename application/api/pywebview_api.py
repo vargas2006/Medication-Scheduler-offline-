@@ -23,6 +23,11 @@ class PythonAPI:
                 "name": u.name,
                 "email": u.email
             }
+            try:
+                from services.background_worker import NotificationWorker
+                NotificationWorker().switch_active_user(u.user_id)
+            except Exception as e:
+                print(f"[API] Error switching active user on login: {e}")
         return {"success": success, "message": message, "user": user_data}
 
     def register(self, name, email, password):
@@ -31,7 +36,26 @@ class PythonAPI:
 
     def logout(self):
         self.user_manager.logout()
+        try:
+            from services.background_worker import NotificationWorker
+            NotificationWorker().switch_active_user(None)
+        except Exception:
+            pass
         return {"success": True}
+
+    def set_active_user(self, user_id):
+        try:
+            user_id = int(user_id)
+            user_row = self.inventory_manager.db.fetch_one("SELECT id, username, name, email FROM users WHERE id = ?", (user_id,))
+            if user_row:
+                from models.user import User
+                self.user_manager.current_user = User(user_row[0], user_row[1], user_row[2], user_row[3])
+                from services.background_worker import NotificationWorker
+                NotificationWorker().switch_active_user(user_id)
+                return {"success": True}
+            return {"success": False, "message": "User not found"}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
 
     def get_dashboard_data(self, user_id):
         try:
@@ -181,3 +205,65 @@ class PythonAPI:
             return {"success": True, "filepath": filepath, "message": f"Exported successfully to {filepath}"}
         except Exception as e:
             return {"success": False, "message": str(e)}
+
+    def get_settings(self, user_id=None):
+        try:
+            from database.db_manager import DatabaseManager
+            db = DatabaseManager()
+            if not user_id and self.user_manager.current_user:
+                user_id = self.user_manager.current_user.user_id
+            settings = db.get_settings(user_id)
+            return {"success": True, **settings}
+        except Exception as e:
+            return {"success": False, "error": str(e), "enable_offline_popups": 0, "enable_gmail_notifications": 0, "recipient_email": ""}
+
+    def save_settings(self, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email="", sender_password="", user_id=None):
+        try:
+            from database.db_manager import DatabaseManager
+            db = DatabaseManager()
+            if not user_id and self.user_manager.current_user:
+                user_id = self.user_manager.current_user.user_id
+            db.save_settings(enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, user_id)
+            return {"success": True, "message": "Settings updated successfully."}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
+    def send_test_notification(self):
+        try:
+            from database.db_manager import DatabaseManager
+            db = DatabaseManager()
+            settings = db.get_settings()
+            
+            med_name = "Paracetamol"
+            dosage = "500mg"
+            time_val = datetime.now().strftime("%I:%M %p")
+
+            # 1. Enqueue Due Medication Email in SQLite database ONLY if Gmail notifications are enabled
+            if settings.get("enable_gmail_notifications") and settings.get("recipient_email"):
+                subject = f"⏰ Medication Due Reminder: {med_name} ({dosage})"
+                body = (
+                    f"Hello!\n\n"
+                    f"This is a test reminder that it is time to take your scheduled medication:\n"
+                    f"• Medication: {med_name}\n"
+                    f"• Dosage: {dosage}\n"
+                    f"• Time Scheduled: {time_val}\n\n"
+                    f"Please take your dose now and log it in your Smart Medication Scheduler app."
+                )
+                db.enqueue_email(subject, body)
+            
+            # 2. Always trigger instant OS Desktop Popup on test
+            try:
+                from services.background_worker import NotificationWorker
+                worker = NotificationWorker()
+                worker._trigger_os_popup(
+                    "⏰ Medication Due Alert!",
+                    f"It is time to take your dose: {med_name} ({dosage}) at {time_val}."
+                )
+            except Exception as ex:
+                print(f"[API] Error in popup trigger: {ex}")
+                
+            return {"success": True, "message": "Due medication test alert triggered!"}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
+

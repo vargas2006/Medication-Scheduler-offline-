@@ -86,6 +86,56 @@ class DatabaseManager:
             )
         ''')
 
+        # Settings table (Single configuration row id=1)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS settings (
+                id INTEGER PRIMARY KEY,
+                enable_offline_popups INTEGER NOT NULL DEFAULT 0,
+                enable_gmail_notifications INTEGER NOT NULL DEFAULT 0,
+                recipient_email TEXT DEFAULT '',
+                sender_email TEXT DEFAULT 'johnleevargas25@gmail.com',
+                sender_password TEXT DEFAULT 'ocpl htqd tblw zquk'
+            )
+        ''')
+
+        try:
+            cursor.execute("ALTER TABLE settings ADD COLUMN sender_email TEXT DEFAULT 'johnleevargas25@gmail.com'")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            cursor.execute("ALTER TABLE settings ADD COLUMN sender_password TEXT DEFAULT 'ocpl htqd tblw zquk'")
+        except sqlite3.OperationalError:
+            pass
+
+        cursor.execute('''
+            INSERT OR IGNORE INTO settings (id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password)
+            VALUES (1, 0, 0, '', 'johnleevargas25@gmail.com', 'ocpl htqd tblw zquk')
+        ''')
+        # Ensure sender credentials are populated
+        cursor.execute('''
+            UPDATE settings 
+            SET sender_email = 'johnleevargas25@gmail.com', 
+                sender_password = 'ocpl htqd tblw zquk' 
+            WHERE id = 1 AND (sender_email = '' OR sender_password = '')
+        ''')
+
+        # Email queue table for offline email persistence
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS email_queue (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                subject TEXT NOT NULL,
+                body TEXT NOT NULL,
+                recipient_email TEXT DEFAULT '',
+                status TEXT NOT NULL DEFAULT 'pending',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
+        try:
+            cursor.execute("ALTER TABLE email_queue ADD COLUMN recipient_email TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+
         conn.commit()
         conn.close()
 
@@ -113,3 +163,94 @@ class DatabaseManager:
         row = cursor.fetchone()
         conn.close()
         return row
+
+    def get_settings(self, user_id=None):
+        if user_id:
+            row = self.fetch_one(
+                "SELECT id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password FROM settings WHERE user_id = ?",
+                (int(user_id),)
+            )
+            if row:
+                return {
+                    "enable_offline_popups": row[1],
+                    "enable_gmail_notifications": row[2],
+                    "recipient_email": row[3] or "",
+                    "sender_email": row[4] or "johnleevargas25@gmail.com",
+                    "sender_password": row[5] or "ocpl htqd tblw zquk"
+                }
+            # Look up user's default email from users table
+            u = self.fetch_one("SELECT email FROM users WHERE id = ?", (int(user_id),))
+            default_email = (u[0] or "").strip() if u else ""
+            self.execute_query(
+                "INSERT INTO settings (user_id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password) VALUES (?, 0, 0, ?, 'johnleevargas25@gmail.com', 'ocpl htqd tblw zquk')",
+                (int(user_id), default_email)
+            )
+            return {
+                "enable_offline_popups": 0,
+                "enable_gmail_notifications": 0,
+                "recipient_email": default_email,
+                "sender_email": "johnleevargas25@gmail.com",
+                "sender_password": "ocpl htqd tblw zquk"
+            }
+
+        # Fallback to row id=1
+        row = self.fetch_one("SELECT id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password FROM settings WHERE id = 1")
+        if not row:
+            self.execute_query("INSERT OR IGNORE INTO settings (id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password) VALUES (1, 0, 0, '', 'johnleevargas25@gmail.com', 'ocpl htqd tblw zquk')")
+            return {"enable_offline_popups": 0, "enable_gmail_notifications": 0, "recipient_email": "", "sender_email": "johnleevargas25@gmail.com", "sender_password": "ocpl htqd tblw zquk"}
+        return {
+            "enable_offline_popups": row[1],
+            "enable_gmail_notifications": row[2],
+            "recipient_email": row[3] or "",
+            "sender_email": row[4] or "johnleevargas25@gmail.com",
+            "sender_password": row[5] or "ocpl htqd tblw zquk"
+        }
+
+    def save_settings(self, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email="", sender_password="", user_id=None):
+        clean_sender_email = str(sender_email).strip() or "johnleevargas25@gmail.com"
+        clean_sender_password = str(sender_password).strip() or "ocpl htqd tblw zquk"
+        clean_recipient = str(recipient_email).strip()
+
+        if user_id:
+            user_id = int(user_id)
+            existing = self.fetch_one("SELECT id FROM settings WHERE user_id = ?", (user_id,))
+            if existing:
+                self.execute_query('''
+                    UPDATE settings 
+                    SET enable_offline_popups = ?, 
+                        enable_gmail_notifications = ?, 
+                        recipient_email = ?,
+                        sender_email = ?,
+                        sender_password = ?
+                    WHERE user_id = ?
+                ''', (int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, clean_sender_email, clean_sender_password, user_id))
+            else:
+                self.execute_query('''
+                    INSERT INTO settings (user_id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (user_id, int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, clean_sender_email, clean_sender_password))
+            return True
+
+        self.execute_query('''
+            UPDATE settings 
+            SET enable_offline_popups = ?, 
+                enable_gmail_notifications = ?, 
+                recipient_email = ?,
+                sender_email = ?,
+                sender_password = ?
+            WHERE id = 1
+        ''', (int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, clean_sender_email, clean_sender_password))
+        return True
+
+    def enqueue_email(self, subject, body, recipient_email=""):
+        return self.execute_query(
+            "INSERT INTO email_queue (subject, body, recipient_email, status) VALUES (?, ?, ?, 'pending')", 
+            (subject, body, str(recipient_email).strip())
+        )
+
+    def get_pending_emails(self):
+        return self.fetch_all("SELECT id, subject, body, recipient_email FROM email_queue WHERE status = 'pending'")
+
+    def mark_email_sent(self, email_id):
+        self.execute_query("UPDATE email_queue SET status = 'sent' WHERE id = ?", (email_id,))
+
