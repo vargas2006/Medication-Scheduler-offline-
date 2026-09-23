@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, AlertCircle, Check, Search, Calendar, Clock, X, LayoutList, LayoutGrid } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, AlertTriangle, Check, CheckCircle2, Search, ArrowUpDown, Filter, Boxes, PackageCheck, PackageX, X, LayoutList, LayoutGrid, Calendar, Clock } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
 
 function MedImage({ src, alt }) {
@@ -30,10 +30,10 @@ export default function MedicationsView({ user, onDataChange }) {
   // View Mode: 'grid' | 'list'
   const [viewMode, setViewMode] = useState('grid');
 
-  // Timeline / Date Filter State
-  const [dateFilter, setDateFilter] = useState('ALL');
-  const [customStart, setCustomStart] = useState('');
-  const [customEnd, setCustomEnd] = useState('');
+  // Stock Quantity / Refill Filter State ('ALL' | 'LOW_STOCK' | 'OUT_OF_STOCK' | 'IN_STOCK')
+  const [stockFilter, setStockFilter] = useState('ALL');
+  // Sort State ('DEFAULT' | 'STOCK_ASC' | 'STOCK_DESC' | 'NAME_AZ')
+  const [sortBy, setSortBy] = useState('DEFAULT');
 
   // Modal State for Adding New Drug
   const [showModal, setShowModal] = useState(false);
@@ -42,10 +42,24 @@ export default function MedicationsView({ user, onDataChange }) {
   const [stock, setStock] = useState('30');
   const [threshold, setThreshold] = useState('10');
   const [schedType, setSchedType] = useState('DAILY_TIME');
-  const [timeValue, setTimeValue] = useState('08:00');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedTime, setSelectedTime] = useState('08:00');
   const [imagePath, setImagePath] = useState('');
   const [formMsg, setFormMsg] = useState({ text: '', isError: false });
   const [submitting, setSubmitting] = useState(false);
+
+  const setQuickDate = (offsetDays) => {
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    setSelectedDate(d.toISOString().split('T')[0]);
+  };
+
+  const timePresets = [
+    { label: 'Morning', value: '08:00' },
+    { label: 'Noon', value: '12:00' },
+    { label: 'Evening', value: '18:00' },
+    { label: 'Night', value: '21:00' }
+  ];
 
   const fetchMeds = async () => {
     if (!user?.user_id) return;
@@ -81,7 +95,8 @@ export default function MedicationsView({ user, onDataChange }) {
         parseInt(threshold) || 0,
         imagePath || null,
         schedType,
-        timeValue
+        selectedTime,
+        selectedDate
       );
 
       if (res.success) {
@@ -90,7 +105,8 @@ export default function MedicationsView({ user, onDataChange }) {
         setDosage('');
         setStock('30');
         setThreshold('10');
-        setTimeValue('08:00');
+        setSelectedTime('08:00');
+        setSelectedDate(new Date().toISOString().split('T')[0]);
         setImagePath('');
         fetchMeds();
         if (onDataChange) onDataChange();
@@ -116,57 +132,40 @@ export default function MedicationsView({ user, onDataChange }) {
     }
   };
 
-  // Filter search + date filter logic
-  const filteredMeds = medications.filter((m) => {
-    const matchesSearch =
-      m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.dosage.toLowerCase().includes(searchTerm.toLowerCase());
+  const totalCount = medications.length;
+  const lowStockCount = medications.filter((m) => m.stock > 0 && (m.is_low_stock || m.stock <= (m.refill_threshold || 5))).length;
+  const outOfStockCount = medications.filter((m) => m.stock <= 0).length;
+  const inStockCount = medications.filter((m) => m.stock > (m.refill_threshold || 5)).length;
 
-    if (!matchesSearch) return false;
-    if (dateFilter === 'ALL') return true;
+  // Filter search + stock quantity status filter + sorting logic
+  const filteredMeds = medications
+    .filter((m) => {
+      const matchesSearch =
+        m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        m.dosage.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const rawDate = m.created_at || m.timestamp;
-    if (!rawDate) return true;
+      if (!matchesSearch) return false;
 
-    const itemDate = new Date(rawDate.replace(' ', 'T'));
-    if (isNaN(itemDate.getTime())) return true;
+      const threshold = m.refill_threshold || 5;
+      const isOut = m.stock <= 0;
+      const isLow = m.stock > 0 && (m.is_low_stock || m.stock <= threshold);
+      const isSufficient = m.stock > threshold;
 
-    const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
-    const diffDays = (now - itemDate) / (1000 * 60 * 60 * 24);
-
-    if (dateFilter === 'TODAY') {
-      return itemDate.toISOString().split('T')[0] === todayStr;
-    }
-    if (dateFilter === 'YESTERDAY') {
-      const y = new Date(now);
-      y.setDate(y.getDate() - 1);
-      return itemDate.toISOString().split('T')[0] === y.toISOString().split('T')[0];
-    }
-    if (dateFilter === 'THIS_WEEK') {
-      return diffDays >= 0 && diffDays <= 7;
-    }
-    if (dateFilter === 'THIS_MONTH') {
-      return diffDays >= 0 && diffDays <= 30;
-    }
-    if (dateFilter === 'LAST_3_MONTHS') {
-      return diffDays >= 0 && diffDays <= 90;
-    }
-    if (dateFilter === 'CUSTOM') {
-      if (customStart && new Date(customStart) > itemDate) return false;
-      if (customEnd) {
-        const endDate = new Date(customEnd);
-        endDate.setHours(23, 59, 59, 999);
-        if (endDate < itemDate) return false;
-      }
+      if (stockFilter === 'LOW_STOCK') return isLow;
+      if (stockFilter === 'OUT_OF_STOCK') return isOut;
+      if (stockFilter === 'IN_STOCK') return isSufficient;
       return true;
-    }
-    return true;
-  });
+    })
+    .sort((a, b) => {
+      if (sortBy === 'STOCK_ASC') return a.stock - b.stock;
+      if (sortBy === 'STOCK_DESC') return b.stock - a.stock;
+      if (sortBy === 'NAME_AZ') return a.name.localeCompare(b.name);
+      return 0;
+    });
 
   return (
     <div className="p-5 flex flex-col h-full overflow-hidden space-y-4 relative">
-      {/* Top Controls Bar (Identical Layout to Intake Medication) */}
+      {/* Top Controls Bar */}
       <div className="bg-[#161926] border border-[#24293e] rounded-2xl p-4 flex flex-col gap-3 shrink-0">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           {/* Search Box */}
@@ -182,7 +181,7 @@ export default function MedicationsView({ user, onDataChange }) {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* View Mode Toggle Switch (Matching Reference Image) */}
+            {/* View Mode Toggle Switch */}
             <div className="flex items-center bg-[#1c2033] border border-[#282f47] p-1 rounded-xl shadow-inner">
               <button
                 type="button"
@@ -226,53 +225,104 @@ export default function MedicationsView({ user, onDataChange }) {
           </div>
         </div>
 
-        {/* Timeline / Date Filter Selector Bar */}
+        {/* Stock Quantity / Refill Status Filter Bar */}
         <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-[#22273a]">
-          <div className="flex items-center gap-2 bg-[#1c2033] border border-[#282f47] px-3 py-1.5 rounded-xl text-xs">
-            <Calendar className="w-3.5 h-3.5 text-[#38bdf8]" />
-            <span className="text-slate-400 font-semibold">Filter Timeline:</span>
-            <select
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="bg-transparent text-white font-bold focus:outline-none cursor-pointer"
+          {/* Stock Filter Pills */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setStockFilter('ALL')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                stockFilter === 'ALL'
+                  ? 'bg-[#2b3558] text-white shadow-sm border border-[#3b4772]'
+                  : 'bg-[#1c2033] border border-[#272e45] text-slate-400 hover:text-white'
+              }`}
             >
-              <option value="ALL" className="bg-[#161926]">All Dates</option>
-              <option value="TODAY" className="bg-[#161926]">Today</option>
-              <option value="YESTERDAY" className="bg-[#161926]">Yesterday</option>
-              <option value="THIS_WEEK" className="bg-[#161926]">This Week (7 Days)</option>
-              <option value="THIS_MONTH" className="bg-[#161926]">This Month (30 Days)</option>
-              <option value="LAST_3_MONTHS" className="bg-[#161926]">Last 3 Months (90 Days)</option>
-              <option value="CUSTOM" className="bg-[#161926]">Custom Range</option>
-            </select>
+              <Boxes className="w-3.5 h-3.5" />
+              <span>All Stock</span>
+              <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300">
+                {totalCount}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setStockFilter('LOW_STOCK')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                stockFilter === 'LOW_STOCK'
+                  ? 'bg-amber-950/80 text-amber-300 border border-amber-500/60 shadow-sm'
+                  : 'bg-[#1c2033] border border-[#272e45] text-slate-400 hover:text-amber-400'
+              }`}
+            >
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+              <span>Low Stock (Need Refill)</span>
+              <span className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                lowStockCount > 0 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-slate-800 text-slate-400'
+              }`}>
+                {lowStockCount}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setStockFilter('OUT_OF_STOCK')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                stockFilter === 'OUT_OF_STOCK'
+                  ? 'bg-rose-950/80 text-rose-300 border border-rose-500/60 shadow-sm'
+                  : 'bg-[#1c2033] border border-[#272e45] text-slate-400 hover:text-rose-400'
+              }`}
+            >
+              <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+              <span>Out of Stock</span>
+              <span className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                outOfStockCount > 0 ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-slate-800 text-slate-400'
+              }`}>
+                {outOfStockCount}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setStockFilter('IN_STOCK')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                stockFilter === 'IN_STOCK'
+                  ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/60 shadow-sm'
+                  : 'bg-[#1c2033] border border-[#272e45] text-slate-400 hover:text-emerald-400'
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>In Stock (Optimal)</span>
+              <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                {inStockCount}
+              </span>
+            </button>
           </div>
 
-          <div className="text-xs text-slate-400 flex items-center gap-2 font-medium">
-            <span>Inventory Items:</span>
-            <span className="bg-[#10273f] text-[#38bdf8] font-bold px-2.5 py-0.5 rounded-md">
-              {filteredMeds.length}
-            </span>
+          {/* Right Controls: Sort Order & Count */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-[#1c2033] border border-[#282f47] px-3 py-1.5 rounded-xl text-xs">
+              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-slate-400 font-semibold">Sort By:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-transparent text-white font-bold focus:outline-none cursor-pointer"
+              >
+                <option value="DEFAULT" className="bg-[#161926]">Default</option>
+                <option value="STOCK_ASC" className="bg-[#161926]">Stock (Low to High - Refills First)</option>
+                <option value="STOCK_DESC" className="bg-[#161926]">Stock (High to Low)</option>
+                <option value="NAME_AZ" className="bg-[#161926]">Medication Name (A - Z)</option>
+              </select>
+            </div>
+
+            <div className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
+              <span>Showing:</span>
+              <span className="bg-[#10273f] text-[#38bdf8] font-bold px-2 py-0.5 rounded-md">
+                {filteredMeds.length}
+              </span>
+            </div>
           </div>
         </div>
-
-        {/* Custom Range Date Pickers */}
-        {dateFilter === 'CUSTOM' && (
-          <div className="flex items-center gap-2 bg-[#1c2033] border border-[#282f47] p-2 rounded-xl text-xs">
-            <span className="text-slate-400 font-medium">Start Date:</span>
-            <input
-              type="date"
-              value={customStart}
-              onChange={(e) => setCustomStart(e.target.value)}
-              className="bg-[#161926] border border-[#272e45] rounded-lg px-2 py-1 text-white text-xs focus:outline-none"
-            />
-            <span className="text-slate-400 font-medium">End Date:</span>
-            <input
-              type="date"
-              value={customEnd}
-              onChange={(e) => setCustomEnd(e.target.value)}
-              className="bg-[#161926] border border-[#272e45] rounded-lg px-2 py-1 text-white text-xs focus:outline-none"
-            />
-          </div>
-        )}
       </div>
 
       {/* Main Content Area (Grid View vs List View) */}
@@ -280,7 +330,7 @@ export default function MedicationsView({ user, onDataChange }) {
         {loading ? (
           <div className="text-center text-slate-500 py-20 text-xs">Loading medication inventory...</div>
         ) : filteredMeds.length === 0 ? (
-          <div className="text-center text-slate-500 py-24 text-xs">No medications found matching search or date filter.</div>
+          <div className="text-center text-slate-500 py-24 text-xs">No medications found matching search or stock quantity filter.</div>
         ) : viewMode === 'grid' ? (
           /* GRID VIEW LAYOUT (Fixed Working Grid) */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -381,7 +431,7 @@ export default function MedicationsView({ user, onDataChange }) {
       {/* MODAL FORM: Add/Register New Drug */}
       {showModal && (
         <div className="fixed inset-0 bg-[#090b12]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="w-full max-w-lg bg-[#121520] border border-[#24293e] rounded-2xl p-6 shadow-2xl space-y-5">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#121520] border border-[#24293e] rounded-2xl p-6 shadow-2xl space-y-5">
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-[#1e2438] pb-3.5">
               <div className="flex items-center gap-2.5">
@@ -459,29 +509,108 @@ export default function MedicationsView({ user, onDataChange }) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Schedule Type</label>
-                  <select
-                    value={schedType}
-                    onChange={(e) => setSchedType(e.target.value)}
-                    className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
-                  >
-                    <option value="DAILY_TIME">DAILY TIME</option>
-                    <option value="INTERVAL">INTERVAL (Hours)</option>
-                  </select>
+              {/* Schedule Type Selection */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Schedule Type</label>
+                <select
+                  value={schedType}
+                  onChange={(e) => setSchedType(e.target.value)}
+                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
+                >
+                  <option value="DAILY_TIME">DAILY TIME (Specific Time &amp; Date)</option>
+                  <option value="INTERVAL">INTERVAL (Every X Hours)</option>
+                </select>
+              </div>
+
+              {/* Date Selection with Calendar & Quick Pills (Matching Schedule New Intake) */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-[#38bdf8]" />
+                    <span>Choose Schedule Date</span>
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-mono">{selectedDate}</span>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Time / Interval</label>
-                  <input
-                    type="text"
-                    placeholder={schedType === 'DAILY_TIME' ? '08:00' : '6'}
-                    value={timeValue}
-                    onChange={(e) => setTimeValue(e.target.value)}
-                    className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
-                  />
+                <input
+                  type="date"
+                  required
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed] mb-2"
+                />
+
+                {/* Quick Date Selector Pills */}
+                <div className="grid grid-cols-4 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setQuickDate(0)}
+                    className="py-1.5 px-2 bg-[#1c2033] hover:bg-[#252b45] border border-[#2b324d] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
+                  >
+                    Today
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setQuickDate(1)}
+                    className="py-1.5 px-2 bg-[#1c2033] hover:bg-[#252b45] border border-[#2b324d] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
+                  >
+                    Tomorrow
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setQuickDate(2)}
+                    className="py-1.5 px-2 bg-[#1c2033] hover:bg-[#252b45] border border-[#2b324d] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
+                  >
+                    In 2 Days
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setQuickDate(3)}
+                    className="py-1.5 px-2 bg-[#1c2033] hover:bg-[#252b45] border border-[#2b324d] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
+                  >
+                    In 3 Days
+                  </button>
                 </div>
+              </div>
+
+              {/* Time Selection with Presets & Input (Matching Schedule New Intake) */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#c084fc]" />
+                    <span>Choose Intake Time</span>
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-mono">{selectedTime}</span>
+                </div>
+
+                <input
+                  type={schedType === 'DAILY_TIME' ? 'time' : 'text'}
+                  required
+                  placeholder={schedType === 'DAILY_TIME' ? '08:00' : 'Interval in hours (e.g. 6)'}
+                  value={selectedTime}
+                  onChange={(e) => setSelectedTime(e.target.value)}
+                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed] mb-2"
+                />
+
+                {/* Preset Time Pills (Only for DAILY_TIME) */}
+                {schedType === 'DAILY_TIME' && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {timePresets.map((preset) => (
+                      <button
+                        key={preset.value}
+                        type="button"
+                        onClick={() => setSelectedTime(preset.value)}
+                        className={`py-1.5 px-2 border rounded-lg text-[10px] font-bold transition-all ${
+                          selectedTime === preset.value
+                            ? 'bg-[#7c3aed] border-[#9333ea] text-white shadow-sm'
+                            : 'bg-[#1c2033] hover:bg-[#252b45] border-[#2b324d] text-slate-300'
+                        }`}
+                      >
+                        {preset.label} ({preset.value})
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Modal Actions */}

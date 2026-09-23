@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Moon, Sun, UserCheck, Shield, Bell, Mail, CheckCircle2 } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
 
-export default function SettingsView({ user }) {
-  const [isDark, setIsDark] = useState(true);
+export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
+  const isDark = theme === 'dark';
 
   // Notification & Alert persistent states
   const [enableOfflinePopups, setEnableOfflinePopups] = useState(false);
@@ -80,8 +80,9 @@ export default function SettingsView({ user }) {
             </div>
 
             <button
-              onClick={() => setIsDark(!isDark)}
-              className={`w-12 h-6 rounded-full p-1 transition-colors ${isDark ? 'bg-[#7c3aed]' : 'bg-slate-600'}`}
+              type="button"
+              onClick={onToggleTheme}
+              className={`w-12 h-6 rounded-full p-1 transition-colors ${isDark ? 'bg-[#7c3aed]' : 'bg-amber-500'}`}
             >
               <div className={`w-4 h-4 rounded-full bg-white transition-transform ${isDark ? 'translate-x-6' : 'translate-x-0'}`} />
             </button>

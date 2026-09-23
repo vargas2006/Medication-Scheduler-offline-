@@ -126,7 +126,7 @@ class PythonAPI:
         except Exception as e:
             return {"success": False, "error": str(e), "medications": []}
 
-    def add_medication(self, user_id, name, dosage, stock, refill_threshold, image_path=None, schedule_type="DAILY_TIME", time_value="08:00"):
+    def add_medication(self, user_id, name, dosage, stock, refill_threshold, image_path=None, schedule_type="DAILY_TIME", time_value="08:00", schedule_date=None):
         try:
             user_id = int(user_id)
             stock = int(stock)
@@ -136,7 +136,8 @@ class PythonAPI:
                 user_id, name, dosage, stock, refill_threshold, image_path
             )
             if schedule_type and time_value:
-                self.dose_alert.add_schedule(med_id, schedule_type, time_value)
+                clean_date = str(schedule_date).strip() if schedule_date else None
+                self.dose_alert.add_schedule(med_id, schedule_type, time_value, schedule_date=clean_date)
 
             return {"success": True, "message": "Medication added successfully!", "med_id": med_id}
         except Exception as e:

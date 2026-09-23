@@ -1,7 +1,7 @@
 import React from 'react';
-import { Calendar } from 'lucide-react';
+import { Calendar, Sun, Moon } from 'lucide-react';
 
-export default function Header({ activeTab, user }) {
+export default function Header({ activeTab, user, theme = 'dark', onToggleTheme }) {
   const displayName = user?.name || user?.username || 'User';
 
   const dateStr = new Date().toLocaleDateString('en-US', {
@@ -62,9 +62,32 @@ export default function Header({ activeTab, user }) {
         <p className="text-xs text-slate-400 mt-0.5">{meta.subtitle}</p>
       </div>
 
-      <div className="bg-[#161926] border border-[#24293e] rounded-lg px-3.5 py-1.5 flex items-center gap-2 text-xs font-semibold text-slate-400 shadow-sm">
-        <Calendar className="w-4 h-4 text-slate-400" />
-        <span>{dateStr}</span>
+      <div className="flex items-center gap-2.5">
+        {/* Quick Theme Toggle Button */}
+        <button
+          type="button"
+          onClick={onToggleTheme}
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          className="bg-[#161926] hover:bg-[#1c2033] border border-[#24293e] rounded-xl px-3 py-2 flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white transition-all shadow-sm"
+        >
+          {theme === 'dark' ? (
+            <>
+              <Sun className="w-4 h-4 text-amber-400 animate-pulse" />
+              <span className="hidden sm:inline text-xs text-slate-300">Light Mode</span>
+            </>
+          ) : (
+            <>
+              <Moon className="w-4 h-4 text-purple-600" />
+              <span className="hidden sm:inline text-xs text-slate-700">Dark Mode</span>
+            </>
+          )}
+        </button>
+
+        {/* Date Display Badge */}
+        <div className="bg-[#161926] border border-[#24293e] rounded-xl px-3.5 py-2 flex items-center gap-2 text-xs font-semibold text-slate-400 shadow-sm">
+          <Calendar className="w-4 h-4 text-slate-400" />
+          <span>{dateStr}</span>
+        </div>
       </div>
     </header>
   );

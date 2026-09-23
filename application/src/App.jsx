@@ -17,6 +17,28 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('DashboardFrame');
   const [dataRefreshKey, setDataRefreshKey] = useState(0);
   const [activeAlert, setActiveAlert] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('med_app_theme') || 'dark';
+  });
+
+  const handleToggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    try {
+      localStorage.setItem('med_app_theme', nextTheme);
+      document.documentElement.setAttribute('data-theme', nextTheme);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    try {
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [theme]);
 
   useEffect(() => {
     const handleDueAlert = (e) => {
@@ -85,7 +107,7 @@ export default function App() {
       {/* Main Right Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#0d0f17]">
         {/* Permanent Top Header */}
-        <Header activeTab={activeTab} user={user} />
+        <Header activeTab={activeTab} user={user} theme={theme} onToggleTheme={handleToggleTheme} />
 
         {/* Dynamic Body Content */}
         <main className="flex-1 overflow-hidden relative">
@@ -102,7 +124,7 @@ export default function App() {
             <HistoryView key={`hist-${dataRefreshKey}`} user={user} />
           )}
           {activeTab === 'SettingsFrame' && (
-            <SettingsView user={user} />
+            <SettingsView user={user} theme={theme} onToggleTheme={handleToggleTheme} />
           )}
         </main>
       </div>
