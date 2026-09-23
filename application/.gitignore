@@ -48,3 +48,28 @@ htmlcov/
 
 # Logs
 *.log
+
+# Local Database & Credentials
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+.env
+.env.local
+
+# Python Backend
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# ReactJS Frontend
+node_modules/
+build/
+dist/
+
+# System & Editors
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

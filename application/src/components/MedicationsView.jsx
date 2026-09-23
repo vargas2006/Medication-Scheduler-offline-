@@ -236,13 +236,13 @@ export default function MedicationsView({ user, onDataChange }) {
               onChange={(e) => setDateFilter(e.target.value)}
               className="bg-transparent text-white font-bold focus:outline-none cursor-pointer"
             >
-              <option value="ALL" className="bg-[#161926]">All Dates (Lahat ng Petsa)</option>
-              <option value="TODAY" className="bg-[#161926]">Today (Ngayong Araw)</option>
-              <option value="YESTERDAY" className="bg-[#161926]">Yesterday (Kahapon)</option>
-              <option value="THIS_WEEK" className="bg-[#161926]">This Week / Last 7 Days (Nitong Linggo / 7 Araw)</option>
-              <option value="THIS_MONTH" className="bg-[#161926]">This Month / Last 30 Days (Nitong Buwan / 30 Araw)</option>
-              <option value="LAST_3_MONTHS" className="bg-[#161926]">Last 3 Months / 90 Days (Nakaraang 3 Buwan)</option>
-              <option value="CUSTOM" className="bg-[#161926]">Older / Custom Range (Pumili ng Petsa)</option>
+              <option value="ALL" className="bg-[#161926]">All Dates</option>
+              <option value="TODAY" className="bg-[#161926]">Today</option>
+              <option value="YESTERDAY" className="bg-[#161926]">Yesterday</option>
+              <option value="THIS_WEEK" className="bg-[#161926]">This Week (7 Days)</option>
+              <option value="THIS_MONTH" className="bg-[#161926]">This Month (30 Days)</option>
+              <option value="LAST_3_MONTHS" className="bg-[#161926]">Last 3 Months (90 Days)</option>
+              <option value="CUSTOM" className="bg-[#161926]">Custom Range</option>
             </select>
           </div>
 
