@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, X } from 'lucide-react';
+import { Bell, X, Pill, Clock, Check, AlertCircle } from 'lucide-react';
 import AppLoadingScreen from './components/AppLoadingScreen';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -107,43 +107,99 @@ export default function App() {
         </main>
       </div>
 
-      {/* Global In-App Medication Due Alert Banner */}
+      {/* Global In-App Medication Due Alert Card (Large, Detailed, Prominent Borders) */}
       {activeAlert && (
-        <div className="fixed top-5 right-5 z-[9999] max-w-sm bg-[#161926] border-2 border-emerald-500/80 rounded-2xl p-4 shadow-2xl shadow-black/80 flex items-start gap-3 backdrop-blur-md">
-          <div className="p-2 bg-emerald-500/20 rounded-xl text-emerald-400 shrink-0">
-            <Bell className="w-5 h-5 animate-pulse" />
+        <div className="fixed top-6 right-6 z-[9999] w-[500px] max-w-[94vw] bg-[#121626]/98 border-2 border-emerald-500 rounded-3xl p-5 shadow-[0_12px_45px_rgba(0,0,0,0.85),0_0_30px_rgba(16,185,129,0.35)] backdrop-blur-2xl animate-in fade-in slide-in-from-top-4 duration-300 ring-1 ring-white/10">
+          {/* Card Header */}
+          <div className="flex items-start justify-between gap-3 pb-3 mb-3 border-b border-[#252d47]">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-emerald-500/20 border border-emerald-500/40 rounded-2xl text-emerald-400 shrink-0 shadow-inner">
+                <Bell className="w-5 h-5 animate-bounce" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-white text-sm tracking-wide">
+                    {activeAlert.title || 'Medication Due Reminder'}
+                  </span>
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-[#0b0e17]">
+                    Today
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400 font-medium">
+                  {activeAlert.date || 'Scheduled for today'} &bull; {activeAlert.timestamp || 'Due Now'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setActiveAlert(null)}
+              className="text-slate-400 hover:text-white p-1 rounded-xl hover:bg-[#202740] transition-colors"
+              title="Dismiss"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <div className="flex-1 text-xs">
-            <div className="flex items-center justify-between mb-1">
-              <span className="font-bold text-white text-xs">{activeAlert.title}</span>
-              <button
-                type="button"
-                onClick={() => setActiveAlert(null)}
-                className="text-slate-400 hover:text-white p-0.5"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
+
+          {/* Detailed Medications List or Message */}
+          {activeAlert.medications && activeAlert.medications.length > 0 ? (
+            <div className="space-y-2 mb-4 max-h-[220px] overflow-y-auto pr-1">
+              {activeAlert.medications.map((m, idx) => (
+                <div
+                  key={idx}
+                  className="bg-[#171d33] border border-[#2b3558] hover:border-emerald-500/40 rounded-2xl p-3 flex items-center justify-between transition-all"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                      <Pill className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-white text-xs truncate">{m.name}</h4>
+                      <span className="inline-block mt-0.5 text-[10px] font-semibold text-sky-300 bg-sky-950/70 border border-sky-500/30 px-2 py-0.5 rounded-md">
+                        {m.dosage}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-purple-300 bg-purple-950/70 border border-purple-500/30 px-2.5 py-1 rounded-xl text-[11px] font-bold shrink-0">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{m.time_value || 'Today'}</span>
+                  </div>
+                </div>
+              ))}
             </div>
-            <p className="text-slate-300 leading-snug mb-3 text-[11px]">{activeAlert.message}</p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveAlert(null);
-                  setActiveTab('IntakeFrame');
-                }}
-                className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg text-[11px] transition-colors"
-              >
-                Take Dose Now
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveAlert(null)}
-                className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[11px] transition-colors"
-              >
-                Dismiss
-              </button>
-            </div>
+          ) : (
+            <p className="text-slate-300 text-xs leading-relaxed mb-4 p-3 bg-[#171d33] border border-[#2b3558] rounded-2xl">
+              {activeAlert.message}
+            </p>
+          )}
+
+          {/* Health Tip / Instruction banner */}
+          <div className="mb-4 px-3 py-2 bg-emerald-950/30 border border-emerald-500/20 rounded-xl flex items-center gap-2 text-[11px] text-emerald-300 font-medium">
+            <span className="text-sm">💧</span>
+            <span>Take dose with water and log intake to update your schedule.</span>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#252d47]">
+            <button
+              type="button"
+              onClick={() => setActiveAlert(null)}
+              className="px-4 py-2 bg-[#1c2238] hover:bg-[#252c48] border border-[#2e375b] text-slate-300 font-bold rounded-xl text-xs transition-colors"
+            >
+              Dismiss
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveAlert(null);
+                setActiveTab('IntakeFrame');
+              }}
+              className="px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold rounded-xl text-xs shadow-lg shadow-emerald-950/50 flex items-center gap-2 transition-all transform active:scale-95"
+            >
+              <Check className="w-4 h-4" />
+              <span>Take Dose Now</span>
+            </button>
           </div>
         </div>
       )}

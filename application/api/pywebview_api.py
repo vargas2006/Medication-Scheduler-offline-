@@ -183,15 +183,19 @@ class PythonAPI:
         try:
             user_id = int(user_id)
             med_id = int(med_id)
-            timestamp_str = f"{date_str} {time_str}:00" if len(time_str) == 5 else f"{date_str} {time_str}"
+            clean_time = time_str.strip()
+            clean_date = date_str.strip()
+            timestamp_str = f"{clean_date} {clean_time}:00" if len(clean_time) == 5 else f"{clean_date} {clean_time}"
             
             if status == "TAKEN":
                 self.inventory_manager.deduct_stock(med_id)
-                
-            self.report_generator.log_intake(user_id, med_id, status, timestamp_str)
-            self.dose_alert.add_schedule(med_id, "DAILY_TIME", time_str)
+                self.report_generator.log_intake(user_id, med_id, "TAKEN", timestamp_str)
+            else:
+                # SCHEDULED reminder
+                self.report_generator.log_intake(user_id, med_id, "SCHEDULED", timestamp_str)
+                self.dose_alert.add_schedule(med_id, "DAILY_TIME", clean_time, schedule_date=clean_date)
             
-            return {"success": True, "message": f"Intake record scheduled for {date_str} at {time_str}!"}
+            return {"success": True, "message": f"Intake scheduled for {clean_date} at {clean_time}!"}
         except Exception as e:
             return {"success": False, "message": str(e)}
 

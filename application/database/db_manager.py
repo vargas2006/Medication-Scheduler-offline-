@@ -99,6 +99,24 @@ class DatabaseManager:
         ''')
 
         try:
+            cursor.execute("ALTER TABLE schedules ADD COLUMN schedule_date TEXT DEFAULT NULL")
+        except sqlite3.OperationalError:
+            pass
+
+        # Notifications sent tracking table to ensure strictly 1x notification per day
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS notifications_sent (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                medication_id INTEGER NOT NULL,
+                notification_type TEXT NOT NULL,
+                notified_date TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, medication_id, notification_type, notified_date)
+            )
+        ''')
+
+        try:
             cursor.execute("ALTER TABLE settings ADD COLUMN sender_email TEXT DEFAULT 'johnleevargas25@gmail.com'")
         except sqlite3.OperationalError:
             pass
@@ -126,6 +144,7 @@ class DatabaseManager:
                 subject TEXT NOT NULL,
                 body TEXT NOT NULL,
                 recipient_email TEXT DEFAULT '',
+                is_html INTEGER DEFAULT 0,
                 status TEXT NOT NULL DEFAULT 'pending',
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
@@ -133,6 +152,10 @@ class DatabaseManager:
 
         try:
             cursor.execute("ALTER TABLE email_queue ADD COLUMN recipient_email TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            cursor.execute("ALTER TABLE email_queue ADD COLUMN is_html INTEGER DEFAULT 0")
         except sqlite3.OperationalError:
             pass
 
@@ -242,15 +265,35 @@ class DatabaseManager:
         ''', (int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, clean_sender_email, clean_sender_password))
         return True
 
-    def enqueue_email(self, subject, body, recipient_email=""):
+    def enqueue_email(self, subject, body, recipient_email="", is_html=0):
         return self.execute_query(
-            "INSERT INTO email_queue (subject, body, recipient_email, status) VALUES (?, ?, ?, 'pending')", 
-            (subject, body, str(recipient_email).strip())
+            "INSERT INTO email_queue (subject, body, recipient_email, is_html, status) VALUES (?, ?, ?, ?, 'pending')", 
+            (subject, body, str(recipient_email).strip(), int(is_html))
         )
 
     def get_pending_emails(self):
-        return self.fetch_all("SELECT id, subject, body, recipient_email FROM email_queue WHERE status = 'pending'")
+        return self.fetch_all("SELECT id, subject, body, recipient_email, is_html FROM email_queue WHERE status = 'pending'")
 
     def mark_email_sent(self, email_id):
         self.execute_query("UPDATE email_queue SET status = 'sent' WHERE id = ?", (email_id,))
+
+    def is_already_notified_today(self, user_id, medication_id, notification_type, notified_date):
+        """
+        Checks if a notification has already been sent to this user for this medication today.
+        Guarantees strictly 1x notification per day.
+        """
+        row = self.fetch_one(
+            "SELECT id FROM notifications_sent WHERE user_id = ? AND medication_id = ? AND notification_type = ? AND notified_date = ?",
+            (int(user_id), int(medication_id), str(notification_type), str(notified_date))
+        )
+        return row is not None
+
+    def mark_notified_today(self, user_id, medication_id, notification_type, notified_date):
+        """
+        Records that a notification was sent so it will not repeat today.
+        """
+        self.execute_query(
+            "INSERT OR IGNORE INTO notifications_sent (user_id, medication_id, notification_type, notified_date) VALUES (?, ?, ?, ?)",
+            (int(user_id), int(medication_id), str(notification_type), str(notified_date))
+        )
 
