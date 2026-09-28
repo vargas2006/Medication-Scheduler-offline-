@@ -37,7 +37,7 @@ class DoseAlert:
         
         query = '''
             SELECT m.id, m.name, m.dosage, s.schedule_type, s.time_value, s.schedule_date,
-                   (SELECT MAX(timestamp) FROM intake_log WHERE medication_id = m.id AND status = 'TAKEN') as last_taken
+            (SELECT MAX(timestamp) FROM intake_log WHERE medication_id = m.id AND status = 'TAKEN') as last_taken
             FROM medications m
             JOIN schedules s ON m.id = s.medication_id
             WHERE m.user_id = ?
