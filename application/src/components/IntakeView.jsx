@@ -231,9 +231,7 @@ export default function IntakeView({ user, onDataChange }) {
               }}
               className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-purple-900/30 shrink-0"
             >
-              <Plus className="w-4 h-4" />
-              <Calendar className="w-4 h-4" />
-              <span>Schedule New Intake</span>
+              <span>Add Intake Schedule</span>
             </button>
           </div>
         </div>
@@ -596,8 +594,7 @@ export default function IntakeView({ user, onDataChange }) {
                   disabled={submitting}
                   className="px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-900/30 transition-all flex items-center gap-2 disabled:opacity-50"
                 >
-                  <Check className="w-4 h-4" />
-                  <span>{submitting ? 'Saving...' : 'Save Intake Schedule'}</span>
+                  <span>{submitting ? 'Saving...' : 'Save Schedule'}</span>
                 </button>
               </div>
             </form>

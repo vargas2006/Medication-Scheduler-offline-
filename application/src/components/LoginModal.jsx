@@ -99,7 +99,7 @@ export default function LoginModal({ onLoginSuccess }) {
                 <input
                   type="text"
                   required
-                  placeholder="John Doe"
+                  placeholder="Rene Baterbonia"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full bg-[#161926] border border-[#272e45] rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#7c3aed]"
@@ -110,7 +110,7 @@ export default function LoginModal({ onLoginSuccess }) {
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              {isRegister ? 'Email Address' : 'Email or Username'}
+              {isRegister ? 'Email/Username' : 'Email/Username'}
             </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />

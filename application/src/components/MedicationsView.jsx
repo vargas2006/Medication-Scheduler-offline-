@@ -219,8 +219,7 @@ export default function MedicationsView({ user, onDataChange }) {
               onClick={() => setShowModal(true)}
               className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-purple-900/30 shrink-0"
             >
-              <Plus className="w-4 h-4" />
-              <span>Register New Drug</span>
+              <span>Add Drug</span>
             </button>
           </div>
         </div>
@@ -627,8 +626,7 @@ export default function MedicationsView({ user, onDataChange }) {
                   disabled={submitting}
                   className="px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-900/30 transition-all flex items-center gap-2 disabled:opacity-50"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>{submitting ? 'Saving...' : 'Register Drug'}</span>
+                  <span>{submitting ? 'Adding...' : 'Add Drug'}</span>
                 </button>
               </div>
             </form>
