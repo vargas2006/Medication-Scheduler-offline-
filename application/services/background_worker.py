@@ -283,8 +283,12 @@ class NotificationWorker:
             return
 
         global_settings = self.db.get_settings()
-        sender_email = global_settings.get("sender_email") or "johnleevargas25@gmail.com"
-        sender_password = global_settings.get("sender_password") or "ocpl htqd tblw zquk"
+        sender_email = (global_settings.get("sender_email") or "").strip()
+        sender_password = (global_settings.get("sender_password") or "").strip()
+
+        if not sender_email or not sender_password:
+            print("[NotificationWorker] Gmail sender credentials not configured. Skipping email queue.")
+            return
 
         # Send queued emails with rate limiting (max 3 at a time)
         for email_item in pending_emails[:3]:

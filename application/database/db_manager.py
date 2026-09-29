@@ -42,6 +42,15 @@ class DatabaseManager:
         except sqlite3.OperationalError:
             pass
 
+        # Password resets table for OTP verification
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS password_resets (
+                email TEXT PRIMARY KEY,
+                code TEXT NOT NULL,
+                expires_at INTEGER NOT NULL
+            )
+        ''')
+
         # Medications table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS medications (
@@ -93,8 +102,8 @@ class DatabaseManager:
                 enable_offline_popups INTEGER NOT NULL DEFAULT 0,
                 enable_gmail_notifications INTEGER NOT NULL DEFAULT 0,
                 recipient_email TEXT DEFAULT '',
-                sender_email TEXT DEFAULT 'johnleevargas25@gmail.com',
-                sender_password TEXT DEFAULT 'ocpl htqd tblw zquk'
+                sender_email TEXT DEFAULT '',
+                sender_password TEXT DEFAULT ''
             )
         ''')
 
@@ -117,24 +126,21 @@ class DatabaseManager:
         ''')
 
         try:
-            cursor.execute("ALTER TABLE settings ADD COLUMN sender_email TEXT DEFAULT 'johnleevargas25@gmail.com'")
+            cursor.execute("ALTER TABLE settings ADD COLUMN sender_email TEXT DEFAULT ''")
         except sqlite3.OperationalError:
             pass
         try:
-            cursor.execute("ALTER TABLE settings ADD COLUMN sender_password TEXT DEFAULT 'ocpl htqd tblw zquk'")
+            cursor.execute("ALTER TABLE settings ADD COLUMN sender_password TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            cursor.execute("ALTER TABLE settings ADD COLUMN is_email_verified INTEGER DEFAULT 0")
         except sqlite3.OperationalError:
             pass
 
         cursor.execute('''
-            INSERT OR IGNORE INTO settings (id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password)
-            VALUES (1, 0, 0, '', 'johnleevargas25@gmail.com', 'ocpl htqd tblw zquk')
-        ''')
-        # Ensure sender credentials are populated
-        cursor.execute('''
-            UPDATE settings 
-            SET sender_email = 'johnleevargas25@gmail.com', 
-                sender_password = 'ocpl htqd tblw zquk' 
-            WHERE id = 1 AND (sender_email = '' OR sender_password = '')
+            INSERT OR IGNORE INTO settings (id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, is_email_verified)
+            VALUES (1, 0, 0, '', '', '', 0)
         ''')
 
         # Email queue table for offline email persistence
@@ -190,7 +196,7 @@ class DatabaseManager:
     def get_settings(self, user_id=None):
         if user_id:
             row = self.fetch_one(
-                "SELECT id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password FROM settings WHERE user_id = ?",
+                "SELECT id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, is_email_verified FROM settings WHERE user_id = ?",
                 (int(user_id),)
             )
             if row:
@@ -198,60 +204,63 @@ class DatabaseManager:
                     "enable_offline_popups": row[1],
                     "enable_gmail_notifications": row[2],
                     "recipient_email": row[3] or "",
-                    "sender_email": row[4] or "johnleevargas25@gmail.com",
-                    "sender_password": row[5] or "ocpl htqd tblw zquk"
+                    "sender_email": row[4] or "",
+                    "sender_password": row[5] or "",
+                    "is_email_verified": row[6] if len(row) > 6 and row[6] is not None else (1 if row[3] else 0)
                 }
-            # Look up user's default email from users table
-            u = self.fetch_one("SELECT email FROM users WHERE id = ?", (int(user_id),))
-            default_email = (u[0] or "").strip() if u else ""
             self.execute_query(
-                "INSERT INTO settings (user_id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password) VALUES (?, 0, 0, ?, 'johnleevargas25@gmail.com', 'ocpl htqd tblw zquk')",
-                (int(user_id), default_email)
+                "INSERT INTO settings (user_id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, is_email_verified) VALUES (?, 0, 0, '', '', '', 0)",
+                (int(user_id),)
             )
             return {
                 "enable_offline_popups": 0,
                 "enable_gmail_notifications": 0,
-                "recipient_email": default_email,
-                "sender_email": "johnleevargas25@gmail.com",
-                "sender_password": "ocpl htqd tblw zquk"
+                "recipient_email": "",
+                "sender_email": "",
+                "sender_password": "",
+                "is_email_verified": 0
             }
 
         # Fallback to row id=1
-        row = self.fetch_one("SELECT id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password FROM settings WHERE id = 1")
+        row = self.fetch_one("SELECT id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, is_email_verified FROM settings WHERE id = 1")
         if not row:
-            self.execute_query("INSERT OR IGNORE INTO settings (id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password) VALUES (1, 0, 0, '', 'johnleevargas25@gmail.com', 'ocpl htqd tblw zquk')")
-            return {"enable_offline_popups": 0, "enable_gmail_notifications": 0, "recipient_email": "", "sender_email": "johnleevargas25@gmail.com", "sender_password": "ocpl htqd tblw zquk"}
+            self.execute_query("INSERT OR IGNORE INTO settings (id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, is_email_verified) VALUES (1, 0, 0, '', '', '', 0)")
+            return {"enable_offline_popups": 0, "enable_gmail_notifications": 0, "recipient_email": "", "sender_email": "", "sender_password": "", "is_email_verified": 0}
         return {
             "enable_offline_popups": row[1],
             "enable_gmail_notifications": row[2],
             "recipient_email": row[3] or "",
-            "sender_email": row[4] or "johnleevargas25@gmail.com",
-            "sender_password": row[5] or "ocpl htqd tblw zquk"
+            "sender_email": row[4] or "",
+            "sender_password": row[5] or "",
+            "is_email_verified": row[6] if len(row) > 6 and row[6] is not None else 0
         }
 
-    def save_settings(self, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email="", sender_password="", user_id=None):
-        clean_sender_email = str(sender_email).strip() or "johnleevargas25@gmail.com"
-        clean_sender_password = str(sender_password).strip() or "ocpl htqd tblw zquk"
+    def save_settings(self, enable_offline_popups, enable_gmail_notifications, recipient_email="", sender_email="", sender_password="", user_id=None, is_email_verified=None):
+        clean_sender_email = str(sender_email).strip()
+        clean_sender_password = str(sender_password).strip()
         clean_recipient = str(recipient_email).strip()
 
         if user_id:
             user_id = int(user_id)
-            existing = self.fetch_one("SELECT id FROM settings WHERE user_id = ?", (user_id,))
+            existing = self.fetch_one("SELECT id, is_email_verified FROM settings WHERE user_id = ?", (user_id,))
             if existing:
+                verified_val = is_email_verified if is_email_verified is not None else existing[1]
                 self.execute_query('''
                     UPDATE settings 
                     SET enable_offline_popups = ?, 
                         enable_gmail_notifications = ?, 
                         recipient_email = ?,
                         sender_email = ?,
-                        sender_password = ?
+                        sender_password = ?,
+                        is_email_verified = ?
                     WHERE user_id = ?
-                ''', (int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, clean_sender_email, clean_sender_password, user_id))
+                ''', (int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, clean_sender_email, clean_sender_password, int(verified_val), user_id))
             else:
+                verified_val = is_email_verified if is_email_verified is not None else 0
                 self.execute_query('''
-                    INSERT INTO settings (user_id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', (user_id, int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, clean_sender_email, clean_sender_password))
+                    INSERT INTO settings (user_id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, is_email_verified)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (user_id, int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, clean_sender_email, clean_sender_password, int(verified_val)))
             return True
 
         self.execute_query('''

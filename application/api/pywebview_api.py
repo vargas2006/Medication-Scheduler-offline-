@@ -222,16 +222,145 @@ class PythonAPI:
         except Exception as e:
             return {"success": False, "error": str(e), "enable_offline_popups": 0, "enable_gmail_notifications": 0, "recipient_email": ""}
 
-    def save_settings(self, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email="", sender_password="", user_id=None):
+    def save_settings(self, enable_offline_popups, enable_gmail_notifications, recipient_email="", sender_email="", sender_password="", user_id=None, is_email_verified=None):
         try:
             from database.db_manager import DatabaseManager
             db = DatabaseManager()
             if not user_id and self.user_manager.current_user:
                 user_id = self.user_manager.current_user.user_id
-            db.save_settings(enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, user_id)
+            db.save_settings(enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, user_id, is_email_verified)
             return {"success": True, "message": "Settings updated successfully."}
         except Exception as e:
             return {"success": False, "message": str(e)}
+
+    def send_gmail_bind_code(self, user_id, email):
+        """Send a 6-digit verification code to the target Gmail address to bind it for notifications."""
+        try:
+            import random
+            import time
+            import smtplib
+            from email.mime.text import MIMEText
+            from email.mime.multipart import MIMEMultipart
+            from database.db_manager import DatabaseManager
+            db = DatabaseManager()
+
+            target_email = (email or "").strip().lower()
+            if not target_email or "@" not in target_email:
+                return {"success": False, "message": "Please enter a valid Gmail address."}
+
+            code = f"{random.randint(100000, 999999)}"
+            expires_at = int(time.time()) + 900  # 15 mins
+
+            # Store code in password_resets table
+            db.execute_query(
+                "INSERT OR REPLACE INTO password_resets (email, code, expires_at) VALUES (?, ?, ?)",
+                (target_email, code, expires_at)
+            )
+
+            user_id = int(user_id) if user_id else (self.user_manager.current_user.user_id if self.user_manager.current_user else None)
+            settings = db.get_settings(user_id)
+            sender_email = settings.get("sender_email")
+            sender_password = settings.get("sender_password")
+
+            subject = "✉ Verification Code: Bind Gmail for Medication Notifications"
+            html_body = f"""
+            <div style="font-family: Arial, sans-serif; background-color: #0d1117; color: #e6edf3; padding: 24px; border-radius: 12px; max-width: 480px; margin: 0 auto; border: 1px solid #24293e;">
+              <h2 style="color: #38bdf8; margin-top: 0; font-size: 20px;">💊 Smart Medication Scheduler</h2>
+              <h3 style="color: #ffffff; font-size: 16px;">Gmail Verification Code</h3>
+              <p style="color: #94a3b8; font-size: 13px;">You requested to bind this Gmail address to receive medication alerts. Enter the code below in your app settings:</p>
+              <div style="background-color: #161926; border: 1px solid #38bdf8; border-radius: 10px; padding: 18px; text-align: center; margin: 20px 0;">
+                <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #38bdf8;">{code}</span>
+              </div>
+              <p style="color: #64748b; font-size: 11px; margin-bottom: 0;">This code will expire in 15 minutes.</p>
+            </div>
+            """
+
+            sent_directly = False
+            if sender_email and sender_password:
+                try:
+                    msg = MIMEMultipart("alternative")
+                    msg['From'] = f"Smart Medication Scheduler <{sender_email}>"
+                    msg['To'] = target_email
+                    msg['Subject'] = subject
+                    msg.attach(MIMEText(f"Your verification code is: {code}", "plain"))
+                    msg.attach(MIMEText(html_body, "html"))
+
+                    server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
+                    server.starttls()
+                    server.login(sender_email, sender_password)
+                    server.sendmail(sender_email, target_email, msg.as_string())
+                    server.quit()
+                    sent_directly = True
+                except Exception as e:
+                    print(f"[API] Direct SMTP error: {e}")
+
+            if not sent_directly:
+                db.enqueue_email(subject, html_body, target_email, is_html=1)
+
+            return {"success": True, "message": f"Verification code sent to {target_email}!"}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
+    def verify_and_bind_gmail(self, user_id, email, code):
+        """Verify 6-digit OTP code and bind Gmail for notifications."""
+        try:
+            import time
+            from database.db_manager import DatabaseManager
+            db = DatabaseManager()
+
+            target_email = (email or "").strip().lower()
+            input_code = (code or "").strip()
+            if not target_email or not input_code:
+                return {"success": False, "message": "Please enter verification code."}
+
+            row = db.fetch_one("SELECT code, expires_at FROM password_resets WHERE email = ?", (target_email,))
+            if not row:
+                return {"success": False, "message": "No verification request found for this email."}
+
+            saved_code, expires_at = row
+            if saved_code != input_code:
+                return {"success": False, "message": "Invalid verification code. Please check your Gmail."}
+
+            if int(time.time()) > expires_at:
+                return {"success": False, "message": "Verification code has expired. Please request a new code."}
+
+            user_id = int(user_id) if user_id else (self.user_manager.current_user.user_id if self.user_manager.current_user else None)
+            current = db.get_settings(user_id)
+            db.save_settings(
+                enable_offline_popups=current.get("enable_offline_popups", 0),
+                enable_gmail_notifications=1,
+                recipient_email=target_email,
+                sender_email=current.get("sender_email", ""),
+                sender_password=current.get("sender_password", ""),
+                user_id=user_id,
+                is_email_verified=1
+            )
+
+            db.execute_query("DELETE FROM password_resets WHERE email = ?", (target_email,))
+            return {"success": True, "message": f"✓ Gmail address {target_email} verified and bound successfully!"}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
+    def unbind_gmail(self, user_id):
+        """Unbind current notification Gmail address."""
+        try:
+            from database.db_manager import DatabaseManager
+            db = DatabaseManager()
+            user_id = int(user_id) if user_id else (self.user_manager.current_user.user_id if self.user_manager.current_user else None)
+            current = db.get_settings(user_id)
+            db.save_settings(
+                enable_offline_popups=current.get("enable_offline_popups", 0),
+                enable_gmail_notifications=0,
+                recipient_email="",
+                sender_email=current.get("sender_email", ""),
+                sender_password=current.get("sender_password", ""),
+                user_id=user_id,
+                is_email_verified=0
+            )
+            return {"success": True, "message": "Gmail unbound successfully."}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
 
     def send_test_notification(self):
         try:
@@ -270,5 +399,182 @@ class PythonAPI:
             return {"success": True, "message": "Due medication test alert triggered!"}
         except Exception as e:
             return {"success": False, "message": str(e)}
+
+    def change_password(self, user_id, current_password, new_password):
+        """Verify current password then update to a new PBKDF2-hashed password."""
+        try:
+            from database.db_manager import DatabaseManager
+            from models.user import _hash_password, _verify_password, _is_hashed
+            db = DatabaseManager()
+
+            user_id = int(user_id)
+            row = db.fetch_one(
+                "SELECT id, username, password FROM users WHERE id = ?", (user_id,)
+            )
+            if not row:
+                return {"success": False, "message": "User not found."}
+
+            stored_pw = row[2] or ""
+
+            # Verify current password (supports both plain-text legacy and hashed)
+            if _is_hashed(stored_pw):
+                valid = _verify_password(current_password, stored_pw)
+            else:
+                valid = (stored_pw == current_password)
+
+            if not valid:
+                return {"success": False, "message": "Current password is incorrect."}
+
+            if not new_password or len(new_password) < 6:
+                return {"success": False, "message": "New password must be at least 6 characters."}
+
+            new_hash = _hash_password(new_password)
+            db.execute_query("UPDATE users SET password = ? WHERE id = ?", (new_hash, user_id))
+            print(f"[API] Password changed and hashed for user_id={user_id}")
+            return {"success": True, "message": "Password updated successfully."}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
+    def request_password_reset(self, identifier):
+        """Send a 6-digit verification code to user's email for password recovery."""
+        try:
+            import random
+            import time
+            import smtplib
+            from email.mime.text import MIMEText
+            from email.mime.multipart import MIMEMultipart
+            from database.db_manager import DatabaseManager
+            db = DatabaseManager()
+
+            ident = (identifier or "").strip()
+            if not ident:
+                return {"success": False, "message": "Please enter your username or registered email."}
+
+            user_row = db.fetch_one(
+                "SELECT id, username, name, email FROM users WHERE username = ? OR LOWER(email) = LOWER(?)",
+                (ident, ident)
+            )
+            if not user_row:
+                return {"success": False, "message": "No account found matching that username or email."}
+
+            user_id, username, name, user_email = user_row
+            user_email = (user_email or "").strip()
+            if not user_email:
+                return {"success": False, "message": "No email address is registered for this account."}
+
+            # Generate 6-digit code
+            code = f"{random.randint(100000, 999999)}"
+            expires_at = int(time.time()) + 900  # 15 mins
+
+            # Save in password_resets table
+            db.execute_query(
+                "INSERT OR REPLACE INTO password_resets (email, code, expires_at) VALUES (?, ?, ?)",
+                (user_email.lower(), code, expires_at)
+            )
+
+            # Get sender credentials
+            settings = db.get_settings(user_id)
+            sender_email = settings.get("sender_email")
+            sender_password = settings.get("sender_password")
+
+            subject = "🔒 Password Reset Verification Code - Smart Medication Scheduler"
+            html_body = f"""
+            <div style="font-family: Arial, sans-serif; background-color: #0d1117; color: #e6edf3; padding: 24px; border-radius: 12px; max-width: 480px; margin: 0 auto; border: 1px solid #24293e;">
+              <h2 style="color: #7c3aed; margin-top: 0; font-size: 20px;">💊 Smart Medication Scheduler</h2>
+              <h3 style="color: #ffffff; font-size: 16px;">Verification Code</h3>
+              <p style="color: #94a3b8; font-size: 13px;">Hi <b>{name or username}</b>,</p>
+              <p style="color: #94a3b8; font-size: 13px;">You requested to reset your password. Use the verification code below to proceed:</p>
+              <div style="background-color: #161926; border: 1px solid #38bdf8; border-radius: 10px; padding: 18px; text-align: center; margin: 20px 0;">
+                <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #38bdf8;">{code}</span>
+              </div>
+              <p style="color: #64748b; font-size: 11px; margin-bottom: 0;">This code is valid for 15 minutes. If you did not request this code, please ignore this email.</p>
+            </div>
+            """
+
+            # Direct SMTP send if sender credentials present
+            sent_directly = False
+            if sender_email and sender_password:
+                try:
+                    msg = MIMEMultipart("alternative")
+                    msg['From'] = f"Smart Medication Scheduler <{sender_email}>"
+                    msg['To'] = user_email
+                    msg['Subject'] = subject
+                    msg.attach(MIMEText(f"Your verification code is: {code}", "plain"))
+                    msg.attach(MIMEText(html_body, "html"))
+
+                    server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
+                    server.starttls()
+                    server.login(sender_email, sender_password)
+                    server.sendmail(sender_email, user_email, msg.as_string())
+                    server.quit()
+                    sent_directly = True
+                    print(f"[API] Verification code {code} sent directly via Gmail to {user_email}")
+                except Exception as smtp_err:
+                    print(f"[API] Direct SMTP error: {smtp_err}. Enqueuing in email_queue fallback.")
+
+            if not sent_directly:
+                # Enqueue for background worker
+                db.enqueue_email(subject, html_body, user_email, is_html=1)
+
+            # Mask email for privacy (e.g. j***5@gmail.com)
+            parts = user_email.split("@")
+            if len(parts) == 2:
+                uname, domain = parts
+                masked = uname[0] + "***" + (uname[-1] if len(uname) > 1 else "") + "@" + domain
+            else:
+                masked = user_email
+
+            return {
+                "success": True,
+                "message": f"Verification code sent to {masked}!",
+                "email": user_email
+            }
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
+    def verify_and_reset_password(self, email, code, new_password):
+        """Verify 6-digit OTP code and set new password for the account."""
+        try:
+            import time
+            from database.db_manager import DatabaseManager
+            from models.user import _hash_password
+            db = DatabaseManager()
+
+            target_email = (email or "").strip().lower()
+            input_code = (code or "").strip()
+            new_pass = (new_password or "").strip()
+
+            if not target_email or not input_code or not new_pass:
+                return {"success": False, "message": "Please enter code and new password."}
+
+            if len(new_pass) < 6:
+                return {"success": False, "message": "New password must be at least 6 characters."}
+
+            row = db.fetch_one(
+                "SELECT code, expires_at FROM password_resets WHERE email = ?",
+                (target_email,)
+            )
+            if not row:
+                return {"success": False, "message": "No verification request found for this email."}
+
+            saved_code, expires_at = row
+            if saved_code != input_code:
+                return {"success": False, "message": "Invalid verification code. Please check your email."}
+
+            if int(time.time()) > expires_at:
+                return {"success": False, "message": "Verification code has expired. Please request a new one."}
+
+            # Hash new password & update user
+            new_hash = _hash_password(new_pass)
+            db.execute_query("UPDATE users SET password = ? WHERE LOWER(email) = ?", (new_hash, target_email))
+
+            # Delete used reset record
+            db.execute_query("DELETE FROM password_resets WHERE email = ?", (target_email,))
+            print(f"[API] Password successfully reset for {target_email}")
+
+            return {"success": True, "message": "Password updated successfully! You can now sign in."}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
 
 
