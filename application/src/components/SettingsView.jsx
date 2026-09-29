@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Moon, Sun, UserCheck, Shield, Bell, Mail, CheckCircle2 } from 'lucide-react';
+import { Moon, Sun, UserCheck, Shield, Bell, Mail, CheckCircle2, AlertCircle, RefreshCw, KeyRound, ShieldCheck, Save } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
 
 export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
   const isDark = theme === 'dark';
 
-  // Notification & Alert persistent states
+  // Persistent Settings
   const [enableOfflinePopups, setEnableOfflinePopups] = useState(false);
   const [enableGmailNotifications, setEnableGmailNotifications] = useState(false);
-  const [recipientEmail, setRecipientEmail] = useState('');
-  const [senderEmail, setSenderEmail] = useState('');
-  const [senderPassword, setSenderPassword] = useState('');
+  const [boundEmail, setBoundEmail] = useState('');
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+
+  // Binding OTP flow states
+  const [inputGmail, setInputGmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
+
+  // Status messages
+  const [bindStatus, setBindStatus] = useState({ msg: '', isError: false });
   const [saveStatus, setSaveStatus] = useState('');
 
-  // Gmail rotation state
-  const [rotateStatus, setRotateStatus] = useState('');
-
-  // Change password state
+  // Password change state
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
@@ -25,68 +29,109 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
   const displayName = user?.name || user?.username || 'User';
   const emailInfo = user?.email ? ` (${user.email})` : '';
 
-  useEffect(() => {
-    async function loadSettings() {
-      try {
-        const res = await callApi('get_settings', user?.user_id);
-        if (res.success) {
-          setEnableOfflinePopups(res.enable_offline_popups === 1);
-          setEnableGmailNotifications(res.enable_gmail_notifications === 1);
-          setRecipientEmail(res.recipient_email || '');
-          setSenderEmail(res.sender_email || '');
-          setSenderPassword(res.sender_password || '');
+  const loadSettings = async () => {
+    try {
+      const res = await callApi('get_settings', user?.user_id);
+      if (res.success) {
+        setEnableOfflinePopups(res.enable_offline_popups === 1);
+        setEnableGmailNotifications(res.enable_gmail_notifications === 1);
+        setBoundEmail(res.recipient_email || '');
+        setIsEmailVerified(res.is_email_verified === 1);
+        if (res.recipient_email) {
+          setInputGmail(res.recipient_email);
         }
-      } catch (e) {
-        console.error('Failed to load settings from DB:', e);
       }
+    } catch (e) {
+      console.error('Failed to load settings:', e);
     }
+  };
+
+  useEffect(() => {
     loadSettings();
   }, [user]);
 
-  const persistSettings = async (offlineVal, gmailVal, sendEmailVal = senderEmail, sendPassVal = senderPassword) => {
+  // Save Settings button handler
+  const handleSaveSettings = async () => {
     try {
       setSaveStatus('Saving...');
-      // recipient_email left empty — backend uses user's registered email automatically
-      await callApi('save_settings', offlineVal ? 1 : 0, gmailVal ? 1 : 0, '', sendEmailVal, sendPassVal, user?.user_id);
-      setSaveStatus('Saved');
-      setTimeout(() => setSaveStatus(''), 2000);
+      await callApi(
+        'save_settings',
+        enableOfflinePopups ? 1 : 0,
+        enableGmailNotifications ? 1 : 0,
+        boundEmail,
+        '',
+        '',
+        user?.user_id,
+        isEmailVerified ? 1 : 0
+      );
+      setSaveStatus('Saved!');
+      setTimeout(() => setSaveStatus(''), 3000);
     } catch (e) {
       console.error('Failed to save settings:', e);
       setSaveStatus('Error saving');
     }
   };
 
-  const handleOfflineToggle = () => {
-    const nextVal = !enableOfflinePopups;
-    setEnableOfflinePopups(nextVal);
-    persistSettings(nextVal, enableGmailNotifications, senderEmail, senderPassword);
-  };
-
-  const handleGmailToggle = () => {
-    const nextVal = !enableGmailNotifications;
-    setEnableGmailNotifications(nextVal);
-    persistSettings(enableOfflinePopups, nextVal, senderEmail, senderPassword);
-  };
-
-  const handleBlurSave = () => {
-    persistSettings(enableOfflinePopups, enableGmailNotifications, senderEmail, senderPassword);
-  };
-
-  // Gmail credential rotation — clears saved sender and resets fields
-  const handleRotateGmailCredentials = async () => {
-    setRotateStatus('Clearing...');
+  // Step 1: Send 6-digit verification code to target Gmail
+  const handleSendCode = async () => {
+    const emailToVerify = inputGmail.trim();
+    if (!emailToVerify || !emailToVerify.includes('@')) {
+      setBindStatus({ msg: 'Please enter a valid Gmail address.', isError: true });
+      return;
+    }
+    setBindStatus({ msg: 'Sending 6-digit verification code to your Gmail...', isError: false });
     try {
-      await callApi('save_settings',
-        enableOfflinePopups ? 1 : 0,
-        enableGmailNotifications ? 1 : 0,
-        '', '', '', user?.user_id
-      );
-      setSenderEmail('');
-      setSenderPassword('');
-      setRotateStatus('Credentials cleared — enter new ones above and click away to save.');
-      setTimeout(() => setRotateStatus(''), 5000);
+      const res = await callApi('send_gmail_bind_code', user?.user_id, emailToVerify);
+      if (res.success) {
+        setCodeSent(true);
+        setBindStatus({ msg: res.message || `Code sent to ${emailToVerify}! Check your inbox.`, isError: false });
+      } else {
+        setBindStatus({ msg: res.message || 'Failed to send code.', isError: true });
+      }
     } catch (e) {
-      setRotateStatus('Error clearing credentials.');
+      setBindStatus({ msg: 'Error sending verification code.', isError: true });
+    }
+  };
+
+  // Step 2: Verify 6-digit code and bind Gmail
+  const handleVerifyAndBind = async () => {
+    const code = otpCode.trim();
+    if (!code) {
+      setBindStatus({ msg: 'Please enter the 6-digit verification code.', isError: true });
+      return;
+    }
+    setBindStatus({ msg: 'Verifying code...', isError: false });
+    try {
+      const res = await callApi('verify_and_bind_gmail', user?.user_id, inputGmail.trim(), code);
+      if (res.success) {
+        setBoundEmail(inputGmail.trim());
+        setIsEmailVerified(true);
+        setEnableGmailNotifications(true);
+        setCodeSent(false);
+        setOtpCode('');
+        setBindStatus({ msg: res.message || 'Gmail verified and bound successfully!', isError: false });
+      } else {
+        setBindStatus({ msg: res.message || 'Invalid code.', isError: true });
+      }
+    } catch (e) {
+      setBindStatus({ msg: 'Error verifying code.', isError: true });
+    }
+  };
+
+  // Unbind / Change Gmail
+  const handleUnbind = async () => {
+    try {
+      await callApi('unbind_gmail', user?.user_id);
+      setBoundEmail('');
+      setIsEmailVerified(false);
+      setInputGmail('');
+      setCodeSent(false);
+      setOtpCode('');
+      setEnableGmailNotifications(false);
+      setBindStatus({ msg: 'Gmail unbound.', isError: false });
+      setTimeout(() => setBindStatus({ msg: '', isError: false }), 3000);
+    } catch (e) {
+      setBindStatus({ msg: 'Error unbinding Gmail.', isError: true });
     }
   };
 
@@ -155,139 +200,160 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-400 mb-4">Configure local system popups and automated Gmail notifications.</p>
+          <p className="text-xs text-slate-400 mb-4">Configure system popups and verify Gmail for online medication alerts.</p>
 
-          <div className="space-y-3 max-w-lg">
+          <div className="space-y-4 max-w-lg">
             {/* Toggle 1: Local Desktop Notifications (Offline) */}
             <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Bell className="w-5 h-5 text-emerald-400" />
                 <div>
-                  <span className="text-xs font-bold text-white block">Enable Local Desktop Notifications (Offline)</span>
+                  <span className="text-xs font-bold text-white block">Local Desktop Notifications (Offline)</span>
                   <span className="text-[11px] text-slate-400">Trigger OS native popups for medication alerts</span>
                 </div>
               </div>
 
               <button
                 type="button"
-                onClick={handleOfflineToggle}
+                onClick={() => setEnableOfflinePopups(!enableOfflinePopups)}
                 className={`w-12 h-6 rounded-full p-1 transition-colors ${enableOfflinePopups ? 'bg-[#10b981]' : 'bg-slate-700'}`}
               >
                 <div className={`w-4 h-4 rounded-full bg-white transition-transform ${enableOfflinePopups ? 'translate-x-6' : 'translate-x-0'}`} />
               </button>
             </div>
 
-            {/* Toggle 2: Gmail Notifications (Requires Internet) */}
+            {/* Toggle 2: Gmail Notifications Toggle */}
             <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-sky-400" />
                 <div>
-                  <span className="text-xs font-bold text-white block">Enable Gmail Notifications (Requires Internet)</span>
-                  <span className="text-[11px] text-slate-400">Queue emails offline and send automatically when online</span>
+                  <span className="text-xs font-bold text-white block">Gmail Reminders (Requires Internet)</span>
+                  <span className="text-[11px] text-slate-400">Receive medication reminders directly to verified Gmail</span>
                 </div>
               </div>
 
               <button
                 type="button"
-                onClick={handleGmailToggle}
+                onClick={() => setEnableGmailNotifications(!enableGmailNotifications)}
                 className={`w-12 h-6 rounded-full p-1 transition-colors ${enableGmailNotifications ? 'bg-[#38bdf8]' : 'bg-slate-700'}`}
               >
                 <div className={`w-4 h-4 rounded-full bg-white transition-transform ${enableGmailNotifications ? 'translate-x-6' : 'translate-x-0'}`} />
               </button>
             </div>
 
-            {/* Conditional Input: Sender Email Configuration */}
-            {enableGmailNotifications && (
-              <div className="bg-[#161926] border border-[#2b334c] rounded-xl p-4 space-y-3.5">
-
-                {/* Auto-recipient info badge */}
-                <div className="flex items-center gap-2.5 bg-sky-500/8 border border-sky-500/20 rounded-xl px-3.5 py-2.5">
-                  <Mail className="w-4 h-4 text-sky-400 shrink-0" />
-                  <div className="min-w-0">
-                    <span className="text-[11px] font-semibold text-sky-300 block">Notification Recipient</span>
-                    <span className="text-[10px] text-slate-400 block truncate">
-                      Alerts will be sent automatically to your registered email:
-                      <span className="text-sky-400 font-mono ml-1">{user?.email || 'your registered email'}</span>
-                    </span>
-                  </div>
+            {/* Gmail Verification / Binding Box */}
+            <div className="bg-[#161926] border border-[#2b334c] rounded-xl p-4 space-y-3.5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-white block">Gmail Notification Binding</span>
+                  <span className="text-[10px] text-slate-400">Verify your Gmail address using a 6-digit code to enable alerts.</span>
                 </div>
-
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Sender Gmail Account <span className="text-slate-500">(Gmail address used to send alerts)</span></label>
-                    <input
-                      type="email"
-                      placeholder="yourapp@gmail.com"
-                      value={senderEmail}
-                      onChange={(e) => setSenderEmail(e.target.value)}
-                      onBlur={handleBlurSave}
-                      className="w-full bg-[#1c2033] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#38bdf8]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Gmail App Password <span className="text-slate-500">(16-char Google App Password)</span></label>
-                    <input
-                      type="password"
-                      placeholder="xxxx xxxx xxxx xxxx"
-                      value={senderPassword}
-                      onChange={(e) => setSenderPassword(e.target.value)}
-                      onBlur={handleBlurSave}
-                      className="w-full bg-[#1c2033] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#38bdf8]"
-                    />
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      Generate this in Google Account → Security → 2-Step Verification → App passwords.
-                    </p>
-                  </div>
-
-                  {/* Status badge + Rotate button */}
-                  <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-3 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-xs font-bold text-white block">Email Dispatcher Service</span>
-                        {senderEmail ? (
-                          <span className="text-[11px] text-[#38bdf8] font-mono font-medium block mt-0.5">{senderEmail}</span>
-                        ) : (
-                          <span className="text-[11px] text-amber-400 font-medium block mt-0.5">⚠ Not configured — enter sender Gmail above</span>
-                        )}
-                      </div>
-                      <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full shrink-0 ${
-                        senderEmail && senderPassword
-                          ? 'bg-emerald-500/10 border border-emerald-500/20'
-                          : 'bg-amber-500/10 border border-amber-500/20'
-                      }`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${
-                          senderEmail && senderPassword ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
-                        }`} />
-                        <span className={`text-[10px] font-semibold ${
-                          senderEmail && senderPassword ? 'text-emerald-400' : 'text-amber-400'
-                        }`}>
-                          {senderEmail && senderPassword ? 'Configured' : 'Not Set'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Rotate credentials button */}
-                    {senderEmail && senderPassword && (
-                      <div className="border-t border-[#272e45] pt-2.5">
-                        <button
-                          type="button"
-                          onClick={handleRotateGmailCredentials}
-                          className="flex items-center gap-2 text-[11px] font-semibold text-rose-400 hover:text-rose-300 transition-colors bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 rounded-lg px-3 py-1.5"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                          </svg>
-                          Rotate / Reset Gmail Credentials
-                        </button>
-                        {rotateStatus && (
-                          <p className="text-[10px] text-amber-400 mt-1.5">{rotateStatus}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                {/* Status Badge */}
+                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full shrink-0 ${
+                  isEmailVerified && boundEmail
+                    ? 'bg-emerald-500/10 border border-emerald-500/20'
+                    : 'bg-amber-500/10 border border-amber-500/20'
+                }`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${
+                    isEmailVerified && boundEmail ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                  }`} />
+                  <span className={`text-[10px] font-semibold ${
+                    isEmailVerified && boundEmail ? 'text-emerald-400' : 'text-amber-400'
+                  }`}>
+                    {isEmailVerified && boundEmail ? '✓ Verified & Bound' : '⚠ Not Verified'}
+                  </span>
                 </div>
               </div>
-            )}
+
+              {/* Status Alert */}
+              {bindStatus.msg && (
+                <div className={`p-2.5 rounded-lg flex items-center gap-2 text-xs ${
+                  bindStatus.isError ? 'bg-rose-950/60 border border-rose-800/80 text-rose-300' : 'bg-sky-950/60 border border-sky-800/80 text-sky-300'
+                }`}>
+                  {bindStatus.isError ? <AlertCircle className="w-3.5 h-3.5 shrink-0" /> : <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />}
+                  <span className="text-[11px] font-medium">{bindStatus.msg}</span>
+                </div>
+              )}
+
+              {/* Scenario A: Already Verified & Bound */}
+              {isEmailVerified && boundEmail ? (
+                <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Bound Gmail Address</span>
+                      <span className="text-xs font-mono font-bold text-sky-400">{boundEmail}</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleUnbind}
+                    className="text-[11px] font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    Unbind Gmail
+                  </button>
+                </div>
+              ) : (
+                /* Scenario B: Not Yet Verified — Input + Send Code Flow */
+                <div className="space-y-3 border-t border-[#272e45] pt-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Enter Gmail Address for Notifications</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="email"
+                        placeholder="yourname@gmail.com"
+                        value={inputGmail}
+                        onChange={(e) => setInputGmail(e.target.value)}
+                        className="flex-1 bg-[#1c2033] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#38bdf8]"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleSendCode}
+                        className="text-xs font-bold bg-[#38bdf8] hover:bg-[#0ea5e9] text-[#0b0e17] px-3.5 py-2 rounded-xl transition-colors shrink-0"
+                      >
+                        {codeSent ? 'Resend Code' : 'Send Code'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Code Input Box (Visible after Send Code) */}
+                  {codeSent && (
+                    <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-3 space-y-2.5">
+                      <label className="block text-xs font-semibold text-slate-300">Enter 6-Digit Verification Code</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          maxLength={6}
+                          placeholder="123456"
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                          className="w-36 bg-[#161926] border border-[#272e45] rounded-xl px-3 py-2 text-center text-sm font-mono tracking-widest text-sky-400 focus:outline-none focus:border-[#38bdf8]"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleVerifyAndBind}
+                          className="flex-1 text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-white px-4 py-2 rounded-xl transition-colors"
+                        >
+                          Verify & Bind Gmail
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Save Settings Action Button */}
+            <div className="flex justify-end pt-1">
+              <button
+                type="button"
+                onClick={handleSaveSettings}
+                className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-purple-900/30 transition-all"
+              >
+                <Save className="w-4 h-4" />
+                Save Settings
+              </button>
+            </div>
           </div>
         </div>
 
