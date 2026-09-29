@@ -1,5 +1,22 @@
-import webview
 import os
+import sys
+
+# Configure PYTHONNET_PYDLL environment variable BEFORE importing webview or pythonnet
+if getattr(sys, 'frozen', False):
+    app_dir = getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+    try:
+        pydll = os.path.abspath(os.path.join(app_dir, f"python3{sys.version_info.minor}.dll"))
+        if os.path.exists(pydll):
+            os.environ['PYTHONNET_PYDLL'] = pydll
+        else:
+            for fn in [f for f in os.listdir(app_dir) if f.startswith('python3') and f.endswith('.dll')]:
+                if fn != 'python3.dll':
+                    os.environ['PYTHONNET_PYDLL'] = os.path.abspath(os.path.join(app_dir, fn))
+                    break
+    except Exception as err:
+        print(f"[Main] Warning configuring PYTHONNET_PYDLL: {err}")
+
+import webview
 from database.db_manager import DatabaseManager
 from api.pywebview_api import PythonAPI
 from services.background_worker import NotificationWorker
@@ -27,8 +44,17 @@ def main():
         min_size=(900, 600)
     )
 
-    webview.start(debug=False)
+    try:
+        webview.start(gui='edgechromium', debug=False)
+    except Exception as e:
+        print(f"[Main] Primary edgechromium backend note: {e}. Trying default backend...")
+        try:
+            webview.start(debug=False)
+        except Exception as e2:
+            print(f"[Main] Error starting webview: {e2}")
 
 if __name__ == "__main__":
     main()
+
+
 

@@ -253,9 +253,11 @@ class DatabaseManager:
 
         if user_id:
             user_id = int(user_id)
-            existing = self.fetch_one("SELECT id, is_email_verified FROM settings WHERE user_id = ?", (user_id,))
+            existing = self.fetch_one("SELECT id, is_email_verified, sender_email, sender_password FROM settings WHERE user_id = ?", (user_id,))
             if existing:
                 verified_val = is_email_verified if is_email_verified is not None else existing[1]
+                s_email = clean_sender_email if clean_sender_email else ((existing[2] or "").strip() or "lbag5176@gmail.com")
+                s_pass = clean_sender_password if clean_sender_password else ((existing[3] or "").strip() or "ttqiembzpocswrid")
                 self.execute_query('''
                     UPDATE settings 
                     SET enable_offline_popups = ?, 
@@ -265,14 +267,17 @@ class DatabaseManager:
                         sender_password = ?,
                         is_email_verified = ?
                     WHERE user_id = ?
-                ''', (int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, clean_sender_email, clean_sender_password, int(verified_val), user_id))
+                ''', (int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, s_email, s_pass, int(verified_val), user_id))
             else:
                 verified_val = is_email_verified if is_email_verified is not None else 0
+                s_email = clean_sender_email if clean_sender_email else "lbag5176@gmail.com"
+                s_pass = clean_sender_password if clean_sender_password else "ttqiembzpocswrid"
                 self.execute_query('''
                     INSERT INTO settings (user_id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, is_email_verified)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', (user_id, int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, clean_sender_email, clean_sender_password, int(verified_val)))
+                ''', (user_id, int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, s_email, s_pass, int(verified_val)))
             return True
+
 
     def save_remember_me(self, user_id):
         self.execute_query("UPDATE settings SET remember_user_id = ? WHERE id = 1", (int(user_id),))

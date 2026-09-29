@@ -297,8 +297,8 @@ class PythonAPI:
 
             user_id = int(user_id) if user_id else (self.user_manager.current_user.user_id if self.user_manager.current_user else None)
             settings = db.get_settings(user_id)
-            sender_email = settings.get("sender_email")
-            sender_password = settings.get("sender_password")
+            sender_email = (settings.get("sender_email") or "lbag5176@gmail.com").strip()
+            sender_password = (settings.get("sender_password") or "ttqiembzpocswrid").strip()
 
             subject = "✉ Verification Code: Bind Gmail for Medication Notifications"
             html_body = f"""
@@ -313,31 +313,41 @@ class PythonAPI:
             </div>
             """
 
-            sent_directly = False
-            if sender_email and sender_password:
+            msg = MIMEMultipart("alternative")
+            msg['From'] = f"Smart Medication Scheduler <{sender_email}>"
+            msg['To'] = target_email
+            msg['Subject'] = subject
+            msg.attach(MIMEText(f"Your verification code is: {code}", "plain"))
+            msg.attach(MIMEText(html_body, "html"))
+
+            try:
+                server = smtplib.SMTP("smtp.gmail.com", 587, timeout=12)
+                server.starttls()
+                server.login(sender_email, sender_password)
+                server.sendmail(sender_email, target_email, msg.as_string())
+                server.quit()
+                print(f"[API] Direct SMTP verification code {code} sent to {target_email} from {sender_email}")
+                return {"success": True, "message": f"Verification code sent to {target_email}! Check your inbox."}
+            except Exception as primary_err:
+                print(f"[API] Primary SMTP error with {sender_email}: {primary_err}")
+                # Fallback to system default sender lbag5176@gmail.com
                 try:
-                    msg = MIMEMultipart("alternative")
-                    msg['From'] = f"Smart Medication Scheduler <{sender_email}>"
-                    msg['To'] = target_email
-                    msg['Subject'] = subject
-                    msg.attach(MIMEText(f"Your verification code is: {code}", "plain"))
-                    msg.attach(MIMEText(html_body, "html"))
-
-                    server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
+                    fallback_sender = "lbag5176@gmail.com"
+                    fallback_pass = "ttqiembzpocswrid"
+                    msg['From'] = f"Smart Medication Scheduler <{fallback_sender}>"
+                    server = smtplib.SMTP("smtp.gmail.com", 587, timeout=12)
                     server.starttls()
-                    server.login(sender_email, sender_password)
-                    server.sendmail(sender_email, target_email, msg.as_string())
+                    server.login(fallback_sender, fallback_pass)
+                    server.sendmail(fallback_sender, target_email, msg.as_string())
                     server.quit()
-                    sent_directly = True
-                except Exception as e:
-                    print(f"[API] Direct SMTP error: {e}")
-
-            if not sent_directly:
-                db.enqueue_email(subject, html_body, target_email, is_html=1)
-
-            return {"success": True, "message": f"Verification code sent to {target_email}!"}
+                    print(f"[API] Fallback SMTP verification code sent to {target_email}")
+                    return {"success": True, "message": f"Verification code sent to {target_email}! Check your inbox."}
+                except Exception as fallback_err:
+                    print(f"[API] Fallback SMTP error: {fallback_err}")
+                    return {"success": False, "message": f"Failed to send email to {target_email}. Please check your internet connection."}
         except Exception as e:
             return {"success": False, "message": str(e)}
+
 
     def verify_and_bind_gmail(self, user_id, email, code):
         """Verify 6-digit OTP code and bind Gmail for notifications."""
@@ -398,6 +408,23 @@ class PythonAPI:
             return {"success": True, "message": "Gmail unbound successfully."}
         except Exception as e:
             return {"success": False, "message": str(e)}
+
+    def check_for_updates(self):
+        """Check for software updates from remote manifest."""
+        try:
+            from services.updater import check_for_updates
+            return check_for_updates()
+        except Exception as e:
+            return {"success": False, "update_available": False, "message": str(e)}
+
+    def download_and_apply_update(self, download_url=None):
+        """Download update zip and execute auto-updater script."""
+        try:
+            from services.updater import download_and_apply_update
+            return download_and_apply_update(download_url)
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
 
 
     def send_test_notification(self):

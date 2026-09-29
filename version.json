@@ -1,0 +1,7 @@
+{
+  "version": "1.0.0",
+  "release_date": "2026-09-29",
+  "release_notes": "Initial Release: Smart Medication Scheduler Desktop Application with PBKDF2 Password Security, Gmail Reminders, and Auto-Updater.",
+  "download_url": "https://github.com/vargas2006/Medication-Scheduler-offline-/releases/download/v1.0.0/SmartMedicationScheduler.zip",
+  "mandatory": false
+}

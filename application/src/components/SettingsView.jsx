@@ -427,9 +427,53 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                 )}
               </div>
             </div>
+            {/* Auto-Updater Section */}
+            <div className="bg-[#161926] border border-[#2b334c] rounded-xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-white block">Software Updates</span>
+                  <span className="text-[10px] text-slate-400">Current App Version: <strong className="text-purple-400 font-mono">v1.0.0</strong></span>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const btn = document.getElementById('chk-update-btn');
+                    const statusText = document.getElementById('chk-update-status');
+                    if (btn) btn.disabled = true;
+                    if (statusText) statusText.innerText = 'Checking remote manifest...';
+                    try {
+                      const res = await callApi('check_for_updates');
+                      if (res.success) {
+                        if (res.update_available) {
+                          if (statusText) statusText.innerText = `New version v${res.remote_version} available! Downloading...`;
+                          const upRes = await callApi('download_and_apply_update', res.download_url);
+                          if (!upRes.success && statusText) {
+                            statusText.innerText = `Update error: ${upRes.message}`;
+                          }
+                        } else {
+                          if (statusText) statusText.innerText = '✓ You are on the latest version (v1.0.0).';
+                        }
+                      } else {
+                        if (statusText) statusText.innerText = res.message || 'Unable to check for updates.';
+                      }
+                    } catch (err) {
+                      if (statusText) statusText.innerText = 'Error connecting to update server.';
+                    } finally {
+                      if (btn) btn.disabled = false;
+                    }
+                  }}
+                  id="chk-update-btn"
+                  className="text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl transition-all shadow-md shadow-purple-900/30 flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  Check for Updates
+                </button>
+              </div>
+              <div id="chk-update-status" className="text-[11px] font-medium text-slate-400"></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
