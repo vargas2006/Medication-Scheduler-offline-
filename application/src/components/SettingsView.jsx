@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Moon, Sun, UserCheck, Shield, Bell, Mail, CheckCircle2, AlertCircle, RefreshCw, KeyRound, ShieldCheck, Save } from 'lucide-react';
+import { Moon, Sun, UserCheck, Shield, Bell, Mail, CheckCircle2, AlertCircle, Save, ShieldCheck } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
 
 export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
@@ -79,6 +79,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
       setBindStatus({ msg: 'Please enter a valid Gmail address.', isError: true });
       return;
     }
+
     setBindStatus({ msg: 'Sending 6-digit verification code to your Gmail...', isError: false });
     try {
       const res = await callApi('send_gmail_bind_code', user?.user_id, emailToVerify);

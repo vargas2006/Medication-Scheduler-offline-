@@ -43,6 +43,11 @@ export default function LoginModal({ onLoginSuccess }) {
           if (rememberMe) {
             const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
             localStorage.setItem('med_user_session', JSON.stringify({ user: res.user, expiry }));
+            try {
+              await callApi('save_remember_session', res.user.user_id);
+            } catch (e) {
+              console.error('Failed saving SQLite remember session:', e);
+            }
           } else {
             localStorage.removeItem('med_user_session');
           }

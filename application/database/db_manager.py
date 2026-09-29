@@ -137,10 +137,14 @@ class DatabaseManager:
             cursor.execute("ALTER TABLE settings ADD COLUMN is_email_verified INTEGER DEFAULT 0")
         except sqlite3.OperationalError:
             pass
+        try:
+            cursor.execute("ALTER TABLE settings ADD COLUMN remember_user_id INTEGER DEFAULT NULL")
+        except sqlite3.OperationalError:
+            pass
 
         cursor.execute('''
-            INSERT OR IGNORE INTO settings (id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, is_email_verified)
-            VALUES (1, 0, 0, '', '', '', 0)
+            INSERT OR IGNORE INTO settings (id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, is_email_verified, remember_user_id)
+            VALUES (1, 0, 0, '', '', '', 0, NULL)
         ''')
 
         # Email queue table for offline email persistence
@@ -194,18 +198,25 @@ class DatabaseManager:
         return row
 
     def get_settings(self, user_id=None):
+        # Fetch global sender credentials from row id=1 as fallback
+        g_row = self.fetch_one("SELECT sender_email, sender_password FROM settings WHERE id = 1")
+        global_sender = (g_row[0] or "").strip() if g_row else ""
+        global_pass = (g_row[1] or "").strip() if g_row else ""
+
         if user_id:
             row = self.fetch_one(
                 "SELECT id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, is_email_verified FROM settings WHERE user_id = ?",
                 (int(user_id),)
             )
             if row:
+                s_email = (row[4] or "").strip() or global_sender
+                s_pass = (row[5] or "").strip() or global_pass
                 return {
                     "enable_offline_popups": row[1],
                     "enable_gmail_notifications": row[2],
                     "recipient_email": row[3] or "",
-                    "sender_email": row[4] or "",
-                    "sender_password": row[5] or "",
+                    "sender_email": s_email,
+                    "sender_password": s_pass,
                     "is_email_verified": row[6] if len(row) > 6 and row[6] is not None else (1 if row[3] else 0)
                 }
             self.execute_query(
@@ -216,8 +227,8 @@ class DatabaseManager:
                 "enable_offline_popups": 0,
                 "enable_gmail_notifications": 0,
                 "recipient_email": "",
-                "sender_email": "",
-                "sender_password": "",
+                "sender_email": global_sender,
+                "sender_password": global_pass,
                 "is_email_verified": 0
             }
 
@@ -230,8 +241,8 @@ class DatabaseManager:
             "enable_offline_popups": row[1],
             "enable_gmail_notifications": row[2],
             "recipient_email": row[3] or "",
-            "sender_email": row[4] or "",
-            "sender_password": row[5] or "",
+            "sender_email": (row[4] or "").strip(),
+            "sender_password": (row[5] or "").strip(),
             "is_email_verified": row[6] if len(row) > 6 and row[6] is not None else 0
         }
 
@@ -262,6 +273,16 @@ class DatabaseManager:
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 ''', (user_id, int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, clean_sender_email, clean_sender_password, int(verified_val)))
             return True
+
+    def save_remember_me(self, user_id):
+        self.execute_query("UPDATE settings SET remember_user_id = ? WHERE id = 1", (int(user_id),))
+
+    def clear_remember_me(self):
+        self.execute_query("UPDATE settings SET remember_user_id = NULL WHERE id = 1")
+
+    def get_remembered_user_id(self):
+        row = self.fetch_one("SELECT remember_user_id FROM settings WHERE id = 1")
+        return row[0] if row else None
 
         self.execute_query('''
             UPDATE settings 

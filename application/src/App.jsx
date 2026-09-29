@@ -51,20 +51,30 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    try {
-      const savedSession = localStorage.getItem('med_user_session');
-      if (savedSession) {
-        const { user: savedUser, expiry } = JSON.parse(savedSession);
-        if (savedUser && expiry && expiry > Date.now()) {
-          setUser(savedUser);
-          callApi('set_active_user', savedUser.user_id);
-        } else {
-          localStorage.removeItem('med_user_session');
+    async function checkAutoLogin() {
+      try {
+        // 1. Try persistent SQLite session first (immune to webview profile clears)
+        const res = await callApi('get_auto_login_user');
+        if (res && res.success && res.user) {
+          setUser(res.user);
+          return;
         }
+        // 2. Fallback to localStorage session
+        const savedSession = localStorage.getItem('med_user_session');
+        if (savedSession) {
+          const { user: savedUser, expiry } = JSON.parse(savedSession);
+          if (savedUser && expiry && expiry > Date.now()) {
+            setUser(savedUser);
+            callApi('set_active_user', savedUser.user_id);
+          } else {
+            localStorage.removeItem('med_user_session');
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load saved session:', e);
       }
-    } catch (e) {
-      console.error('Failed to load saved session:', e);
     }
+    checkAutoLogin();
   }, []);
 
   const handleLogout = async () => {

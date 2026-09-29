@@ -37,11 +37,49 @@ class PythonAPI:
     def logout(self):
         self.user_manager.logout()
         try:
+            from database.db_manager import DatabaseManager
+            DatabaseManager().clear_remember_me()
             from services.background_worker import NotificationWorker
             NotificationWorker().switch_active_user(None)
         except Exception:
             pass
         return {"success": True}
+
+    def get_auto_login_user(self):
+        """Check SQLite DB for a remembered active user session across app restarts."""
+        try:
+            from database.db_manager import DatabaseManager
+            db = DatabaseManager()
+            remembered_id = db.get_remembered_user_id()
+            if remembered_id:
+                user_row = db.fetch_one("SELECT id, username, name, email FROM users WHERE id = ?", (int(remembered_id),))
+                if user_row:
+                    from models.user import PatientProfile
+                    self.user_manager.current_user = PatientProfile(user_row[0], user_row[1], user_row[2] or "", user_row[3] or "")
+                    from services.background_worker import NotificationWorker
+                    NotificationWorker().switch_active_user(user_row[0])
+                    return {
+                        "success": True,
+                        "user": {
+                            "user_id": user_row[0],
+                            "username": user_row[1],
+                            "name": user_row[2] or "",
+                            "email": user_row[3] or ""
+                        }
+                    }
+            return {"success": False}
+        except Exception as e:
+            print(f"[API] Error in get_auto_login_user: {e}")
+            return {"success": False}
+
+    def save_remember_session(self, user_id):
+        try:
+            from database.db_manager import DatabaseManager
+            db = DatabaseManager()
+            db.save_remember_me(int(user_id))
+            return {"success": True}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
 
     def set_active_user(self, user_id):
         try:

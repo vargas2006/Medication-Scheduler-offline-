@@ -15,8 +15,10 @@ def main():
     html_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "dist", "index.html"))
     target_url = html_path if os.path.exists(html_path) else "http://localhost:5173"
 
+    icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "app_icon.ico"))
+
     window = webview.create_window(
-        title="Smart Medication Scheduler System",
+        title="Smart Medication Scheduler",
         url=target_url,
         js_api=api,
         width=1150,
