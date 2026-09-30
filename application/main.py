@@ -34,6 +34,24 @@ def main():
 
     icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "app_icon.ico"))
 
+    def apply_win32_icon():
+        if sys.platform == 'win32':
+            import time
+            import ctypes
+            time.sleep(1.0)
+            try:
+                user32 = ctypes.windll.user32
+                h_icon = user32.LoadImageW(0, icon_path, 1, 0, 0, 0x00000010)
+                if h_icon:
+                    hwnd = user32.FindWindowW(None, "Smart Medication Scheduler")
+                    if hwnd:
+                        user32.SendMessageW(hwnd, 0x0080, 0, h_icon)  # ICON_SMALL
+                        user32.SendMessageW(hwnd, 0x0080, 1, h_icon)  # ICON_BIG
+            except Exception as ex:
+                print(f"[Main] Note applying win32 icon: {ex}")
+
+    threading.Thread(target=apply_win32_icon, daemon=True).start()
+
     window = webview.create_window(
         title="Smart Medication Scheduler",
         url=target_url,
@@ -45,11 +63,11 @@ def main():
     )
 
     try:
-        webview.start(gui='edgechromium', debug=False)
+        webview.start(gui='edgechromium', debug=False, icon=icon_path)
     except Exception as e:
         print(f"[Main] Primary edgechromium backend note: {e}. Trying default backend...")
         try:
-            webview.start(debug=False)
+            webview.start(debug=False, icon=icon_path)
         except Exception as e2:
             print(f"[Main] Error starting webview: {e2}")
 
