@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('application/dist', 'dist'), ('application/med_scheduler.db', '.'), ('application/app_icon.ico', '.')]
+datas = [('application/dist', 'dist'), ('application/med_scheduler.db', '.'), ('application/app_icon.ico', '.'), ('version.json', '.'), ('application/version.json', '.')]
 binaries = []
 hiddenimports = []
 tmp_ret = collect_all('comtypes')

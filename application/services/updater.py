@@ -7,13 +7,39 @@ import urllib.request
 import tempfile
 import zipfile
 
-CURRENT_VERSION = "1.0.0"
-# Default remote manifest URL (GitHub raw content for this repository)
-REMOTE_MANIFEST_URL = "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/version.json"
-
-
 def get_current_version():
-    return CURRENT_VERSION
+    """Dynamically read the installed application version from version.json."""
+    search_paths = []
+    if getattr(sys, 'frozen', False):
+        app_dir = os.path.dirname(sys.executable)
+        meipass = getattr(sys, '_MEIPASS', app_dir)
+        search_paths.extend([
+            os.path.join(meipass, "version.json"),
+            os.path.join(app_dir, "version.json"),
+            os.path.join(meipass, "_internal", "version.json"),
+            os.path.join(app_dir, "_internal", "version.json")
+        ])
+    else:
+        curr_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = os.path.dirname(curr_dir)
+        root_dir = os.path.dirname(app_dir)
+        search_paths.extend([
+            os.path.join(root_dir, "version.json"),
+            os.path.join(app_dir, "version.json"),
+            os.path.join(curr_dir, "version.json")
+        ])
+
+    for path in search_paths:
+        if os.path.exists(path):
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    ver = data.get("version")
+                    if ver:
+                        return str(ver).strip()
+            except Exception:
+                pass
+    return "1.0.4"
 
 
 def compare_versions(v1, v2):
@@ -26,9 +52,13 @@ def compare_versions(v1, v2):
         return v2 != v1
 
 
+REMOTE_MANIFEST_URL = "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/version.json"
+
+
 def check_for_updates(manifest_url=REMOTE_MANIFEST_URL):
     """Check online manifest URL for remote updates."""
     try:
+        current_ver = get_current_version()
         # Append cache buster parameter to bypass GitHub raw CDN caching
         cache_buster_url = f"{manifest_url}{'&' if '?' in manifest_url else '?'}t={int(time.time())}"
         req = urllib.request.Request(
@@ -38,12 +68,12 @@ def check_for_updates(manifest_url=REMOTE_MANIFEST_URL):
         with urllib.request.urlopen(req, timeout=10) as response:
             data = json.loads(response.read().decode('utf-8'))
 
-        remote_ver = data.get("version", "1.0.0")
-        is_newer = compare_versions(CURRENT_VERSION, remote_ver)
+        remote_ver = data.get("version", current_ver)
+        is_newer = compare_versions(current_ver, remote_ver)
 
         return {
             "success": True,
-            "current_version": CURRENT_VERSION,
+            "current_version": current_ver,
             "remote_version": remote_ver,
             "update_available": is_newer,
             "release_notes": data.get("release_notes", "Bug fixes and performance improvements."),
@@ -51,10 +81,11 @@ def check_for_updates(manifest_url=REMOTE_MANIFEST_URL):
             "release_date": data.get("release_date", "")
         }
     except Exception as e:
+        current_ver = get_current_version()
         print(f"[Updater] Check for updates failed: {e}")
         return {
             "success": False,
-            "current_version": CURRENT_VERSION,
+            "current_version": current_ver,
             "update_available": False,
             "message": f"Unable to check for updates: {str(e)}"
         }
