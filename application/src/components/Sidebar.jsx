@@ -11,7 +11,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
         <img
           src="/app_icon.png"
           alt="MedScheduler Logo"
-          className="w-10 h-10 rounded-xl object-contain shadow-md shrink-0 bg-[#161a29] p-0.5 border border-[#2b3149]"
+          className="w-10 h-10 object-contain drop-shadow-md shrink-0"
         />
         <div className="flex flex-col min-w-0">
           <span className="font-bold text-white text-base leading-tight truncate">MedScheduler</span>

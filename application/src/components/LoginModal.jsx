@@ -133,7 +133,7 @@ export default function LoginModal({ onLoginSuccess }) {
           <img
             src="/app_icon.png"
             alt="MedScheduler Logo"
-            className="w-16 h-16 rounded-2xl object-contain shadow-xl mb-3 border border-[#24293e] p-1 bg-[#161a29]"
+            className="w-16 h-16 object-contain drop-shadow-xl mb-3"
           />
           <h2 className="text-2xl font-bold text-white tracking-tight">Smart Medication Scheduler</h2>
           <p className="text-xs text-slate-400 mt-1">Real-time Care & Medication Management System</p>

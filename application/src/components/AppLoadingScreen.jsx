@@ -35,7 +35,7 @@ export default function AppLoadingScreen({ onFinish }) {
         <img
           src="/app_icon.png"
           alt="MedScheduler Logo"
-          className="w-16 h-16 rounded-2xl object-contain shadow-2xl mb-4 border border-[#242a3e] p-1 bg-[#141724]"
+          className="w-16 h-16 object-contain drop-shadow-xl mb-4"
         />
 
         {/* Brand Name & Subtitle */}
