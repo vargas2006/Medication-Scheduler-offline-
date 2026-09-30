@@ -157,6 +157,10 @@ class DatabaseManager:
         except sqlite3.OperationalError:
             pass
         try:
+            cursor.execute("ALTER TABLE settings ADD COLUMN user_id INTEGER DEFAULT NULL")
+        except sqlite3.OperationalError:
+            pass
+        try:
             cursor.execute("ALTER TABLE settings ADD COLUMN remember_user_id INTEGER DEFAULT NULL")
         except sqlite3.OperationalError:
             pass

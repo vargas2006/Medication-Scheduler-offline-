@@ -304,6 +304,21 @@ class PythonAPI:
             )
 
             user_id = int(user_id) if user_id else (self.user_manager.current_user.user_id if self.user_manager.current_user else None)
+
+            # Safety check: Ensure Gmail address is not already bound & verified by ANOTHER user account
+            if user_id:
+                existing_owner = db.fetch_one(
+                    "SELECT user_id FROM settings WHERE LOWER(recipient_email) = ? AND is_email_verified = 1 AND user_id != ?",
+                    (target_email, user_id)
+                )
+                if existing_owner and existing_owner[0]:
+                    owner_row = db.fetch_one("SELECT username FROM users WHERE id = ?", (existing_owner[0],))
+                    if owner_row:
+                        return {
+                            "success": False,
+                            "message": f"The Gmail address '{target_email}' is already bound to account '{owner_row[0]}'. Please use a unique Gmail address for this account."
+                        }
+
             settings = db.get_settings(user_id)
             sender_email = (settings.get("sender_email") or "lbag5176@gmail.com").strip()
             sender_password = (settings.get("sender_password") or "ttqiembzpocswrid").strip()
@@ -381,6 +396,21 @@ class PythonAPI:
                 return {"success": False, "message": "Verification code has expired. Please request a new code."}
 
             user_id = int(user_id) if user_id else (self.user_manager.current_user.user_id if self.user_manager.current_user else None)
+
+            # Safety check: Ensure Gmail address is not already bound & verified by ANOTHER user account
+            if user_id:
+                existing_owner = db.fetch_one(
+                    "SELECT user_id FROM settings WHERE LOWER(recipient_email) = ? AND is_email_verified = 1 AND user_id != ?",
+                    (target_email, user_id)
+                )
+                if existing_owner and existing_owner[0]:
+                    owner_row = db.fetch_one("SELECT username FROM users WHERE id = ?", (existing_owner[0],))
+                    if owner_row:
+                        return {
+                            "success": False,
+                            "message": f"The Gmail address '{target_email}' is already bound to account '{owner_row[0]}'. Please use a unique Gmail address for this account."
+                        }
+
             current = db.get_settings(user_id)
             db.save_settings(
                 enable_offline_popups=current.get("enable_offline_popups", 0),
