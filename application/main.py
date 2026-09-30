@@ -1,5 +1,6 @@
 import os
 import sys
+import threading
 
 # Configure PYTHONNET_PYDLL environment variable BEFORE importing webview or pythonnet
 if getattr(sys, 'frozen', False):

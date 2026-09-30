@@ -1,7 +1,7 @@
 {
-  "version": "1.0.3",
+  "version": "1.0.4",
   "release_date": "2026-09-30",
-  "release_notes": "Version 1.0.3 Update: Fixed Windows Taskbar icon embedding and process AppUserModelID grouping.",
+  "release_notes": "Version 1.0.4 Update: Fixed threading import and Taskbar icon embedding.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }
