@@ -233,7 +233,7 @@ export default function LoginModal({ onLoginSuccess }) {
                       onChange={(e) => setRememberMe(e.target.checked)}
                       className="w-4 h-4 rounded border-[#272e45] bg-[#161926] text-[#7c3aed] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#7c3aed]"
                     />
-                    <span className="select-none font-medium text-[11px]">Remember me</span>
+                    <span className="select-none font-medium text-[11px]">Remember me </span>
                   </label>
 
                   {/* Forgot Password Button */}
