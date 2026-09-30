@@ -97,6 +97,19 @@ timeout /t 1 /nobreak > nul
 echo Extracting update files to "{app_dir}"...
 powershell -Command "Expand-Archive -Path '{zip_path}' -DestinationPath '{app_dir}' -Force" > nul 2>&1
 
+if exist "{app_dir}\\scratch_test\\{exe_name}" (
+    xcopy /E /Y /Q "{app_dir}\\scratch_test\\*" "{app_dir}\\" > nul 2>&1
+    rmdir /S /Q "{app_dir}\\scratch_test" > nul 2>&1
+)
+if exist "{app_dir}\\scratch_test (2)\\{exe_name}" (
+    xcopy /E /Y /Q "{app_dir}\\scratch_test (2)\\*" "{app_dir}\\" > nul 2>&1
+    rmdir /S /Q "{app_dir}\\scratch_test (2)" > nul 2>&1
+)
+if exist "{app_dir}\\SmartMedicationScheduler\\{exe_name}" (
+    xcopy /E /Y /Q "{app_dir}\\SmartMedicationScheduler\\*" "{app_dir}\\" > nul 2>&1
+    rmdir /S /Q "{app_dir}\\SmartMedicationScheduler" > nul 2>&1
+)
+
 echo Relaunching application...
 start "" "{os.path.join(app_dir, exe_name)}"
 
