@@ -32,9 +32,11 @@ export default function AppLoadingScreen({ onFinish }) {
     >
       <div className="flex flex-col items-center">
         {/* Brand Icon */}
-        <div className="w-16 h-16 rounded-2xl bg-[#141724] border border-[#242a3e] flex items-center justify-center text-3xl shadow-xl mb-4">
-          💊
-        </div>
+        <img
+          src="/app_icon.png"
+          alt="MedScheduler Logo"
+          className="w-16 h-16 rounded-2xl object-contain shadow-2xl mb-4 border border-[#242a3e] p-1 bg-[#141724]"
+        />
 
         {/* Brand Name & Subtitle */}
         <h1 className="text-xl font-bold text-white tracking-tight">MedScheduler</h1>

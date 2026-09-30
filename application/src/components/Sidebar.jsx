@@ -8,9 +8,11 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
     <aside className="w-[240px] bg-[#121520] border-r border-[#1e2235] flex flex-col h-full shrink-0 select-none">
       {/* Brand Header */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-[#1a1e2e]">
-        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-xl shadow-sm shrink-0">
-          💊
-        </div>
+        <img
+          src="/app_icon.png"
+          alt="MedScheduler Logo"
+          className="w-10 h-10 rounded-xl object-contain shadow-md shrink-0 bg-[#161a29] p-0.5 border border-[#2b3149]"
+        />
         <div className="flex flex-col min-w-0">
           <span className="font-bold text-white text-base leading-tight truncate">MedScheduler</span>
           <span className="text-[11px] text-slate-400 truncate">Smart Care Monitor</span>

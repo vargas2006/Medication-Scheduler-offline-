@@ -130,9 +130,11 @@ export default function LoginModal({ onLoginSuccess }) {
       <div className="w-full max-w-md bg-[#121520] border border-[#24293e] rounded-2xl p-8 shadow-2xl space-y-6">
         {/* Brand logo */}
         <div className="flex flex-col items-center text-center">
-          <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-3xl shadow-lg mb-3">
-            💊
-          </div>
+          <img
+            src="/app_icon.png"
+            alt="MedScheduler Logo"
+            className="w-16 h-16 rounded-2xl object-contain shadow-xl mb-3 border border-[#24293e] p-1 bg-[#161a29]"
+          />
           <h2 className="text-2xl font-bold text-white tracking-tight">Smart Medication Scheduler</h2>
           <p className="text-xs text-slate-400 mt-1">Real-time Care & Medication Management System</p>
         </div>
