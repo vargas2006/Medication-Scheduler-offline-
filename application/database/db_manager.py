@@ -82,18 +82,37 @@ class DatabaseManager:
             )
         ''')
 
-        # Intake history table
+        # Intake history table (preserves audit records even if medication is deleted)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS intake_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
-                medication_id INTEGER NOT NULL,
+                medication_id INTEGER,
+                medication_name TEXT,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 status TEXT NOT NULL,
-                FOREIGN KEY(user_id) REFERENCES users(id),
-                FOREIGN KEY(medication_id) REFERENCES medications(id) ON DELETE CASCADE
+                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
             )
         ''')
+
+        # Add medication_name column to existing databases if missing
+        try:
+            cursor.execute("ALTER TABLE intake_log ADD COLUMN medication_name TEXT")
+        except sqlite3.OperationalError:
+            pass
+
+        # Populate missing medication_name values from medications table
+        try:
+            cursor.execute("""
+                UPDATE intake_log
+                SET medication_name = (
+                    SELECT name FROM medications WHERE medications.id = intake_log.medication_id
+                )
+                WHERE (medication_name IS NULL OR medication_name = '')
+                  AND medication_id IN (SELECT id FROM medications)
+            """)
+        except Exception:
+            pass
 
         # Settings table (Single configuration row id=1)
         cursor.execute('''

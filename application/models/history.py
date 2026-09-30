@@ -19,26 +19,36 @@ class ReportGenerator:
     def log_intake(self, user_id, med_id, status, timestamp=None):
         if not timestamp:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Fetch medication name to persist in history log
+        row = self.db.fetch_one("SELECT name FROM medications WHERE id = ?", (med_id,))
+        med_name = row[0] if row and row[0] else "Medication"
         self.db.execute_query(
-            "INSERT INTO intake_log (user_id, medication_id, timestamp, status) VALUES (?, ?, ?, ?)",
-            (user_id, med_id, timestamp, status)
+            "INSERT INTO intake_log (user_id, medication_id, medication_name, timestamp, status) VALUES (?, ?, ?, ?, ?)",
+            (user_id, med_id, med_name, timestamp, status)
         )
+
+    def delete_log(self, log_id):
+        self.db.execute_query("DELETE FROM intake_log WHERE id = ?", (log_id,))
 
     def get_user_history(self, user_id=None):
         if user_id is not None:
             query = '''
-                SELECT l.id, l.user_id, l.medication_id, m.name, l.timestamp, l.status 
+                SELECT l.id, l.user_id, l.medication_id, 
+                       COALESCE(NULLIF(l.medication_name, ''), m.name, 'Deleted Medication') AS med_name, 
+                       l.timestamp, l.status 
                 FROM intake_log l
-                JOIN medications m ON l.medication_id = m.id
+                LEFT JOIN medications m ON l.medication_id = m.id
                 WHERE l.user_id = ?
                 ORDER BY l.timestamp DESC
             '''
             rows = self.db.fetch_all(query, (user_id,))
         else:
             query = '''
-                SELECT l.id, l.user_id, l.medication_id, m.name, l.timestamp, l.status 
+                SELECT l.id, l.user_id, l.medication_id, 
+                       COALESCE(NULLIF(l.medication_name, ''), m.name, 'Deleted Medication') AS med_name, 
+                       l.timestamp, l.status 
                 FROM intake_log l
-                JOIN medications m ON l.medication_id = m.id
+                LEFT JOIN medications m ON l.medication_id = m.id
                 ORDER BY l.timestamp DESC
             '''
             rows = self.db.fetch_all(query)

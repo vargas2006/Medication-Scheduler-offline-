@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, FileSpreadsheet } from 'lucide-react';
+import { Calendar, FileSpreadsheet, Trash2 } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
 
 export default function HistoryView({ user }) {
@@ -20,6 +20,14 @@ export default function HistoryView({ user }) {
       setHistory(res.history || []);
     }
     setLoading(false);
+  };
+
+  const handleDeleteLog = async (logId) => {
+    if (!window.confirm('Are you sure you want to delete this history record?')) return;
+    const res = await callApi('delete_history_log', logId);
+    if (res.success) {
+      fetchHistory();
+    }
   };
 
   useEffect(() => {
@@ -156,7 +164,16 @@ export default function HistoryView({ user }) {
                     </span>
                     <span className="font-bold text-white text-xs">{log.med_name}</span>
                   </div>
-                  <span className="text-slate-400 font-mono text-[11px]">{log.timestamp}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-slate-400 font-mono text-[11px]">{log.timestamp}</span>
+                    <button
+                      onClick={() => handleDeleteLog(log.log_id)}
+                      title="Delete History Record"
+                      className="text-slate-500 hover:text-rose-400 p-1 transition-colors rounded-lg hover:bg-rose-500/10"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               );
             })

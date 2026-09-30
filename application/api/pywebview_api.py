@@ -117,7 +117,7 @@ class PythonAPI:
                         pass
 
             total_logs = len(history)
-            adherence_rate = f"{int((doses_taken / total_logs) * 100)}%" if total_logs > 0 else "100%"
+            adherence_rate = f"{int((doses_taken / total_logs) * 100)}%" if total_logs > 0 else "0%"
 
             recent_history = [
                 {
@@ -217,6 +217,14 @@ class PythonAPI:
             return {"success": True, "history": logs}
         except Exception as e:
             return {"success": False, "error": str(e), "history": []}
+
+    def delete_history_log(self, log_id):
+        try:
+            log_id = int(log_id)
+            self.report_generator.delete_log(log_id)
+            return {"success": True, "message": "History log entry deleted."}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
 
     def create_intake_schedule(self, user_id, med_id, date_str, time_str, status="TAKEN"):
         try:

@@ -1,7 +1,7 @@
 {
-  "version": "1.0.6",
+  "version": "1.0.7",
   "release_date": "2026-09-30",
-  "release_notes": "Version 1.0.6 Update: Fixed hardcoded v1.0.0 strings in SettingsView React component.",
+  "release_notes": "Version 1.0.7 Update: Set default 0% adherence rate for new accounts and preserved intake history records when deleting medication stock.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }

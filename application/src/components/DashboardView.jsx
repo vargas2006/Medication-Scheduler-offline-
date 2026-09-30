@@ -47,7 +47,7 @@ export default function DashboardView({ user, onDataChange }) {
     total_meds = 0,
     low_stock = 0,
     doses_taken = 0,
-    adherence_rate = '100%',
+    adherence_rate = '0%',
     weekly_counts = [0, 0, 0, 0, 0, 0, 0],
     due_meds = [],
     recent_history = []
