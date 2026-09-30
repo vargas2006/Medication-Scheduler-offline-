@@ -21,6 +21,15 @@ from database.db_manager import DatabaseManager
 from api.pywebview_api import PythonAPI
 from services.background_worker import NotificationWorker
 
+# Force Windows Taskbar to disassociate from cached python icons and use our app icon
+if sys.platform == 'win32':
+    try:
+        import ctypes
+        myappid = 'vargas2006.smartmedicationscheduler.care.1.0'
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    except Exception as err:
+        print(f"[Main] AppUserModelID notice: {err}")
+
 def main():
     db = DatabaseManager()
     api = PythonAPI()
