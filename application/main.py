@@ -22,7 +22,6 @@ from database.db_manager import DatabaseManager
 from api.pywebview_api import PythonAPI
 from services.background_worker import NotificationWorker
 
-# Force Windows Taskbar to disassociate from cached python icons and use our app icon
 if sys.platform == 'win32':
     try:
         import ctypes
@@ -35,7 +34,7 @@ def main():
     db = DatabaseManager()
     api = PythonAPI()
     
-    # Start background notification & offline email worker
+
     worker = NotificationWorker(check_interval=30)
     worker.start()
 
@@ -55,8 +54,8 @@ def main():
                 if h_icon:
                     hwnd = user32.FindWindowW(None, "Smart Medication Scheduler")
                     if hwnd:
-                        user32.SendMessageW(hwnd, 0x0080, 0, h_icon)  # ICON_SMALL
-                        user32.SendMessageW(hwnd, 0x0080, 1, h_icon)  # ICON_BIG
+                        user32.SendMessageW(hwnd, 0x0080, 0, h_icon)  
+                        user32.SendMessageW(hwnd, 0x0080, 1, h_icon)  
             except Exception as ex:
                 print(f"[Main] Note applying win32 icon: {ex}")
 

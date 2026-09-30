@@ -1,7 +1,7 @@
 {
-  "version": "1.0.10",
-  "release_date": "2026-09-30",
-  "release_notes": "Version 1.0.10 Update: Removed obsolete legacy UI files, temporary test scripts, and cleaned up codebase.",
+  "version": "1.0.11",
+  "release_date": "2026-10-01",
+  "release_notes": "Version 1.0.11 Update: Fixed database resetting on app updates by storing database in user AppData, and removed default login account.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }

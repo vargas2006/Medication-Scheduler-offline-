@@ -201,7 +201,7 @@ export default function LoginModal({ onLoginSuccess }) {
                   <input
                     type="text"
                     required
-                    placeholder="name@example.com"
+                    placeholder="name@gmail.com"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     className="w-full bg-[#161926] border border-[#272e45] rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#7c3aed]"
@@ -233,7 +233,7 @@ export default function LoginModal({ onLoginSuccess }) {
                       onChange={(e) => setRememberMe(e.target.checked)}
                       className="w-4 h-4 rounded border-[#272e45] bg-[#161926] text-[#7c3aed] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#7c3aed]"
                     />
-                    <span className="select-none font-medium text-[11px]">Remember me </span>
+                    <span className="select-none font-medium text-[11px]">Remember me 30d</span>
                   </label>
 
                   {/* Forgot Password Button */}
@@ -293,7 +293,7 @@ export default function LoginModal({ onLoginSuccess }) {
                   <input
                     type="text"
                     required
-                    placeholder="name@example.com"
+                    placeholder="name@gmail.com"
                     value={resetIdent}
                     onChange={(e) => setResetIdent(e.target.value)}
                     className="w-full bg-[#161926] border border-[#272e45] rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#38bdf8]"

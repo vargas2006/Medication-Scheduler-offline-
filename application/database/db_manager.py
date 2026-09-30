@@ -1,5 +1,7 @@
 import sqlite3
 import os
+import sys
+import shutil
 
 class DatabaseManager:
     _instance = None
@@ -7,8 +9,36 @@ class DatabaseManager:
     def __new__(cls, db_name=None):
         if cls._instance is None:
             if db_name is None:
-                base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                db_name = os.path.join(base_dir, "med_scheduler.db")
+                # 1. Determine user AppData directory for persistent DB storage across app updates
+                if sys.platform == 'win32':
+                    app_data = os.environ.get('APPDATA', os.path.expanduser('~'))
+                elif sys.platform == 'darwin':
+                    app_data = os.path.expanduser('~/Library/Application Support')
+                else:
+                    app_data = os.path.expanduser('~/.config')
+
+                data_dir = os.path.join(app_data, 'SmartMedicationScheduler')
+                os.makedirs(data_dir, exist_ok=True)
+                target_db = os.path.join(data_dir, 'med_scheduler.db')
+
+                # 2. Migration: If APPDATA db does not exist, look for existing legacy db to preserve user data
+                if not os.path.exists(target_db):
+                    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                    legacy_paths = [
+                        os.path.join(base_dir, "med_scheduler.db"),
+                        os.path.join(os.getcwd(), "med_scheduler.db"),
+                    ]
+                    for legacy in legacy_paths:
+                        if os.path.exists(legacy) and os.path.getsize(legacy) > 0:
+                            try:
+                                shutil.copy2(legacy, target_db)
+                                print(f"[DatabaseManager] Migrated existing DB from {legacy} to {target_db}")
+                                break
+                            except Exception as e:
+                                print(f"[DatabaseManager] Warning migrating legacy DB: {e}")
+
+                db_name = target_db
+
             cls._instance = super(DatabaseManager, cls).__new__(cls)
             cls._instance.db_name = db_name
             cls._instance._initialize_db()
@@ -109,7 +139,7 @@ class DatabaseManager:
                     SELECT name FROM medications WHERE medications.id = intake_log.medication_id
                 )
                 WHERE (medication_name IS NULL OR medication_name = '')
-                  AND medication_id IN (SELECT id FROM medications)
+                AND medication_id IN (SELECT id FROM medications)
             """)
         except Exception:
             pass
@@ -310,18 +340,13 @@ class DatabaseManager:
 
     def get_remembered_user_id(self):
         row = self.fetch_one("SELECT remember_user_id FROM settings WHERE id = 1")
-        return row[0] if row else None
-
-        self.execute_query('''
-            UPDATE settings 
-            SET enable_offline_popups = ?, 
-                enable_gmail_notifications = ?, 
-                recipient_email = ?,
-                sender_email = ?,
-                sender_password = ?
-            WHERE id = 1
-        ''', (int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, clean_sender_email, clean_sender_password))
-        return True
+        if row and row[0] is not None:
+            user_exists = self.fetch_one("SELECT id FROM users WHERE id = ?", (int(row[0]),))
+            if user_exists:
+                return row[0]
+            else:
+                self.clear_remember_me()
+        return None
 
     def enqueue_email(self, subject, body, recipient_email="", is_html=0):
         return self.execute_query(
