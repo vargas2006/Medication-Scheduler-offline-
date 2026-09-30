@@ -29,6 +29,8 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
   const displayName = user?.name || user?.username || 'User';
   const emailInfo = user?.email ? ` (${user.email})` : '';
 
+  const [appVersion, setAppVersion] = useState('1.0.5');
+
   const loadSettings = async () => {
     try {
       const res = await callApi('get_settings', user?.user_id);
@@ -40,6 +42,10 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
         if (res.recipient_email) {
           setInputGmail(res.recipient_email);
         }
+      }
+      const verRes = await callApi('get_current_version');
+      if (verRes && verRes.version) {
+        setAppVersion(verRes.version);
       }
     } catch (e) {
       console.error('Failed to load settings:', e);
@@ -432,7 +438,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-xs font-bold text-white block">Software Updates</span>
-                  <span className="text-[10px] text-slate-400">Current App Version: <strong className="text-purple-400 font-mono">v1.0.0</strong></span>
+                  <span className="text-[10px] text-slate-400">Current App Version: <strong className="text-purple-400 font-mono">v{appVersion}</strong></span>
                 </div>
                 <button
                   type="button"
@@ -444,6 +450,9 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                     try {
                       const res = await callApi('check_for_updates');
                       if (res.success) {
+                        if (res.current_version) {
+                          setAppVersion(res.current_version);
+                        }
                         if (res.update_available) {
                           if (statusText) statusText.innerText = `New version v${res.remote_version} available! Downloading...`;
                           const upRes = await callApi('download_and_apply_update', res.download_url);
@@ -451,7 +460,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                             statusText.innerText = `Update error: ${upRes.message}`;
                           }
                         } else {
-                          if (statusText) statusText.innerText = '✓ You are on the latest version (v1.0.0).';
+                          if (statusText) statusText.innerText = `✓ You are on the latest version (v${res.current_version || appVersion}).`;
                         }
                       } else {
                         if (statusText) statusText.innerText = res.message || 'Unable to check for updates.';

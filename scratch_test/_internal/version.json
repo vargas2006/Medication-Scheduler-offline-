@@ -1,7 +1,7 @@
 {
-  "version": "1.0.4",
+  "version": "1.0.6",
   "release_date": "2026-09-30",
-  "release_notes": "Version 1.0.4 Update: Fixed threading import and Taskbar icon embedding.",
+  "release_notes": "Version 1.0.6 Update: Fixed hardcoded v1.0.0 strings in SettingsView React component.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }
