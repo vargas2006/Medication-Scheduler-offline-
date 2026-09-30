@@ -29,9 +29,11 @@ def compare_versions(v1, v2):
 def check_for_updates(manifest_url=REMOTE_MANIFEST_URL):
     """Check online manifest URL for remote updates."""
     try:
+        # Append cache buster parameter to bypass GitHub raw CDN caching
+        cache_buster_url = f"{manifest_url}{'&' if '?' in manifest_url else '?'}t={int(time.time())}"
         req = urllib.request.Request(
-            manifest_url,
-            headers={'User-Agent': 'SmartMedicationScheduler-Updater/1.0'}
+            cache_buster_url,
+            headers={'User-Agent': 'SmartMedicationScheduler-Updater/1.0', 'Cache-Control': 'no-cache'}
         )
         with urllib.request.urlopen(req, timeout=10) as response:
             data = json.loads(response.read().decode('utf-8'))
@@ -68,15 +70,36 @@ def download_and_apply_update(download_url):
         zip_path = os.path.join(temp_dir, "med_scheduler_update.zip")
         batch_path = os.path.join(temp_dir, "apply_update.bat")
 
-        print(f"[Updater] Downloading update package from {download_url}...")
-        req = urllib.request.Request(
-            download_url,
-            headers={'User-Agent': 'SmartMedicationScheduler-Updater/1.0'}
-        )
-        with urllib.request.urlopen(req, timeout=30) as response, open(zip_path, 'wb') as out_file:
-            out_file.write(response.read())
+        print(f"[Updater] Downloading update package...")
+        fallback_url = "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip"
+        urls_to_try = []
+        if download_url:
+            urls_to_try.append(download_url)
+        if fallback_url not in urls_to_try:
+            urls_to_try.append(fallback_url)
 
-        print(f"[Updater] Download complete. Creating batch update script at {batch_path}...")
+        download_success = False
+        last_err = None
+        for target_url_item in urls_to_try:
+            try:
+                print(f"[Updater] Attempting download from: {target_url_item}")
+                req = urllib.request.Request(
+                    target_url_item,
+                    headers={'User-Agent': 'SmartMedicationScheduler-Updater/1.0'}
+                )
+                with urllib.request.urlopen(req, timeout=45) as response, open(zip_path, 'wb') as out_file:
+                    out_file.write(response.read())
+                download_success = True
+                print(f"[Updater] Successfully downloaded update zip from {target_url_item}!")
+                break
+            except Exception as err:
+                print(f"[Updater] Warning: Download failed from {target_url_item}: {err}")
+                last_err = err
+
+        if not download_success:
+            return {"success": False, "message": f"Update download failed: {last_err}"}
+
+        print(f"[Updater] Creating batch update script at {batch_path}...")
 
         # Determine target install directory (where main executable or main.py resides)
         if getattr(sys, 'frozen', False):
