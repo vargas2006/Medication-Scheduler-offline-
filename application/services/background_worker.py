@@ -135,7 +135,13 @@ class NotificationWorker:
 
             def run_ps():
                 try:
-                    subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", tmp_path], capture_output=True)
+                    import sys
+                    creation_flags = 0x08000000 if sys.platform == 'win32' else 0
+                    subprocess.run(
+                        ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", tmp_path],
+                        capture_output=True,
+                        creationflags=creation_flags
+                    )
                 finally:
                     if os.path.exists(tmp_path):
                         try:
