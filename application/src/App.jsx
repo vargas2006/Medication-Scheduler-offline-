@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, X, Pill, Clock, Check, AlertCircle } from 'lucide-react';
+import { Bell, X, Pill, Clock, Check, AlertCircle, Droplet } from 'lucide-react';
 import AppLoadingScreen from './components/AppLoadingScreen';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -208,7 +208,7 @@ export default function App() {
 
           {/* Health Tip / Instruction banner */}
           <div className="mb-4 px-3 py-2 bg-emerald-950/30 border border-emerald-500/20 rounded-xl flex items-center gap-2 text-[11px] text-emerald-300 font-medium">
-            <span className="text-sm">💧</span>
+            <Droplet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             <span>Take dose with water and log intake to update your schedule.</span>
           </div>
 

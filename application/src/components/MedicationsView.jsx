@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, AlertCircle, AlertTriangle, Check, CheckCircle2, Search, ArrowUpDown, Filter, Boxes, PackageCheck, PackageX, X, LayoutList, LayoutGrid, Calendar, Clock } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, AlertTriangle, Check, CheckCircle2, Search, ArrowUpDown, Filter, Boxes, PackageCheck, PackageX, X, LayoutList, LayoutGrid, Calendar, Clock, Pill } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
 
 function MedImage({ src, alt }) {
   const [hasError, setHasError] = useState(false);
 
   if (!src || hasError) {
-    return '💊';
+    return <Pill className="w-5 h-5 text-purple-400" />;
   }
 
   const imageSrc = src.startsWith('http') ? src : `file:///${src.replace(/\\/g, '/')}`;
@@ -435,7 +435,7 @@ export default function MedicationsView({ user, onDataChange }) {
             <div className="flex items-center justify-between border-b border-[#1e2438] pb-3.5">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-[#2b2046] text-[#c084fc] flex items-center justify-center text-lg">
-                  💊
+                  <Pill className="w-5 h-5 text-[#c084fc]" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-white leading-tight">Register New Drug</h3>

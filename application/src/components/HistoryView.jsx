@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, FileSpreadsheet, Trash2 } from 'lucide-react';
+import { Calendar, FileSpreadsheet, Trash2, History } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
 
 export default function HistoryView({ user }) {
@@ -92,7 +92,7 @@ export default function HistoryView({ user }) {
         <div className="flex flex-col gap-3 mb-4 pb-3 border-b border-[#22273a]">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <span>📜</span>
+              <History className="w-5 h-5 text-indigo-400" />
               <span>Intake History Audit</span>
             </h3>
 

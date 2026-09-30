@@ -172,7 +172,7 @@ class NotificationWorker:
             med_rows += f"""
             <tr style="border-bottom: 1px solid #272e45;">
                 <td style="padding: 14px 16px; font-weight: bold; color: #ffffff; font-size: 14px;">
-                    💊 {med['name']}
+                    {med['name']}
                 </td>
                 <td style="padding: 14px 16px; color: #38bdf8; font-weight: 600; font-size: 13px;">
                     <span style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 4px 8px;">
@@ -181,7 +181,7 @@ class NotificationWorker:
                 </td>
                 <td style="padding: 14px 16px; color: #a78bfa; font-weight: 600; font-size: 13px;">
                     <span style="background: rgba(167, 139, 250, 0.15); border: 1px solid rgba(167, 139, 250, 0.4); border-radius: 6px; padding: 4px 8px;">
-                        ⏰ {time_display}
+                        {time_display}
                     </span>
                 </td>
                 <td style="padding: 14px 16px; text-align: right;">
@@ -207,7 +207,6 @@ class NotificationWorker:
                         <table width="100%" border="0" cellpadding="0" cellspacing="0">
                             <tr>
                                 <td>
-                                    <span style="font-size: 26px;">💊</span>
                                     <h1 style="margin: 6px 0 0 0; font-size: 20px; color: #ffffff; letter-spacing: 0.5px;">Smart Medication Scheduler</h1>
                                     <p style="margin: 4px 0 0 0; font-size: 12px; color: #10b981; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Due Today Reminder &bull; {today_str}</p>
                                 </td>
@@ -256,7 +255,6 @@ class NotificationWorker:
                         <div style="background-color: rgba(16, 185, 129, 0.08); border: 1px dashed #10b981; border-radius: 10px; padding: 14px 16px;">
                             <table width="100%" border="0" cellpadding="0" cellspacing="0">
                                 <tr>
-                                    <td width="28" valign="top"><span style="font-size: 18px;">💧</span></td>
                                     <td style="font-size: 12px; color: #cbd5e1; line-height: 1.5;">
                                         <strong>Intake Reminder:</strong> Please take your medications with a glass of water. After taking your dose, open your Medication Scheduler desktop app and click <strong>"Take Dose Now"</strong> to record your intake.
                                     </td>
@@ -328,7 +326,7 @@ class NotificationWorker:
                 server.sendmail(sender_email, target_recipient, msg.as_string())
                 server.quit()
                 self.db.mark_email_sent(email_id)
-                print(f"[NotificationWorker] 📧 GMAIL DELIVERED! Email ID {email_id} sent to {target_recipient} from {sender_email}")
+                print(f"[NotificationWorker] GMAIL DELIVERED! Email ID {email_id} sent to {target_recipient} from {sender_email}")
             except Exception as e:
                 print(f"[NotificationWorker] Gmail SMTP Error: {e}")
                 self.db.mark_email_sent(email_id)

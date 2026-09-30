@@ -6,7 +6,7 @@ function MedImage({ src, alt }) {
   const [hasError, setHasError] = useState(false);
 
   if (!src || hasError) {
-    return '💊';
+    return <Pill className="w-5 h-5 text-purple-400" />;
   }
 
   const imageSrc = src.startsWith('http') ? src : `file:///${src.replace(/\\/g, '/')}`;

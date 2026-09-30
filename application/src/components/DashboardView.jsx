@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Pill, Bell, History, Check, AlertTriangle, Sparkles } from 'lucide-react';
+import { Pill, Bell, History, Check, AlertTriangle, Sparkles, BarChart3 } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
 
 export default function DashboardView({ user, onDataChange }) {
@@ -109,7 +109,7 @@ export default function DashboardView({ user, onDataChange }) {
         <div className="col-span-6 bg-[#161926] border border-[#24293e] rounded-2xl h-[280px] flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#22273a]">
             <div className="flex items-center gap-2">
-              <span className="text-lg">🔔</span>
+              <Bell className="w-4 h-4 text-purple-400" />
               <h3 className="font-bold text-white text-sm">Due Right Now</h3>
             </div>
             <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${
@@ -133,7 +133,7 @@ export default function DashboardView({ user, onDataChange }) {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-[#272d47] flex items-center justify-center text-base shrink-0">
-                      💊
+                      <Pill className="w-4 h-4 text-purple-400" />
                     </div>
                     <div>
                       <h4 className="font-bold text-white text-xs leading-snug">
@@ -160,7 +160,7 @@ export default function DashboardView({ user, onDataChange }) {
         <div className="col-span-4 bg-[#161926] border border-[#24293e] rounded-2xl h-[280px] flex flex-col p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-white text-xs flex items-center gap-2">
-              <span>📊</span>
+              <BarChart3 className="w-4 h-4 text-sky-400" />
               <span>Weekly Intake Adherence</span>
             </h3>
             <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-[#10273f] text-[#38bdf8]">
@@ -194,7 +194,7 @@ export default function DashboardView({ user, onDataChange }) {
       <div className="bg-[#161926] border border-[#24293e] rounded-2xl h-[220px] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-[#22273a]">
           <h3 className="font-bold text-white text-xs flex items-center gap-2">
-            <span>📜</span>
+            <History className="w-4 h-4 text-indigo-400" />
             <span>Recent Activity Log</span>
           </h3>
           <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-[#1e2438] text-slate-400">

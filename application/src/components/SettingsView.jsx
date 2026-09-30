@@ -157,7 +157,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
       setPwStatus({ msg: 'Updating...', ok: null });
       const res = await callApi('change_password', user?.user_id, currentPw, newPw);
       if (res.success) {
-        setPwStatus({ msg: '✓ Password updated successfully.', ok: true });
+        setPwStatus({ msg: 'Password updated successfully.', ok: true });
         setCurrentPw(''); setNewPw(''); setConfirmPw('');
       } else {
         setPwStatus({ msg: res.message || 'Failed to update password.', ok: false });
@@ -267,7 +267,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                   <span className={`text-[10px] font-semibold ${
                     isEmailVerified && boundEmail ? 'text-emerald-400' : 'text-amber-400'
                   }`}>
-                    {isEmailVerified && boundEmail ? '✓ Verified & Bound' : '⚠ Not Verified'}
+                    {isEmailVerified && boundEmail ? 'Verified & Bound' : 'Not Verified'}
                   </span>
                 </div>
               </div>
@@ -384,7 +384,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               <Shield className="w-5 h-5 text-[#c084fc]" />
               <div className="text-xs">
                 <span className="text-slate-400 block text-[10px]">Password Security</span>
-                <span className="font-bold text-white">PBKDF2-SHA256 Hashed &nbsp;<span className="text-emerald-400 text-[10px] font-normal">✓ Secure</span></span>
+                <span className="font-bold text-white">PBKDF2-SHA256 Hashed &nbsp;<span className="text-emerald-400 text-[10px] font-normal">Secure</span></span>
               </div>
             </div>
 
@@ -460,7 +460,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                             statusText.innerText = `Update error: ${upRes.message}`;
                           }
                         } else {
-                          if (statusText) statusText.innerText = `✓ You are on the latest version (v${res.current_version || appVersion}).`;
+                          if (statusText) statusText.innerText = `You are on the latest version (v${res.current_version || appVersion}).`;
                         }
                       } else {
                         if (statusText) statusText.innerText = res.message || 'Unable to check for updates.';
