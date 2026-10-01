@@ -1,7 +1,7 @@
 {
-  "version": "1.0.19",
+  "version": "1.0.20",
   "release_date": "2026-10-01",
-  "release_notes": "Version 1.0.19 Update: Enhanced auto-updater engine for reliable one-click background updates.",
+  "release_notes": "Version 1.0.20 Test Update: Verified automated background update mechanism.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }
