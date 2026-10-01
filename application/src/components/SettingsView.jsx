@@ -29,7 +29,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
   const displayName = user?.name || user?.username || 'User';
   const emailInfo = user?.email ? ` (${user.email})` : '';
 
-  const [appVersion, setAppVersion] = useState('1.0.5');
+  const [appVersion, setAppVersion] = useState('1.0.12');
 
   const loadSettings = async () => {
     try {
@@ -56,7 +56,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
     loadSettings();
   }, [user]);
 
-  // Save Settings button handler
   const handleSaveSettings = async () => {
     try {
       setSaveStatus('Saving...');
@@ -70,15 +69,14 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
         user?.user_id,
         isEmailVerified ? 1 : 0
       );
-      setSaveStatus('Saved!');
+      setSaveStatus('Settings Saved!');
       setTimeout(() => setSaveStatus(''), 3000);
     } catch (e) {
       console.error('Failed to save settings:', e);
-      setSaveStatus('Error saving');
+      setSaveStatus('Error saving settings');
     }
   };
 
-  // Step 1: Send 6-digit verification code to target Gmail
   const handleSendCode = async () => {
     const emailToVerify = inputGmail.trim();
     if (!emailToVerify || !emailToVerify.includes('@')) {
@@ -100,7 +98,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
     }
   };
 
-  // Step 2: Verify 6-digit code and bind Gmail
   const handleVerifyAndBind = async () => {
     const code = otpCode.trim();
     if (!code) {
@@ -118,371 +115,262 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
         setOtpCode('');
         setBindStatus({ msg: res.message || 'Gmail verified and bound successfully!', isError: false });
       } else {
-        setBindStatus({ msg: res.message || 'Invalid code.', isError: true });
+        setBindStatus({ msg: res.message || 'Invalid verification code.', isError: true });
       }
     } catch (e) {
       setBindStatus({ msg: 'Error verifying code.', isError: true });
     }
   };
 
-  // Unbind / Change Gmail
-  const handleUnbind = async () => {
-    try {
-      await callApi('unbind_gmail', user?.user_id);
-      setBoundEmail('');
-      setIsEmailVerified(false);
-      setInputGmail('');
-      setCodeSent(false);
-      setOtpCode('');
-      setEnableGmailNotifications(false);
-      setBindStatus({ msg: 'Gmail unbound.', isError: false });
-      setTimeout(() => setBindStatus({ msg: '', isError: false }), 3000);
-    } catch (e) {
-      setBindStatus({ msg: 'Error unbinding Gmail.', isError: true });
-    }
-  };
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPwStatus({ msg: '', ok: null });
 
-  // Change password handler
-  const handleChangePassword = async () => {
     if (!currentPw || !newPw || !confirmPw) {
-      setPwStatus({ msg: 'Please fill in all password fields.', ok: false }); return;
+      setPwStatus({ msg: 'Please fill in all password fields.', ok: false });
+      return;
     }
+
     if (newPw !== confirmPw) {
-      setPwStatus({ msg: 'New passwords do not match.', ok: false }); return;
+      setPwStatus({ msg: 'New passwords do not match.', ok: false });
+      return;
     }
-    if (newPw.length < 6) {
-      setPwStatus({ msg: 'New password must be at least 6 characters.', ok: false }); return;
+
+    if (newPw.length < 4) {
+      setPwStatus({ msg: 'New password must be at least 4 characters long.', ok: false });
+      return;
     }
+
     try {
-      setPwStatus({ msg: 'Updating...', ok: null });
       const res = await callApi('change_password', user?.user_id, currentPw, newPw);
       if (res.success) {
-        setPwStatus({ msg: 'Password updated successfully.', ok: true });
-        setCurrentPw(''); setNewPw(''); setConfirmPw('');
+        setPwStatus({ msg: res.message || 'Password changed successfully!', ok: true });
+        setCurrentPw('');
+        setNewPw('');
+        setConfirmPw('');
       } else {
-        setPwStatus({ msg: res.message || 'Failed to update password.', ok: false });
+        setPwStatus({ msg: res.message || 'Failed to change password.', ok: false });
       }
-    } catch (e) {
-      setPwStatus({ msg: 'Error updating password.', ok: false });
+    } catch (err) {
+      setPwStatus({ msg: 'Error changing password.', ok: false });
     }
-    setTimeout(() => setPwStatus({ msg: '', ok: null }), 4000);
   };
 
   return (
-    <div className="p-5 h-full overflow-hidden">
-      <div className="bg-[#161926] border border-[#24293e] rounded-2xl p-6 h-full space-y-6 overflow-y-auto">
-        {/* Appearance Section */}
-        <div>
-          <h3 className="text-base font-bold text-white mb-1">Appearance & Theme</h3>
-          <p className="text-xs text-slate-400 mb-4">Toggle between high-contrast dark mode and light theme.</p>
-          
-          <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-4 flex items-center justify-between max-w-lg">
-            <div className="flex items-center gap-3">
-              {isDark ? <Moon className="w-5 h-5 text-purple-400" /> : <Sun className="w-5 h-5 text-amber-400" />}
-              <div>
-                <span className="text-xs font-bold text-white block">Theme Mode</span>
-                <span className="text-[11px] text-slate-400">{isDark ? 'Dark Mode Active' : 'Light Mode Active'}</span>
+    <div className="p-6 space-y-5 overflow-y-auto h-full bg-[#f5f7fa] dark:bg-[#0f172a] transition-colors">
+      {/* Save Status Banner */}
+      {saveStatus && (
+        <div className="p-3 bg-[#d1fae5] dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-[#047857] dark:text-emerald-300 text-xs font-semibold rounded-md flex items-center gap-2 shadow-2xs">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>{saveStatus}</span>
+        </div>
+      )}
+
+      {/* Section 1: Notification Preferences */}
+      <div className="bg-white dark:bg-[#1e293b] border border-[#d9e0e8] dark:border-[#334155] rounded-lg p-5 shadow-2xs space-y-4">
+        <div className="flex items-center justify-between border-b border-[#d9e0e8] dark:border-[#334155] pb-3">
+          <div className="flex items-center gap-2">
+            <Bell className="w-4 h-4 text-[#2563eb] dark:text-blue-400" />
+            <h2 className="font-semibold text-[#172033] dark:text-slate-100 text-sm">Notification Preferences</h2>
+          </div>
+          <button
+            onClick={handleSaveSettings}
+            className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium px-3.5 py-1.5 rounded-md flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>Save Preferences</span>
+          </button>
+        </div>
+
+        {/* Offline Desktop Popups Checkbox */}
+        <div className="flex items-start justify-between gap-4 p-3 bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md">
+          <div className="space-y-0.5">
+            <span className="font-semibold text-xs text-[#172033] dark:text-slate-200">
+              Offline Desktop Popups &amp; Audio Alerts
+            </span>
+            <p className="text-[11px] text-[#64748b] dark:text-slate-400">
+              Receive desktop windows notifications when scheduled medication doses become due.
+            </p>
+          </div>
+          <input
+            type="checkbox"
+            checked={enableOfflinePopups}
+            onChange={(e) => setEnableOfflinePopups(e.target.checked)}
+            className="w-4 h-4 rounded border-[#d9e0e8] text-[#2563eb] focus:ring-0 cursor-pointer accent-[#2563eb] mt-1"
+          />
+        </div>
+
+        {/* Gmail Notification Checkbox & Binding Box */}
+        <div className="p-3 bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md space-y-3">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-0.5">
+              <span className="font-semibold text-xs text-[#172033] dark:text-slate-200 flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-[#2563eb] dark:text-blue-400" />
+                <span>Automated Gmail Medication Alerts</span>
+              </span>
+              <p className="text-[11px] text-[#64748b] dark:text-slate-400">
+                Receive HTML medication schedule notifications sent to your verified Gmail address.
+              </p>
+            </div>
+            <input
+              type="checkbox"
+              checked={enableGmailNotifications}
+              onChange={(e) => setEnableGmailNotifications(e.target.checked)}
+              className="w-4 h-4 rounded border-[#d9e0e8] text-[#2563eb] focus:ring-0 cursor-pointer accent-[#2563eb] mt-1"
+            />
+          </div>
+
+          {/* Bound Status */}
+          {boundEmail && isEmailVerified ? (
+            <div className="p-2.5 bg-[#d1fae5] dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 rounded text-xs text-[#047857] dark:text-emerald-300 flex items-center justify-between">
+              <span className="flex items-center gap-1.5 font-medium">
+                <CheckCircle2 className="w-4 h-4 text-[#16a34a]" />
+                Bound Gmail: <strong className="font-semibold">{boundEmail}</strong>
+              </span>
+              <span className="text-[10px] bg-[#16a34a] text-white px-2 py-0.5 rounded font-semibold">Verified</span>
+            </div>
+          ) : (
+            <div className="space-y-2 pt-1 border-t border-[#d9e0e8] dark:border-[#334155]">
+              <span className="text-xs font-medium text-[#172033] dark:text-slate-200">
+                Bind &amp; Verify Gmail Address:
+              </span>
+
+              {bindStatus.msg && (
+                <div className={`p-2 rounded text-xs font-medium ${
+                  bindStatus.isError ? 'bg-[#fee2e2] text-[#b91c1c] border border-rose-200' : 'bg-[#d1fae5] text-[#047857] border border-emerald-200'
+                }`}>
+                  {bindStatus.msg}
+                </div>
+              )}
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="email"
+                  placeholder="Enter your Gmail address"
+                  value={inputGmail}
+                  onChange={(e) => setInputGmail(e.target.value)}
+                  className="flex-1 bg-white dark:bg-[#1e293b] border border-[#d9e0e8] dark:border-[#334155] rounded-md px-3 py-1.5 text-xs text-[#172033] dark:text-slate-100 focus:outline-none focus:border-[#2563eb]"
+                />
+                <button
+                  type="button"
+                  onClick={handleSendCode}
+                  className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-medium text-xs px-3.5 py-1.5 rounded-md transition-colors shadow-2xs"
+                >
+                  Send OTP Code
+                </button>
               </div>
+
+              {codeSent && (
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    maxLength={6}
+                    placeholder="Enter 6-digit code"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                    className="w-36 bg-white dark:bg-[#1e293b] border border-[#d9e0e8] dark:border-[#334155] rounded-md px-3 py-1.5 text-xs text-[#172033] dark:text-slate-100 font-mono focus:outline-none focus:border-[#2563eb]"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleVerifyAndBind}
+                    className="bg-[#16a34a] hover:bg-[#15803d] text-white font-medium text-xs px-3.5 py-1.5 rounded-md transition-colors shadow-2xs"
+                  >
+                    Verify &amp; Bind
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Section 2: Account Profile & Security */}
+      <div className="grid grid-cols-2 gap-5">
+        {/* Account Summary */}
+        <div className="bg-white dark:bg-[#1e293b] border border-[#d9e0e8] dark:border-[#334155] rounded-lg p-5 shadow-2xs space-y-3">
+          <div className="flex items-center gap-2 border-b border-[#d9e0e8] dark:border-[#334155] pb-3">
+            <UserCheck className="w-4 h-4 text-[#2563eb] dark:text-blue-400" />
+            <h2 className="font-semibold text-[#172033] dark:text-slate-100 text-sm">Account Summary</h2>
+          </div>
+
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between py-1 border-b border-[#f1f5f9] dark:border-[#334155]">
+              <span className="text-[#64748b] dark:text-slate-400">Account Name:</span>
+              <span className="font-semibold text-[#172033] dark:text-slate-100">{displayName}</span>
+            </div>
+            <div className="flex justify-between py-1 border-b border-[#f1f5f9] dark:border-[#334155]">
+              <span className="text-[#64748b] dark:text-slate-400">Username:</span>
+              <span className="font-semibold text-[#172033] dark:text-slate-100">{user?.username || '—'}</span>
+            </div>
+            <div className="flex justify-between py-1 border-b border-[#f1f5f9] dark:border-[#334155]">
+              <span className="text-[#64748b] dark:text-slate-400">Registered Email:</span>
+              <span className="font-semibold text-[#172033] dark:text-slate-100">{user?.email || '—'}</span>
+            </div>
+            <div className="flex justify-between py-1">
+              <span className="text-[#64748b] dark:text-slate-400">Application Version:</span>
+              <span className="font-mono font-semibold text-[#2563eb] dark:text-blue-400">v{appVersion}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Change Password Form */}
+        <div className="bg-white dark:bg-[#1e293b] border border-[#d9e0e8] dark:border-[#334155] rounded-lg p-5 shadow-2xs space-y-3">
+          <div className="flex items-center gap-2 border-b border-[#d9e0e8] dark:border-[#334155] pb-3">
+            <Shield className="w-4 h-4 text-[#2563eb] dark:text-blue-400" />
+            <h2 className="font-semibold text-[#172033] dark:text-slate-100 text-sm">Security &amp; Password</h2>
+          </div>
+
+          {pwStatus.msg && (
+            <div className={`p-2 rounded text-xs font-medium ${
+              pwStatus.ok ? 'bg-[#d1fae5] text-[#047857] border border-emerald-200' : 'bg-[#fee2e2] text-[#b91c1c] border border-rose-200'
+            }`}>
+              {pwStatus.msg}
+            </div>
+          )}
+
+          <form onSubmit={handleChangePassword} className="space-y-2.5 text-xs">
+            <div>
+              <label className="block font-medium text-[#64748b] dark:text-slate-300 mb-1">Current Password</label>
+              <input
+                type="password"
+                required
+                value={currentPw}
+                onChange={(e) => setCurrentPw(e.target.value)}
+                className="w-full bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md px-3 py-1.5 text-xs text-[#172033] dark:text-slate-100 focus:outline-none focus:border-[#2563eb]"
+              />
+            </div>
+
+            <div>
+              <label className="block font-medium text-[#64748b] dark:text-slate-300 mb-1">New Password</label>
+              <input
+                type="password"
+                required
+                value={newPw}
+                onChange={(e) => setNewPw(e.target.value)}
+                className="w-full bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md px-3 py-1.5 text-xs text-[#172033] dark:text-slate-100 focus:outline-none focus:border-[#2563eb]"
+              />
+            </div>
+
+            <div>
+              <label className="block font-medium text-[#64748b] dark:text-slate-300 mb-1">Confirm New Password</label>
+              <input
+                type="password"
+                required
+                value={confirmPw}
+                onChange={(e) => setConfirmPw(e.target.value)}
+                className="w-full bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md px-3 py-1.5 text-xs text-[#172033] dark:text-slate-100 focus:outline-none focus:border-[#2563eb]"
+              />
             </div>
 
             <button
-              type="button"
-              onClick={onToggleTheme}
-              className={`w-12 h-6 rounded-full p-1 transition-colors ${isDark ? 'bg-[#7c3aed]' : 'bg-amber-500'}`}
+              type="submit"
+              className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-medium text-xs py-2 rounded-md transition-colors shadow-2xs mt-1"
             >
-              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${isDark ? 'translate-x-6' : 'translate-x-0'}`} />
+              Update Password
             </button>
-          </div>
-        </div>
-
-        <hr className="border-[#24293e]" />
-
-        {/* Notifications & Alert System Section */}
-        <div>
-          <div className="flex items-center justify-between max-w-lg mb-1">
-            <h3 className="text-base font-bold text-white">Notifications & Alerts</h3>
-            {saveStatus && (
-              <span className="text-[11px] text-[#10b981] font-semibold flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> {saveStatus}
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-slate-400 mb-4">Configure system popups and verify Gmail for online medication alerts.</p>
-
-          <div className="space-y-4 max-w-lg">
-            {/* Toggle 1: Local Desktop Notifications (Offline) */}
-            <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Bell className="w-5 h-5 text-emerald-400" />
-                <div>
-                  <span className="text-xs font-bold text-white block">Local Desktop Notifications (Offline)</span>
-                  <span className="text-[11px] text-slate-400">Trigger OS native popups for medication alerts</span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setEnableOfflinePopups(!enableOfflinePopups)}
-                className={`w-12 h-6 rounded-full p-1 transition-colors ${enableOfflinePopups ? 'bg-[#10b981]' : 'bg-slate-700'}`}
-              >
-                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${enableOfflinePopups ? 'translate-x-6' : 'translate-x-0'}`} />
-              </button>
-            </div>
-
-            {/* Toggle 2: Gmail Notifications Toggle */}
-            <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-sky-400" />
-                <div>
-                  <span className="text-xs font-bold text-white block">Gmail Reminders (Requires Internet)</span>
-                  <span className="text-[11px] text-slate-400">Receive medication reminders directly to verified Gmail</span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setEnableGmailNotifications(!enableGmailNotifications)}
-                className={`w-12 h-6 rounded-full p-1 transition-colors ${enableGmailNotifications ? 'bg-[#38bdf8]' : 'bg-slate-700'}`}
-              >
-                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${enableGmailNotifications ? 'translate-x-6' : 'translate-x-0'}`} />
-              </button>
-            </div>
-
-            {/* Gmail Verification / Binding Box */}
-            <div className="bg-[#161926] border border-[#2b334c] rounded-xl p-4 space-y-3.5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-bold text-white block">Gmail Notification Binding</span>
-                  <span className="text-[10px] text-slate-400">Verify your Gmail address using a 6-digit code to enable alerts.</span>
-                </div>
-                {/* Status Badge */}
-                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full shrink-0 ${
-                  isEmailVerified && boundEmail
-                    ? 'bg-emerald-500/10 border border-emerald-500/20'
-                    : 'bg-amber-500/10 border border-amber-500/20'
-                }`}>
-                  <div className={`w-1.5 h-1.5 rounded-full ${
-                    isEmailVerified && boundEmail ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
-                  }`} />
-                  <span className={`text-[10px] font-semibold ${
-                    isEmailVerified && boundEmail ? 'text-emerald-400' : 'text-amber-400'
-                  }`}>
-                    {isEmailVerified && boundEmail ? 'Verified & Bound' : 'Not Verified'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Status Alert */}
-              {bindStatus.msg && (
-                <div className={`p-2.5 rounded-lg flex items-center gap-2 text-xs ${
-                  bindStatus.isError ? 'bg-rose-950/60 border border-rose-800/80 text-rose-300' : 'bg-sky-950/60 border border-sky-800/80 text-sky-300'
-                }`}>
-                  {bindStatus.isError ? <AlertCircle className="w-3.5 h-3.5 shrink-0" /> : <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />}
-                  <span className="text-[11px] font-medium">{bindStatus.msg}</span>
-                </div>
-              )}
-
-              {/* Scenario A: Already Verified & Bound */}
-              {isEmailVerified && boundEmail ? (
-                <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <div>
-                      <span className="text-[10px] text-slate-400 block">Bound Gmail Address</span>
-                      <span className="text-xs font-mono font-bold text-sky-400">{boundEmail}</span>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleUnbind}
-                    className="text-[11px] font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    Unbind Gmail
-                  </button>
-                </div>
-              ) : (
-                /* Scenario B: Not Yet Verified — Input + Send Code Flow */
-                <div className="space-y-3 border-t border-[#272e45] pt-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Enter Gmail Address for Notifications</label>
-                    <div className="flex gap-2">
-                      <input
-                        type="email"
-                        placeholder="yourname@gmail.com"
-                        value={inputGmail}
-                        onChange={(e) => setInputGmail(e.target.value)}
-                        className="flex-1 bg-[#1c2033] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#38bdf8]"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleSendCode}
-                        className="text-xs font-bold bg-[#38bdf8] hover:bg-[#0ea5e9] text-[#0b0e17] px-3.5 py-2 rounded-xl transition-colors shrink-0"
-                      >
-                        {codeSent ? 'Resend Code' : 'Send Code'}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Code Input Box (Visible after Send Code) */}
-                  {codeSent && (
-                    <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-3 space-y-2.5">
-                      <label className="block text-xs font-semibold text-slate-300">Enter 6-Digit Verification Code</label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          maxLength={6}
-                          placeholder="123456"
-                          value={otpCode}
-                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                          className="w-36 bg-[#161926] border border-[#272e45] rounded-xl px-3 py-2 text-center text-sm font-mono tracking-widest text-sky-400 focus:outline-none focus:border-[#38bdf8]"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleVerifyAndBind}
-                          className="flex-1 text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-white px-4 py-2 rounded-xl transition-colors"
-                        >
-                          Verify & Bind Gmail
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Save Settings Action Button */}
-            <div className="flex justify-end pt-1">
-              <button
-                type="button"
-                onClick={handleSaveSettings}
-                className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-purple-900/30 transition-all"
-              >
-                <Save className="w-4 h-4" />
-                Save Settings
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <hr className="border-[#24293e]" />
-
-        {/* Account Section */}
-        <div>
-          <h3 className="text-base font-bold text-white mb-1">Account Information</h3>
-          <p className="text-xs text-slate-400 mb-4">Active user credentials and profile details.</p>
-
-          <div className="space-y-3 max-w-lg">
-            <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-3.5 flex items-center gap-3">
-              <UserCheck className="w-5 h-5 text-[#38bdf8]" />
-              <div className="text-xs">
-                <span className="text-slate-400 block text-[10px]">Logged in as</span>
-                <span className="font-bold text-white">{displayName}{emailInfo}</span>
-              </div>
-            </div>
-
-            <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-3.5 flex items-center gap-3">
-              <Shield className="w-5 h-5 text-[#c084fc]" />
-              <div className="text-xs">
-                <span className="text-slate-400 block text-[10px]">Password Security</span>
-                <span className="font-bold text-white">PBKDF2-SHA256 Hashed &nbsp;<span className="text-emerald-400 text-[10px] font-normal">Secure</span></span>
-              </div>
-            </div>
-
-            {/* Change Password */}
-            <div className="bg-[#161926] border border-[#2b334c] rounded-xl p-4 space-y-3">
-              <div>
-                <span className="text-xs font-bold text-white block mb-0.5">Change Password</span>
-                <span className="text-[10px] text-slate-400">Your password is securely hashed and never stored in plain text.</span>
-              </div>
-              <div className="space-y-2">
-                <input
-                  type="password"
-                  placeholder="Current password"
-                  value={currentPw}
-                  onChange={(e) => setCurrentPw(e.target.value)}
-                  className="w-full bg-[#1c2033] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#38bdf8]"
-                />
-                <input
-                  type="password"
-                  placeholder="New password (min. 6 characters)"
-                  value={newPw}
-                  onChange={(e) => setNewPw(e.target.value)}
-                  className="w-full bg-[#1c2033] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#38bdf8]"
-                />
-                <input
-                  type="password"
-                  placeholder="Confirm new password"
-                  value={confirmPw}
-                  onChange={(e) => setConfirmPw(e.target.value)}
-                  className="w-full bg-[#1c2033] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#38bdf8]"
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={handleChangePassword}
-                  className="text-xs font-semibold bg-[#38bdf8] hover:bg-[#0ea5e9] text-[#0b0e17] px-4 py-1.5 rounded-lg transition-colors"
-                >
-                  Update Password
-                </button>
-                {pwStatus.msg && (
-                  <span className={`text-[11px] font-semibold ${
-                    pwStatus.ok === true ? 'text-emerald-400' :
-                    pwStatus.ok === false ? 'text-rose-400' : 'text-slate-400'
-                  }`}>{pwStatus.msg}</span>
-                )}
-              </div>
-            </div>
-            {/* Auto-Updater Section */}
-            <div className="bg-[#161926] border border-[#2b334c] rounded-xl p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-bold text-white block">Software Updates</span>
-                  <span className="text-[10px] text-slate-400">Current App Version: <strong className="text-purple-400 font-mono">v{appVersion}</strong></span>
-                </div>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    const btn = document.getElementById('chk-update-btn');
-                    const statusText = document.getElementById('chk-update-status');
-                    if (btn) btn.disabled = true;
-                    if (statusText) statusText.innerText = 'Checking remote manifest...';
-                    try {
-                      const res = await callApi('check_for_updates');
-                      if (res.success) {
-                        if (res.current_version) {
-                          setAppVersion(res.current_version);
-                        }
-                        if (res.update_available) {
-                          if (statusText) statusText.innerText = `New version v${res.remote_version} available! Downloading...`;
-                          const upRes = await callApi('download_and_apply_update', res.download_url);
-                          if (!upRes.success && statusText) {
-                            statusText.innerText = `Update error: ${upRes.message}`;
-                          }
-                        } else {
-                          if (statusText) statusText.innerText = `You are on the latest version (v${res.current_version || appVersion}).`;
-                        }
-                      } else {
-                        if (statusText) statusText.innerText = res.message || 'Unable to check for updates.';
-                      }
-                    } catch (err) {
-                      if (statusText) statusText.innerText = 'Error connecting to update server.';
-                    } finally {
-                      if (btn) btn.disabled = false;
-                    }
-                  }}
-                  id="chk-update-btn"
-                  className="text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl transition-all shadow-md shadow-purple-900/30 flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  Check for Updates
-                </button>
-              </div>
-              <div id="chk-update-status" className="text-[11px] font-medium text-slate-400"></div>
-            </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
   );
 }
-

@@ -1,7 +1,7 @@
 {
-  "version": "1.0.12",
+  "version": "1.0.14",
   "release_date": "2026-10-01",
-  "release_notes": "Version 1.0.12 Update: Added password visibility toggle (Eye/EyeOff icon) across Sign In, Create Account, and Reset Password views.",
+  "release_notes": "Version 1.0.14 Update: Complete UI/UX redesign into a clean, human-designed healthcare medication management system.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }

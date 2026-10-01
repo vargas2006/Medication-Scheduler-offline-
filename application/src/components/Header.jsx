@@ -2,8 +2,6 @@ import React from 'react';
 import { Calendar, Sun, Moon } from 'lucide-react';
 
 export default function Header({ activeTab, user, theme = 'dark', onToggleTheme }) {
-  const displayName = user?.name || user?.username || 'User';
-
   const dateStr = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'short',
@@ -14,38 +12,28 @@ export default function Header({ activeTab, user, theme = 'dark', onToggleTheme 
     switch (activeTab) {
       case 'MedicationFrame':
         return {
-          tag: '● INVENTORY & STOCK',
-          tagColor: 'text-[#38bdf8]',
-          title: 'Medication Stock',
-          subtitle: 'Register new drugs, manage inventory levels, and configure refill alert thresholds.'
+          title: 'Medication Inventory',
+          subtitle: 'Manage medication stock levels, dosages, and refill thresholds'
         };
       case 'IntakeFrame':
         return {
-          tag: '● DOSE LOGGING',
-          tagColor: 'text-[#10b981]',
           title: 'Intake Medication',
-          subtitle: 'Select and log doses for your registered medications in real time.'
+          subtitle: 'Record and verify medication doses in real time'
         };
       case 'HistoryFrame':
         return {
-          tag: '● AUDIT & INTAKE LOGS',
-          tagColor: 'text-[#c084fc]',
           title: 'Intake History',
-          subtitle: 'Complete historical audit of your medication doses taken and schedule records.'
+          subtitle: 'Audit log of completed and missed medication doses'
         };
       case 'SettingsFrame':
         return {
-          tag: '● SYSTEM CONFIGURATION',
-          tagColor: 'text-[#38bdf8]',
           title: 'Settings & Preferences',
-          subtitle: 'Personalize application theme, profile details, and alert notifications.'
+          subtitle: 'Manage notification preferences and application configuration'
         };
       default:
         return {
-          tag: '● REALTIME CARE MONITOR',
-          tagColor: 'text-[#38bdf8]',
-          title: 'Dashboard Overview',
-          subtitle: `Welcome back, ${displayName}! Here is your medication schedule today.`
+          title: 'Dashboard',
+          subtitle: 'Medication schedule and daily activity overview'
         };
     }
   };
@@ -53,41 +41,42 @@ export default function Header({ activeTab, user, theme = 'dark', onToggleTheme 
   const meta = getHeaderMeta();
 
   return (
-    <header className="flex items-center justify-between px-6 pt-5 pb-3 shrink-0">
+    <header className="flex items-center justify-between px-6 pt-4 pb-3 border-b border-[#d9e0e8] dark:border-[#1e293b] bg-white dark:bg-[#0f172a] shrink-0 transition-colors">
       <div>
-        <div className="bg-[#181d2e] border border-[#2f3957] rounded-md px-2.5 py-0.5 mb-1.5 inline-block">
-          <span className={`text-[10px] font-bold ${meta.tagColor}`}>{meta.tag}</span>
-        </div>
-        <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">{meta.title}</h1>
-        <p className="text-xs text-slate-400 mt-0.5">{meta.subtitle}</p>
+        <h1 className="text-xl font-bold text-[#172033] dark:text-slate-100 tracking-tight">
+          {meta.title}
+        </h1>
+        <p className="text-xs text-[#64748b] dark:text-slate-400 mt-0.5 font-normal">
+          {meta.subtitle}
+        </p>
       </div>
 
-      <div className="flex items-center gap-2.5">
-        {/* Quick Theme Toggle Button */}
+      <div className="flex items-center gap-3">
+        {/* Date Display */}
+        <div className="flex items-center gap-1.5 text-xs text-[#64748b] dark:text-slate-400 font-medium px-2.5 py-1.5 rounded-md bg-[#f8fafc] dark:bg-[#1e293b] border border-[#d9e0e8] dark:border-[#334155]">
+          <Calendar className="w-3.5 h-3.5 text-[#64748b] dark:text-slate-400" />
+          <span>{dateStr}</span>
+        </div>
+
+        {/* Desktop Theme Toggle */}
         <button
           type="button"
           onClick={onToggleTheme}
-          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          className="bg-[#161926] hover:bg-[#1c2033] border border-[#24293e] rounded-xl px-3 py-2 flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white transition-all shadow-sm"
+          title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+          className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-md bg-[#f8fafc] dark:bg-[#1e293b] border border-[#d9e0e8] dark:border-[#334155] text-[#172033] dark:text-slate-200 hover:bg-[#e2e8f0] dark:hover:bg-slate-700 transition-colors"
         >
           {theme === 'dark' ? (
             <>
-              <Sun className="w-4 h-4 text-amber-400 animate-pulse" />
-              <span className="hidden sm:inline text-xs text-slate-300">Light Mode</span>
+              <Sun className="w-3.5 h-3.5 text-amber-400" />
+              <span>Light</span>
             </>
           ) : (
             <>
-              <Moon className="w-4 h-4 text-purple-600" />
-              <span className="hidden sm:inline text-xs text-slate-700">Dark Mode</span>
+              <Moon className="w-3.5 h-3.5 text-blue-600" />
+              <span>Dark</span>
             </>
           )}
         </button>
-
-        {/* Date Display Badge */}
-        <div className="bg-[#161926] border border-[#24293e] rounded-xl px-3.5 py-2 flex items-center gap-2 text-xs font-semibold text-slate-400 shadow-sm">
-          <Calendar className="w-4 h-4 text-slate-400" />
-          <span>{dateStr}</span>
-        </div>
       </div>
     </header>
   );
