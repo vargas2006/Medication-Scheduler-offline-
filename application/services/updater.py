@@ -92,13 +92,14 @@ def check_for_updates(manifest_url=REMOTE_MANIFEST_URL):
 
 
 def download_and_apply_update(download_url):
-    """Download update zip and launch background batch script to replace app files and restart."""
+    """Download update zip, extract staging files, and launch background batch script to replace app files and restart."""
     try:
         if not download_url:
             return {"success": False, "message": "No download URL provided."}
 
         temp_dir = tempfile.gettempdir()
         zip_path = os.path.join(temp_dir, "med_scheduler_update.zip")
+        staging_dir = os.path.join(temp_dir, "med_scheduler_staging")
         batch_path = os.path.join(temp_dir, "apply_update.bat")
 
         print(f"[Updater] Downloading update package...")
@@ -130,7 +131,46 @@ def download_and_apply_update(download_url):
         if not download_success:
             return {"success": False, "message": f"Update download failed: {last_err}"}
 
-        print(f"[Updater] Creating batch update script at {batch_path}...")
+        # Extract zip into staging directory using Python zipfile module for guaranteed extraction
+        if os.path.exists(staging_dir):
+            try:
+                import shutil
+                shutil.rmtree(staging_dir, ignore_errors=True)
+            except Exception:
+                pass
+        os.makedirs(staging_dir, exist_ok=True)
+
+        print(f"[Updater] Extracting zip to staging folder {staging_dir}...")
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(staging_dir)
+
+        # Locate actual root of update payload (handle nested SmartMedicationScheduler folder)
+        payload_dir = staging_dir
+        sub_items = os.listdir(staging_dir)
+        if len(sub_items) == 1 and os.path.isdir(os.path.join(staging_dir, sub_items[0])):
+            payload_dir = os.path.join(staging_dir, sub_items[0])
+
+        # Ensure version.json is placed in both root and _internal in staging payload
+        source_ver_path = None
+        for v_candidate in [
+            os.path.join(payload_dir, "version.json"),
+            os.path.join(payload_dir, "_internal", "version.json"),
+            os.path.join(staging_dir, "version.json")
+        ]:
+            if os.path.exists(v_candidate):
+                source_ver_path = v_candidate
+                break
+
+        if source_ver_path:
+            import shutil
+            root_ver_dest = os.path.join(payload_dir, "version.json")
+            internal_ver_dest = os.path.join(payload_dir, "_internal", "version.json")
+            os.makedirs(os.path.dirname(internal_ver_dest), exist_ok=True)
+            try:
+                shutil.copy2(source_ver_path, root_ver_dest)
+                shutil.copy2(source_ver_path, internal_ver_dest)
+            except Exception:
+                pass
 
         # Determine target install directory (where main executable or main.py resides)
         if getattr(sys, 'frozen', False):
@@ -140,33 +180,29 @@ def download_and_apply_update(download_url):
             app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             exe_name = "SmartMedicationScheduler.exe"
 
+        print(f"[Updater] Target app dir: {app_dir}, Exe name: {exe_name}")
+        print(f"[Updater] Creating batch update script at {batch_path}...")
+
         # Create self-terminating Windows batch script to swap files and relaunch
         bat_content = f"""@echo off
 title Smart Medication Scheduler Auto-Updater
 echo Applying update, please wait...
-timeout /t 2 /nobreak > nul
+timeout /t 3 /nobreak > nul
 taskkill /F /IM "{exe_name}" > nul 2>&1
-timeout /t 1 /nobreak > nul
+timeout /t 2 /nobreak > nul
 
-echo Extracting update files to "{app_dir}"...
-powershell -Command "Expand-Archive -Path '{zip_path}' -DestinationPath '{app_dir}' -Force" > nul 2>&1
+echo Copying updated files to "{app_dir}"...
+xcopy /E /Y /R /H /K "{payload_dir}\\*" "{app_dir}\\" > nul 2>&1
 
-if exist "{app_dir}\\scratch_test\\{exe_name}" (
-    xcopy /E /Y /Q "{app_dir}\\scratch_test\\*" "{app_dir}\\" > nul 2>&1
-    rmdir /S /Q "{app_dir}\\scratch_test" > nul 2>&1
-)
-if exist "{app_dir}\\scratch_test (2)\\{exe_name}" (
-    xcopy /E /Y /Q "{app_dir}\\scratch_test (2)\\*" "{app_dir}\\" > nul 2>&1
-    rmdir /S /Q "{app_dir}\\scratch_test (2)" > nul 2>&1
-)
-if exist "{app_dir}\\SmartMedicationScheduler\\{exe_name}" (
-    xcopy /E /Y /Q "{app_dir}\\SmartMedicationScheduler\\*" "{app_dir}\\" > nul 2>&1
-    rmdir /S /Q "{app_dir}\\SmartMedicationScheduler" > nul 2>&1
+if exist "{payload_dir}\\version.json" (
+    copy /Y "{payload_dir}\\version.json" "{app_dir}\\version.json" > nul 2>&1
+    if exist "{app_dir}\\_internal" copy /Y "{payload_dir}\\version.json" "{app_dir}\\_internal\\version.json" > nul 2>&1
 )
 
 echo Relaunching application...
 start "" "{os.path.join(app_dir, exe_name)}"
 
+rmdir /S /Q "{staging_dir}" > nul 2>&1
 del "{zip_path}" > nul 2>&1
 del "%~f0" > nul 2>&1
 """
