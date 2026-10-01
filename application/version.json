@@ -1,7 +1,7 @@
 {
-  "version": "1.0.17",
+  "version": "1.0.18",
   "release_date": "2026-10-01",
-  "release_notes": "Version 1.0.17 Update: Synchronized application bundle with restored UI/UX design.",
+  "release_notes": "Version 1.0.18 Update: Improved notification copy and removed emojis for a cleaner, natural look.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }
