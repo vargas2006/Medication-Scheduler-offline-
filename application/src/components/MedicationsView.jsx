@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, AlertCircle, AlertTriangle, Check, CheckCircle2, Search, ArrowUpDown, Boxes, X, LayoutList, LayoutGrid, Calendar, Clock, Pill } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, AlertTriangle, Check, CheckCircle2, Search, ArrowUpDown, Filter, Boxes, PackageCheck, PackageX, X, LayoutList, LayoutGrid, Calendar, Clock, Pill } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
 
 function MedImage({ src, alt }) {
   const [hasError, setHasError] = useState(false);
 
   if (!src || hasError) {
-    return <Pill className="w-5 h-5 text-[#2563eb] dark:text-blue-400" />;
+    return <Pill className="w-5 h-5 text-purple-400" />;
   }
 
   const imageSrc = src.startsWith('http') ? src : `file:///${src.replace(/\\/g, '/')}`;
@@ -113,7 +113,7 @@ export default function MedicationsView({ user, onDataChange }) {
         setTimeout(() => {
           setShowModal(false);
           setFormMsg({ text: '', isError: false });
-        }, 1000);
+        }, 1200);
       } else {
         setFormMsg({ text: res.message || 'Failed to add medication.', isError: true });
       }
@@ -125,7 +125,6 @@ export default function MedicationsView({ user, onDataChange }) {
   };
 
   const handleDeleteMedication = async (medId) => {
-    if (!window.confirm('Are you sure you want to delete this medication record?')) return;
     const res = await callApi('delete_medication', medId);
     if (res.success) {
       fetchMeds();
@@ -138,6 +137,7 @@ export default function MedicationsView({ user, onDataChange }) {
   const outOfStockCount = medications.filter((m) => m.stock <= 0).length;
   const inStockCount = medications.filter((m) => m.stock > (m.refill_threshold || 5)).length;
 
+  // Filter search + stock quantity status filter + sorting logic
   const filteredMeds = medications
     .filter((m) => {
       const matchesSearch =
@@ -164,140 +164,174 @@ export default function MedicationsView({ user, onDataChange }) {
     });
 
   return (
-    <div className="p-6 flex flex-col h-full overflow-hidden space-y-4 relative bg-[#f5f7fa] dark:bg-[#0f172a] transition-colors">
+    <div className="p-5 flex flex-col h-full overflow-hidden space-y-4 relative">
       {/* Top Controls Bar */}
-      <div className="bg-white dark:bg-[#1e293b] border border-[#d9e0e8] dark:border-[#334155] rounded-lg p-4 flex flex-col gap-3 shrink-0 shadow-2xs">
+      <div className="bg-[#161926] border border-[#24293e] rounded-2xl p-4 flex flex-col gap-3 shrink-0">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          {/* Search Input */}
+          {/* Search Box */}
           <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-[#64748b] dark:text-slate-400 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
               type="text"
-              placeholder="Search by medication name or dosage..."
+              placeholder="Search medication stock by name or dosage..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md pl-9 pr-3 py-1.5 text-xs text-[#172033] dark:text-slate-100 focus:outline-none focus:border-[#2563eb]"
+              className="w-full bg-[#1c2033] border border-[#272e45] rounded-xl pl-10 pr-4 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
             />
           </div>
 
           <div className="flex items-center gap-3">
-            {/* View Mode Toggle */}
-            <div className="flex items-center bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] p-0.5 rounded-md">
+            {/* View Mode Toggle Switch */}
+            <div className="flex items-center bg-[#1c2033] border border-[#282f47] p-1 rounded-xl shadow-inner">
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
                 title="List View"
-                className={`px-2.5 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-xs font-bold ${
                   viewMode === 'list'
-                    ? 'bg-[#2563eb] text-white font-semibold'
-                    : 'text-[#64748b] dark:text-slate-400 hover:text-[#172033] dark:hover:text-slate-200'
+                    ? 'bg-[#7c3aed] text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
-                <LayoutList className="w-3.5 h-3.5" />
-                <span>List</span>
+                <LayoutList className="w-4 h-4" />
+                <span>List View</span>
               </button>
+
+              <div className="w-[1px] h-4 bg-[#2b324d] mx-1" />
 
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
                 title="Grid View"
-                className={`px-2.5 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-xs font-bold ${
                   viewMode === 'grid'
-                    ? 'bg-[#2563eb] text-white font-semibold'
-                    : 'text-[#64748b] dark:text-slate-400 hover:text-[#172033] dark:hover:text-slate-200'
+                    ? 'bg-[#7c3aed] text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span>Grid</span>
+                <LayoutGrid className="w-4 h-4" />
+                <span>Grid View</span>
               </button>
             </div>
 
-            {/* Action Button: Register New Drug */}
+            {/* Action Button: Register New Drug Modal Trigger */}
             <button
               onClick={() => setShowModal(true)}
-              className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-medium text-xs px-3.5 py-2 rounded-md flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer shrink-0"
+              className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-purple-900/30 shrink-0"
             >
-              <Plus className="w-4 h-4" />
-              <span>Add Medication</span>
+              <span>Add Drug</span>
             </button>
           </div>
         </div>
 
-        {/* Filters Bar */}
-        <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-[#d9e0e8] dark:border-[#334155]">
+        {/* Stock Quantity / Refill Status Filter Bar */}
+        <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-[#22273a]">
+          {/* Stock Filter Pills */}
           <div className="flex items-center gap-1.5 flex-wrap">
             <button
               type="button"
               onClick={() => setStockFilter('ALL')}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 stockFilter === 'ALL'
-                  ? 'bg-[#2563eb] text-white'
-                  : 'bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] text-[#64748b] dark:text-slate-400 hover:text-[#172033]'
+                  ? 'bg-[#2b3558] text-white shadow-sm border border-[#3b4772]'
+                  : 'bg-[#1c2033] border border-[#272e45] text-slate-400 hover:text-white'
               }`}
             >
-              <span>All ({totalCount})</span>
+              <Boxes className="w-3.5 h-3.5" />
+              <span>All Stock</span>
+              <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300">
+                {totalCount}
+              </span>
             </button>
 
             <button
               type="button"
               onClick={() => setStockFilter('LOW_STOCK')}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 stockFilter === 'LOW_STOCK'
-                  ? 'bg-[#d97706] text-white'
-                  : 'bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] text-[#64748b] dark:text-slate-400 hover:text-[#d97706]'
+                  ? 'bg-amber-950/80 text-amber-300 border border-amber-500/60 shadow-sm'
+                  : 'bg-[#1c2033] border border-[#272e45] text-slate-400 hover:text-amber-400'
               }`}
             >
-              <span>Low Stock ({lowStockCount})</span>
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+              <span>Low Stock (Need Refill)</span>
+              <span className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                lowStockCount > 0 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-slate-800 text-slate-400'
+              }`}>
+                {lowStockCount}
+              </span>
             </button>
 
             <button
               type="button"
               onClick={() => setStockFilter('OUT_OF_STOCK')}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 stockFilter === 'OUT_OF_STOCK'
-                  ? 'bg-[#dc2626] text-white'
-                  : 'bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] text-[#64748b] dark:text-slate-400 hover:text-[#dc2626]'
+                  ? 'bg-rose-950/80 text-rose-300 border border-rose-500/60 shadow-sm'
+                  : 'bg-[#1c2033] border border-[#272e45] text-slate-400 hover:text-rose-400'
               }`}
             >
-              <span>Out of Stock ({outOfStockCount})</span>
+              <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+              <span>Out of Stock</span>
+              <span className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                outOfStockCount > 0 ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-slate-800 text-slate-400'
+              }`}>
+                {outOfStockCount}
+              </span>
             </button>
 
             <button
               type="button"
               onClick={() => setStockFilter('IN_STOCK')}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 stockFilter === 'IN_STOCK'
-                  ? 'bg-[#16a34a] text-white'
-                  : 'bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] text-[#64748b] dark:text-slate-400 hover:text-[#16a34a]'
+                  ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/60 shadow-sm'
+                  : 'bg-[#1c2033] border border-[#272e45] text-slate-400 hover:text-emerald-400'
               }`}
             >
-              <span>In Stock ({inStockCount})</span>
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>In Stock (Optimal)</span>
+              <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                {inStockCount}
+              </span>
             </button>
           </div>
 
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-[#64748b] dark:text-slate-400">Sort By:</span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] text-[#172033] dark:text-slate-100 rounded-md px-2 py-1 focus:outline-none cursor-pointer text-xs"
-            >
-              <option value="DEFAULT">Default</option>
-              <option value="STOCK_ASC">Stock (Low to High)</option>
-              <option value="STOCK_DESC">Stock (High to Low)</option>
-              <option value="NAME_AZ">Name (A - Z)</option>
-            </select>
+          {/* Right Controls: Sort Order & Count */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-[#1c2033] border border-[#282f47] px-3 py-1.5 rounded-xl text-xs">
+              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-slate-400 font-semibold">Sort By:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-transparent text-white font-bold focus:outline-none cursor-pointer"
+              >
+                <option value="DEFAULT" className="bg-[#161926]">Default</option>
+                <option value="STOCK_ASC" className="bg-[#161926]">Stock (Low to High - Refills First)</option>
+                <option value="STOCK_DESC" className="bg-[#161926]">Stock (High to Low)</option>
+                <option value="NAME_AZ" className="bg-[#161926]">Medication Name (A - Z)</option>
+              </select>
+            </div>
+
+            <div className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
+              <span>Showing:</span>
+              <span className="bg-[#10273f] text-[#38bdf8] font-bold px-2 py-0.5 rounded-md">
+                {filteredMeds.length}
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Inventory Display (Grid vs List) */}
+      {/* Main Content Area (Grid View vs List View) */}
       <div className="flex-1 overflow-y-auto pr-1">
         {loading ? (
-          <div className="text-center text-[#64748b] dark:text-slate-400 py-16 text-xs">Loading medication inventory...</div>
+          <div className="text-center text-slate-500 py-20 text-xs">Loading medication inventory...</div>
         ) : filteredMeds.length === 0 ? (
-          <div className="text-center text-[#64748b] dark:text-slate-400 py-20 text-xs">No medications found.</div>
+          <div className="text-center text-slate-500 py-24 text-xs">No medications found matching search or stock quantity filter.</div>
         ) : viewMode === 'grid' ? (
+          /* GRID VIEW LAYOUT (Fixed Working Grid) */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredMeds.map((med) => {
               const isOut = med.stock <= 0;
@@ -305,46 +339,42 @@ export default function MedicationsView({ user, onDataChange }) {
               return (
                 <div
                   key={med.med_id}
-                  className="bg-white dark:bg-[#1e293b] border border-[#d9e0e8] dark:border-[#334155] rounded-lg p-4 flex flex-col justify-between space-y-3 shadow-2xs"
+                  className="bg-[#161926] border border-[#24293e] hover:border-[#38bdf8]/40 rounded-2xl p-4 flex flex-col justify-between space-y-4 transition-all shadow-sm"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] flex items-center justify-center shrink-0 overflow-hidden">
+                      <div className="w-11 h-11 rounded-xl bg-[#272d47] border border-[#3b4366] flex items-center justify-center text-xl shrink-0 overflow-hidden shadow-sm">
                         <MedImage src={med.image_path} alt={med.name} />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="font-semibold text-[#172033] dark:text-slate-100 text-xs truncate">{med.name}</h3>
-                        <p className="text-[11px] text-[#64748b] dark:text-slate-400 truncate">{med.dosage}</p>
+                        <h4 className="font-bold text-white text-sm truncate">{med.name}</h4>
+                        <p className="text-xs text-slate-400 truncate">{med.dosage}</p>
                       </div>
                     </div>
 
                     <button
                       onClick={() => handleDeleteMedication(med.med_id)}
-                      className="p-1 rounded text-[#64748b] hover:text-[#dc2626] hover:bg-[#fee2e2] dark:hover:bg-rose-950/60 transition-colors shrink-0"
+                      className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-950/60 hover:text-rose-300 transition-colors shrink-0"
                       title="Delete Medication"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div className="space-y-2 pt-1 border-t border-[#d9e0e8] dark:border-[#334155]">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-[#64748b] dark:text-slate-400">Current Stock:</span>
-                      <span className={`font-semibold ${isOut ? 'text-[#dc2626] dark:text-red-400' : 'text-[#172033] dark:text-slate-100'}`}>
+                  <div className="space-y-2">
+                    <div className="bg-[#1c2033] border border-[#282f47] rounded-xl p-2.5 flex items-center justify-between text-xs">
+                      <span className="text-slate-400">Stock Remaining:</span>
+                      <span className={`font-bold text-sm ${isOut ? 'text-rose-400' : 'text-white'}`}>
                         {med.stock} doses
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-[#64748b] dark:text-slate-400">Threshold: {med.refill_threshold || 10}</span>
-                      <span className={`font-medium px-2 py-0.5 rounded ${
-                        isOut
-                          ? 'bg-[#fee2e2] text-[#b91c1c] dark:bg-rose-950/60 dark:text-rose-300'
-                          : med.is_low_stock
-                          ? 'bg-[#fef3c7] text-[#b45309] dark:bg-amber-950/60 dark:text-amber-300'
-                          : 'bg-[#d1fae5] text-[#047857] dark:bg-emerald-950/60 dark:text-emerald-300'
+                    <div className="flex items-center justify-between text-[11px] text-slate-400">
+                      <span>Refill Threshold: {med.refill_threshold || 10}</span>
+                      <span className={`font-bold px-2 py-0.5 rounded ${
+                        isOut ? 'bg-[#3d1822] text-[#ef4444]' : med.is_low_stock ? 'bg-amber-950/80 text-amber-400' : 'bg-[#102d24] text-[#10b981]'
                       }`}>
-                        {isOut ? 'Out of Stock' : med.is_low_stock ? 'Low Stock' : 'Optimal'}
+                        {isOut ? 'OUT OF STOCK' : med.is_low_stock ? 'REFILL LOW' : 'OPTIMAL'}
                       </span>
                     </div>
                   </div>
@@ -353,41 +383,38 @@ export default function MedicationsView({ user, onDataChange }) {
             })}
           </div>
         ) : (
-          <div className="space-y-2">
+          /* LIST VIEW LAYOUT */
+          <div className="space-y-2.5">
             {filteredMeds.map((med) => {
               const isOut = med.stock <= 0;
 
               return (
                 <div
                   key={med.med_id}
-                  className="bg-white dark:bg-[#1e293b] border border-[#d9e0e8] dark:border-[#334155] rounded-md p-3 flex items-center justify-between shadow-2xs"
+                  className="bg-[#161926] border border-[#24293e] hover:border-[#38bdf8]/40 rounded-xl p-3.5 flex items-center justify-between transition-all"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] flex items-center justify-center shrink-0 overflow-hidden">
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="w-10 h-10 rounded-lg bg-[#272d47] border border-[#3b4366] flex items-center justify-center text-lg shrink-0 overflow-hidden shadow-sm">
                       <MedImage src={med.image_path} alt={med.name} />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-semibold text-[#172033] dark:text-slate-100 text-xs truncate">{med.name}</h3>
-                      <p className="text-[11px] text-[#64748b] dark:text-slate-400 truncate">
-                        {med.dosage} &bull; Stock: <span className={isOut ? 'text-[#dc2626] font-semibold' : 'text-[#172033] dark:text-slate-200'}>{med.stock} doses</span>
+                      <h4 className="font-bold text-white text-xs truncate">{med.name}</h4>
+                      <p className="text-[11px] text-slate-400 truncate">
+                        {med.dosage} &bull; Stock: <span className={isOut ? 'text-rose-400 font-bold' : 'text-slate-300'}>{med.stock} doses</span>
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded ${
-                      isOut
-                        ? 'bg-[#fee2e2] text-[#b91c1c] dark:bg-rose-950/60 dark:text-rose-300'
-                        : med.is_low_stock
-                        ? 'bg-[#fef3c7] text-[#b45309] dark:bg-amber-950/60 dark:text-amber-300'
-                        : 'bg-[#d1fae5] text-[#047857] dark:bg-emerald-950/60 dark:text-emerald-300'
+                    <span className={`text-[9px] font-bold px-2.5 py-1 rounded ${
+                      isOut ? 'bg-[#3d1822] text-[#ef4444]' : med.is_low_stock ? 'bg-amber-950/80 text-amber-400' : 'bg-[#102d24] text-[#10b981]'
                     }`}>
-                      {isOut ? 'Out of Stock' : med.is_low_stock ? 'Low Stock' : 'Optimal'}
+                      {isOut ? 'OUT OF STOCK' : med.is_low_stock ? 'REFILL LOW' : 'OPTIMAL'}
                     </span>
 
                     <button
                       onClick={() => handleDeleteMedication(med.med_id)}
-                      className="p-1.5 rounded text-[#64748b] hover:text-[#dc2626] hover:bg-[#fee2e2] dark:hover:bg-rose-950/60 transition-colors"
+                      className="p-2 rounded-lg text-rose-400 hover:bg-rose-950/60 hover:text-rose-300 transition-colors"
                       title="Delete Medication"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -400,180 +427,206 @@ export default function MedicationsView({ user, onDataChange }) {
         )}
       </div>
 
-      {/* Add Medication Modal */}
+      {/* MODAL FORM: Add/Register New Drug */}
       {showModal && (
-        <div className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-2xs flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="w-full max-w-lg bg-white dark:bg-[#1e293b] border border-[#d9e0e8] dark:border-[#334155] rounded-lg p-6 shadow-lg space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[#d9e0e8] dark:border-[#334155] pb-3">
-              <div>
-                <h3 className="text-base font-semibold text-[#172033] dark:text-slate-100">Register New Medication</h3>
-                <p className="text-xs text-[#64748b] dark:text-slate-400">Add drug details to inventory stock</p>
+        <div className="fixed inset-0 bg-[#090b12]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#121520] border border-[#24293e] rounded-2xl p-6 shadow-2xl space-y-5">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[#1e2438] pb-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#2b2046] text-[#c084fc] flex items-center justify-center text-lg">
+                  <Pill className="w-5 h-5 text-[#c084fc]" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white leading-tight">Register New Drug</h3>
+                  <p className="text-[11px] text-slate-400">Add new drug to medication stock inventory.</p>
+                </div>
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-1 rounded text-[#64748b] hover:text-[#172033] dark:hover:text-slate-200"
+                className="w-8 h-8 rounded-lg hover:bg-[#1f2438] text-slate-400 hover:text-white flex items-center justify-center transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {formMsg.text && (
-              <div className={`p-3 rounded-md text-xs font-medium flex items-center gap-2 ${
-                formMsg.isError ? 'bg-[#fee2e2] text-[#b91c1c] border border-rose-200' : 'bg-[#d1fae5] text-[#047857] border border-emerald-200'
+              <div className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${
+                formMsg.isError ? 'bg-rose-950/60 border border-rose-800 text-rose-300' : 'bg-emerald-950/60 border border-emerald-800 text-emerald-300'
               }`}>
                 {formMsg.isError ? <AlertCircle className="w-4 h-4 shrink-0" /> : <Check className="w-4 h-4 shrink-0" />}
                 <span>{formMsg.text}</span>
               </div>
             )}
 
-            <form onSubmit={handleAddMedication} className="space-y-4 text-xs">
+            <form onSubmit={handleAddMedication} className="space-y-4">
               <div>
-                <label className="block font-medium text-[#172033] dark:text-slate-200 mb-1">Medication Name</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Drug Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Paracetamol"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md px-3 py-2 text-xs text-[#172033] dark:text-slate-100 focus:outline-none focus:border-[#2563eb]"
+                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-[#172033] dark:text-slate-200 mb-1">Dosage Form</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Dosage Form</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. 500mg Tablet"
                   value={dosage}
                   onChange={(e) => setDosage(e.target.value)}
-                  className="w-full bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md px-3 py-2 text-xs text-[#172033] dark:text-slate-100 focus:outline-none focus:border-[#2563eb]"
+                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-[#172033] dark:text-slate-200 mb-1">Initial Stock</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Initial Stock Count</label>
                   <input
                     type="number"
                     min="0"
                     value={stock}
                     onChange={(e) => setStock(e.target.value)}
-                    className="w-full bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md px-3 py-2 text-xs text-[#172033] dark:text-slate-100 focus:outline-none focus:border-[#2563eb]"
+                    className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-medium text-[#172033] dark:text-slate-200 mb-1">Refill Threshold</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Refill Alert At</label>
                   <input
                     type="number"
                     min="0"
                     value={threshold}
                     onChange={(e) => setThreshold(e.target.value)}
-                    className="w-full bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md px-3 py-2 text-xs text-[#172033] dark:text-slate-100 focus:outline-none focus:border-[#2563eb]"
+                    className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
                   />
                 </div>
               </div>
 
+              {/* Schedule Type Selection */}
               <div>
-                <label className="block font-medium text-[#172033] dark:text-slate-200 mb-1">Schedule Type</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Schedule Type</label>
                 <select
                   value={schedType}
                   onChange={(e) => setSchedType(e.target.value)}
-                  className="w-full bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md px-3 py-2 text-xs text-[#172033] dark:text-slate-100 focus:outline-none focus:border-[#2563eb]"
+                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
                 >
                   <option value="DAILY_TIME">DAILY TIME (Specific Time &amp; Date)</option>
                   <option value="INTERVAL">INTERVAL (Every X Hours)</option>
                 </select>
               </div>
 
+              {/* Date Selection with Calendar & Quick Pills (Matching Schedule New Intake) */}
               <div>
-                <label className="block font-medium text-[#172033] dark:text-slate-200 mb-1">Schedule Date</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-[#38bdf8]" />
+                    <span>Choose Schedule Date</span>
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-mono">{selectedDate}</span>
+                </div>
+
                 <input
                   type="date"
                   required
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md px-3 py-2 text-xs text-[#172033] dark:text-slate-100 focus:outline-none focus:border-[#2563eb] mb-1.5"
+                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed] mb-2"
                 />
 
-                <div className="grid grid-cols-4 gap-1.5">
+                {/* Quick Date Selector Pills */}
+                <div className="grid grid-cols-4 gap-2">
                   <button
                     type="button"
                     onClick={() => setQuickDate(0)}
-                    className="py-1 px-2 bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded text-[10px] font-medium text-[#64748b] dark:text-slate-300 hover:text-[#172033]"
+                    className="py-1.5 px-2 bg-[#1c2033] hover:bg-[#252b45] border border-[#2b324d] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
                   >
                     Today
                   </button>
                   <button
                     type="button"
                     onClick={() => setQuickDate(1)}
-                    className="py-1 px-2 bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded text-[10px] font-medium text-[#64748b] dark:text-slate-300 hover:text-[#172033]"
+                    className="py-1.5 px-2 bg-[#1c2033] hover:bg-[#252b45] border border-[#2b324d] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
                   >
                     Tomorrow
                   </button>
                   <button
                     type="button"
                     onClick={() => setQuickDate(2)}
-                    className="py-1 px-2 bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded text-[10px] font-medium text-[#64748b] dark:text-slate-300 hover:text-[#172033]"
+                    className="py-1.5 px-2 bg-[#1c2033] hover:bg-[#252b45] border border-[#2b324d] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
                   >
                     In 2 Days
                   </button>
                   <button
                     type="button"
                     onClick={() => setQuickDate(3)}
-                    className="py-1 px-2 bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded text-[10px] font-medium text-[#64748b] dark:text-slate-300 hover:text-[#172033]"
+                    className="py-1.5 px-2 bg-[#1c2033] hover:bg-[#252b45] border border-[#2b324d] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
                   >
                     In 3 Days
                   </button>
                 </div>
               </div>
 
+              {/* Time Selection with Presets & Input (Matching Schedule New Intake) */}
               <div>
-                <label className="block font-medium text-[#172033] dark:text-slate-200 mb-1">Intake Time</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#c084fc]" />
+                    <span>Choose Intake Time</span>
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-mono">{selectedTime}</span>
+                </div>
+
                 <input
                   type={schedType === 'DAILY_TIME' ? 'time' : 'text'}
                   required
                   placeholder={schedType === 'DAILY_TIME' ? '08:00' : 'Interval in hours (e.g. 6)'}
                   value={selectedTime}
                   onChange={(e) => setSelectedTime(e.target.value)}
-                  className="w-full bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md px-3 py-2 text-xs text-[#172033] dark:text-slate-100 focus:outline-none focus:border-[#2563eb] mb-1.5"
+                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed] mb-2"
                 />
 
+                {/* Preset Time Pills (Only for DAILY_TIME) */}
                 {schedType === 'DAILY_TIME' && (
-                  <div className="grid grid-cols-4 gap-1.5">
+                  <div className="grid grid-cols-4 gap-2">
                     {timePresets.map((preset) => (
                       <button
                         key={preset.value}
                         type="button"
                         onClick={() => setSelectedTime(preset.value)}
-                        className={`py-1 px-2 border rounded text-[10px] font-medium transition-colors ${
+                        className={`py-1.5 px-2 border rounded-lg text-[10px] font-bold transition-all ${
                           selectedTime === preset.value
-                            ? 'bg-[#2563eb] text-white border-[#2563eb]'
-                            : 'bg-[#f8fafc] dark:bg-[#0f172a] border-[#d9e0e8] dark:border-[#334155] text-[#64748b] dark:text-slate-300'
+                            ? 'bg-[#7c3aed] border-[#9333ea] text-white shadow-sm'
+                            : 'bg-[#1c2033] hover:bg-[#252b45] border-[#2b324d] text-slate-300'
                         }`}
                       >
-                        {preset.label}
+                        {preset.label} ({preset.value})
                       </button>
                     ))}
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#d9e0e8] dark:border-[#334155]">
+              {/* Modal Actions */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1e2438]">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-3.5 py-1.5 rounded-md border border-[#d9e0e8] dark:border-[#334155] text-[#64748b] hover:text-[#172033] text-xs font-medium"
+                  className="px-4 py-2.5 rounded-xl border border-[#272e45] text-slate-400 hover:text-white text-xs font-semibold transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-medium text-xs rounded-md shadow-2xs transition-colors disabled:opacity-50"
+                  className="px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-900/30 transition-all flex items-center gap-2 disabled:opacity-50"
                 >
-                  {submitting ? 'Adding...' : 'Add Medication'}
+                  <span>{submitting ? 'Adding...' : 'Add Drug'}</span>
                 </button>
               </div>
             </form>

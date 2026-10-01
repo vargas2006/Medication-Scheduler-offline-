@@ -13,20 +13,20 @@ export default function AppLoadingScreen({ onFinish }) {
             setFadingOut(true);
             setTimeout(() => {
               if (onFinish) onFinish();
-            }, 200);
-          }, 100);
+            }, 300);
+          }, 150);
           return 100;
         }
         return prev + 25;
       });
-    }, 120);
+    }, 180);
 
     return () => clearInterval(timer);
   }, [onFinish]);
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#f5f7fa] dark:bg-[#0f172a] text-[#172033] dark:text-slate-100 select-none transition-opacity duration-200 ${
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0d0f17] text-slate-100 select-none transition-opacity duration-300 ${
         fadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
@@ -35,27 +35,23 @@ export default function AppLoadingScreen({ onFinish }) {
         <img
           src="/app_icon.png"
           alt="MedScheduler Logo"
-          className="w-12 h-12 object-contain mb-3"
+          className="w-16 h-16 object-contain drop-shadow-xl mb-4"
         />
 
         {/* Brand Name & Subtitle */}
-        <h1 className="text-lg font-bold text-[#172033] dark:text-slate-100 tracking-tight">
-          MedScheduler
-        </h1>
-        <p className="text-xs text-[#64748b] dark:text-slate-400 mt-0.5">
-          Healthcare &amp; Inventory Management
-        </p>
+        <h1 className="text-xl font-bold text-white tracking-tight">MedScheduler</h1>
+        <p className="text-xs text-slate-400 mt-1">Smart Care Monitor</p>
 
         {/* Minimal Progress Bar */}
-        <div className="w-44 bg-[#e2e8f0] dark:bg-[#1e293b] border border-[#d9e0e8] dark:border-[#334155] rounded-full h-1.5 overflow-hidden mt-5 mb-2">
+        <div className="w-48 bg-[#161926] border border-[#24293e] rounded-full h-1.5 overflow-hidden mt-6 mb-2">
           <div
-            className="h-full bg-[#2563eb] transition-all duration-200 ease-out rounded-full"
+            className="h-full bg-gradient-to-r from-[#7c3aed] to-[#38bdf8] transition-all duration-300 ease-out rounded-full"
             style={{ width: `${progress}%` }}
           />
         </div>
 
-        <span className="text-[11px] text-[#64748b] dark:text-slate-400 font-normal">
-          Loading application engine...
+        <span className="text-[11px] text-slate-500 font-medium">
+          Loading application...
         </span>
       </div>
     </div>

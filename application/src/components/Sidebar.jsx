@@ -4,148 +4,119 @@ import { LayoutDashboard, Pill, History, Settings, LogOut, User, CheckCircle } f
 export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
   const displayName = user?.name || user?.username || 'User';
 
-  const section1Items = [
-    {
-      id: 'DashboardFrame',
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      iconColor: 'text-[#9333ea] dark:text-[#c084fc]',
-    },
-    {
-      id: 'MedicationFrame',
-      label: 'Medication Stock',
-      icon: Pill,
-      iconColor: 'text-[#2563eb] dark:text-[#38bdf8]',
-    },
-    {
-      id: 'IntakeFrame',
-      label: 'Intake Medication',
-      icon: CheckCircle,
-      iconColor: 'text-[#16a34a] dark:text-[#10b981]',
-    },
-  ];
-
-  const section2Items = [
-    {
-      id: 'HistoryFrame',
-      label: 'Intake History',
-      icon: History,
-      iconColor: 'text-[#9333ea] dark:text-[#c084fc]',
-    },
-    {
-      id: 'SettingsFrame',
-      label: 'Settings',
-      icon: Settings,
-      iconColor: 'text-[#2563eb] dark:text-[#38bdf8]',
-    },
-  ];
-
   return (
-    <aside className="w-[230px] bg-white dark:bg-[#0f172a] border-r border-[#d9e0e8] dark:border-[#1e293b] flex flex-col h-full shrink-0 select-none transition-colors">
+    <aside className="w-[240px] bg-[#121520] border-r border-[#1e2235] flex flex-col h-full shrink-0 select-none">
       {/* Brand Header */}
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-[#d9e0e8] dark:border-[#1e293b]">
+      <div className="flex items-center gap-3 px-4 py-5 border-b border-[#1a1e2e]">
         <img
           src="/app_icon.png"
           alt="MedScheduler Logo"
-          className="w-8 h-8 object-contain shrink-0"
+          className="w-10 h-10 object-contain drop-shadow-md shrink-0"
         />
         <div className="flex flex-col min-w-0">
-          <span className="font-bold text-[#172033] dark:text-slate-100 text-sm leading-tight truncate">
-            MedScheduler
-          </span>
-          <span className="text-[11px] text-[#64748b] dark:text-slate-400 truncate font-medium">
-            Healthcare System
-          </span>
+          <span className="font-bold text-white text-base leading-tight truncate">MedScheduler</span>
+          <span className="text-[11px] text-slate-400 truncate">Smart Care Monitor</span>
         </div>
       </div>
 
-      {/* Main Navigation with Restored Section Labels */}
-      <div className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
-        {/* SECTION 1: OVERVIEW & CARE */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4">
+        {/* Section 1: OVERVIEW & CARE */}
         <div>
-          <div className="px-3 pb-1.5 flex items-center gap-1.5">
-            <span className="text-[9px] text-[#9333ea] dark:text-[#c084fc] font-bold">●</span>
-            <span className="text-[10px] font-semibold text-[#64748b] dark:text-slate-400 uppercase tracking-wider">
-              OVERVIEW &amp; CARE
-            </span>
+          <div className="bg-[#171b29] border border-[#2b3149] rounded-md px-3 py-1 mb-2 inline-flex items-center">
+            <span className="text-[10px] font-bold text-[#c084fc] tracking-wide">● OVERVIEW & CARE</span>
           </div>
 
           <nav className="space-y-1">
-            {section1Items.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium transition-all ${
-                    isActive
-                      ? 'bg-[#eff6ff] text-[#2563eb] dark:bg-blue-950/60 dark:text-blue-400 font-semibold border-l-2 border-[#2563eb]'
-                      : 'text-[#64748b] dark:text-slate-400 hover:bg-[#f1f5f9] dark:hover:bg-slate-800/80 hover:text-[#172033] dark:hover:text-slate-200'
-                  }`}
-                >
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#2563eb] dark:text-blue-400' : item.iconColor}`} />
-                  <span className="truncate">{item.label}</span>
-                </button>
-              );
-            })}
+            <button
+              onClick={() => setActiveTab('DashboardFrame')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === 'DashboardFrame'
+                  ? 'bg-[#2b2046] text-[#e9d5ff] border border-[#a855f7] shadow-sm'
+                  : 'text-slate-400 hover:bg-[#1a1e2e] hover:text-slate-200'
+              }`}
+            >
+              <LayoutDashboard className="w-4 h-4 text-[#c084fc]" />
+              <span>Dashboard</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('MedicationFrame')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === 'MedicationFrame'
+                  ? 'bg-[#2b2046] text-[#e9d5ff] border border-[#a855f7] shadow-sm'
+                  : 'text-slate-400 hover:bg-[#1a1e2e] hover:text-slate-200'
+              }`}
+            >
+              <Pill className="w-4 h-4 text-[#38bdf8]" />
+              <span>Medication Stock</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('IntakeFrame')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === 'IntakeFrame'
+                  ? 'bg-[#2b2046] text-[#e9d5ff] border border-[#a855f7] shadow-sm'
+                  : 'text-slate-400 hover:bg-[#1a1e2e] hover:text-slate-200'
+              }`}
+            >
+              <CheckCircle className="w-4 h-4 text-[#10b981]" />
+              <span>Intake Medication</span>
+            </button>
           </nav>
         </div>
 
-        {/* SECTION 2: RECORDS & SETTINGS */}
+        {/* Section 2: RECORDS & SETTINGS */}
         <div>
-          <div className="px-3 pb-1.5 flex items-center gap-1.5">
-            <span className="text-[9px] text-[#2563eb] dark:text-[#38bdf8] font-bold">●</span>
-            <span className="text-[10px] font-semibold text-[#64748b] dark:text-slate-400 uppercase tracking-wider">
-              RECORDS &amp; SETTINGS
-            </span>
+          <div className="bg-[#171b29] border border-[#2b3149] rounded-md px-3 py-1 mb-2 inline-flex items-center">
+            <span className="text-[10px] font-bold text-[#38bdf8] tracking-wide">● RECORDS & SETTINGS</span>
           </div>
 
           <nav className="space-y-1">
-            {section2Items.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium transition-all ${
-                    isActive
-                      ? 'bg-[#eff6ff] text-[#2563eb] dark:bg-blue-950/60 dark:text-blue-400 font-semibold border-l-2 border-[#2563eb]'
-                      : 'text-[#64748b] dark:text-slate-400 hover:bg-[#f1f5f9] dark:hover:bg-slate-800/80 hover:text-[#172033] dark:hover:text-slate-200'
-                  }`}
-                >
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#2563eb] dark:text-blue-400' : item.iconColor}`} />
-                  <span className="truncate">{item.label}</span>
-                </button>
-              );
-            })}
+            <button
+              onClick={() => setActiveTab('HistoryFrame')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === 'HistoryFrame'
+                  ? 'bg-[#2b2046] text-[#e9d5ff] border border-[#a855f7] shadow-sm'
+                  : 'text-slate-400 hover:bg-[#1a1e2e] hover:text-slate-200'
+              }`}
+            >
+              <History className="w-4 h-4 text-[#c084fc]" />
+              <span>Intake History</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('SettingsFrame')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === 'SettingsFrame'
+                  ? 'bg-[#2b2046] text-[#e9d5ff] border border-[#a855f7] shadow-sm'
+                  : 'text-slate-400 hover:bg-[#1a1e2e] hover:text-slate-200'
+              }`}
+            >
+              <Settings className="w-4 h-4 text-[#38bdf8]" />
+              <span>Settings</span>
+            </button>
           </nav>
         </div>
       </div>
 
-      {/* User / Patient Profile Footer */}
-      <div className="p-3 border-t border-[#d9e0e8] dark:border-[#1e293b] bg-[#f8fafc] dark:bg-[#1e293b]/50">
-        <div className="flex items-center justify-between gap-2">
+      {/* User Profile Footer Card */}
+      <div className="p-3 border-t border-[#1a1e2e]">
+        <div className="bg-[#161a29] border border-[#252b42] rounded-xl p-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-full bg-[#e2e8f0] dark:bg-slate-700 flex items-center justify-center text-[#172033] dark:text-slate-200 shrink-0 font-semibold text-xs">
-              <User className="w-4 h-4 text-[#2563eb] dark:text-blue-400" />
+            <div className="w-8 h-8 rounded-lg bg-[#262d45] flex items-center justify-center text-slate-200 shrink-0">
+              <User className="w-4 h-4" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-semibold text-[#172033] dark:text-slate-100 text-xs truncate">
-                {displayName}
-              </span>
-              <span className="text-[10px] text-[#64748b] dark:text-slate-400 truncate font-normal">
-                Patient Account
-              </span>
+              <span className="font-bold text-white text-xs truncate">{displayName}</span>
+              <span className="text-[10px] text-slate-400 truncate">Patient Profile</span>
             </div>
           </div>
           <button
             onClick={onLogout}
             title="Log Out"
-            className="w-7 h-7 rounded-md text-[#64748b] hover:text-[#dc2626] hover:bg-[#fee2e2] dark:hover:bg-rose-950/50 dark:hover:text-rose-400 flex items-center justify-center transition-colors shrink-0"
+            className="w-8 h-8 rounded-lg hover:bg-[#2a1622] text-rose-500 flex items-center justify-center transition-colors shrink-0"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 {
-  "version": "1.0.15",
+  "version": "1.0.16",
   "release_date": "2026-10-01",
-  "release_notes": "Version 1.0.15 Update: Restored sidebar section labels (OVERVIEW & CARE and RECORDS & SETTINGS) across both Light and Dark themes.",
+  "release_notes": "Version 1.0.16 Update: Restored previous UI/UX design as requested.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }
