@@ -1,34 +1,42 @@
 import React from 'react';
-import { LayoutDashboard, Pill, History, Settings, LogOut, User, CheckSquare } from 'lucide-react';
+import { LayoutDashboard, Pill, History, Settings, LogOut, User, CheckCircle } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
   const displayName = user?.name || user?.username || 'User';
 
-  const navItems = [
+  const section1Items = [
     {
       id: 'DashboardFrame',
       label: 'Dashboard',
       icon: LayoutDashboard,
+      iconColor: 'text-[#9333ea] dark:text-[#c084fc]',
     },
     {
       id: 'MedicationFrame',
-      label: 'Medication Inventory',
+      label: 'Medication Stock',
       icon: Pill,
+      iconColor: 'text-[#2563eb] dark:text-[#38bdf8]',
     },
     {
       id: 'IntakeFrame',
       label: 'Intake Medication',
-      icon: CheckSquare,
+      icon: CheckCircle,
+      iconColor: 'text-[#16a34a] dark:text-[#10b981]',
     },
+  ];
+
+  const section2Items = [
     {
       id: 'HistoryFrame',
       label: 'Intake History',
       icon: History,
+      iconColor: 'text-[#9333ea] dark:text-[#c084fc]',
     },
     {
       id: 'SettingsFrame',
       label: 'Settings',
       icon: Settings,
+      iconColor: 'text-[#2563eb] dark:text-[#38bdf8]',
     },
   ];
 
@@ -51,17 +59,19 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
         </div>
       </div>
 
-      {/* Main Navigation */}
+      {/* Main Navigation with Restored Section Labels */}
       <div className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
+        {/* SECTION 1: OVERVIEW & CARE */}
         <div>
-          <div className="px-3 pb-2">
-            <span className="text-[10px] font-bold text-[#64748b] dark:text-slate-400 uppercase tracking-wider">
-              Main Menu
+          <div className="px-3 pb-1.5 flex items-center gap-1.5">
+            <span className="text-[9px] text-[#9333ea] dark:text-[#c084fc] font-bold">●</span>
+            <span className="text-[10px] font-semibold text-[#64748b] dark:text-slate-400 uppercase tracking-wider">
+              OVERVIEW &amp; CARE
             </span>
           </div>
 
           <nav className="space-y-1">
-            {navItems.map((item) => {
+            {section1Items.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
@@ -70,11 +80,42 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
                   onClick={() => setActiveTab(item.id)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium transition-all ${
                     isActive
-                      ? 'bg-[#eff6ff] text-[#2563eb] dark:bg-blue-950/60 dark:text-blue-400 font-semibold border-l-2 border-[#2563eb] shadow-2xs'
+                      ? 'bg-[#eff6ff] text-[#2563eb] dark:bg-blue-950/60 dark:text-blue-400 font-semibold border-l-2 border-[#2563eb]'
                       : 'text-[#64748b] dark:text-slate-400 hover:bg-[#f1f5f9] dark:hover:bg-slate-800/80 hover:text-[#172033] dark:hover:text-slate-200'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#2563eb] dark:text-blue-400' : 'text-[#64748b] dark:text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#2563eb] dark:text-blue-400' : item.iconColor}`} />
+                  <span className="truncate">{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* SECTION 2: RECORDS & SETTINGS */}
+        <div>
+          <div className="px-3 pb-1.5 flex items-center gap-1.5">
+            <span className="text-[9px] text-[#2563eb] dark:text-[#38bdf8] font-bold">●</span>
+            <span className="text-[10px] font-semibold text-[#64748b] dark:text-slate-400 uppercase tracking-wider">
+              RECORDS &amp; SETTINGS
+            </span>
+          </div>
+
+          <nav className="space-y-1">
+            {section2Items.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium transition-all ${
+                    isActive
+                      ? 'bg-[#eff6ff] text-[#2563eb] dark:bg-blue-950/60 dark:text-blue-400 font-semibold border-l-2 border-[#2563eb]'
+                      : 'text-[#64748b] dark:text-slate-400 hover:bg-[#f1f5f9] dark:hover:bg-slate-800/80 hover:text-[#172033] dark:hover:text-slate-200'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#2563eb] dark:text-blue-400' : item.iconColor}`} />
                   <span className="truncate">{item.label}</span>
                 </button>
               );
@@ -83,7 +124,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
         </div>
       </div>
 
-      {/* User / Patient Profile Section */}
+      {/* User / Patient Profile Footer */}
       <div className="p-3 border-t border-[#d9e0e8] dark:border-[#1e293b] bg-[#f8fafc] dark:bg-[#1e293b]/50">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">

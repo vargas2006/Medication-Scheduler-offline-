@@ -1,7 +1,7 @@
 {
-  "version": "1.0.14",
+  "version": "1.0.15",
   "release_date": "2026-10-01",
-  "release_notes": "Version 1.0.14 Update: Complete UI/UX redesign into a clean, human-designed healthcare medication management system.",
+  "release_notes": "Version 1.0.15 Update: Restored sidebar section labels (OVERVIEW & CARE and RECORDS & SETTINGS) across both Light and Dark themes.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }
