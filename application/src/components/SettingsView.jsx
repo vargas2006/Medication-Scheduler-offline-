@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Moon, Sun, UserCheck, Shield, Bell, Mail, CheckCircle2, AlertCircle, Save, ShieldCheck } from 'lucide-react';
+import { Moon, Sun, UserCheck, Shield, Bell, Mail, CheckCircle2, AlertCircle, Save, ShieldCheck, RefreshCw } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
 
 export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
@@ -26,10 +26,14 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
   const [confirmPw, setConfirmPw] = useState('');
   const [pwStatus, setPwStatus] = useState({ msg: '', ok: null });
 
+  // Software Update State
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState({ msg: '', isError: false });
+
   const displayName = user?.name || user?.username || 'User';
   const emailInfo = user?.email ? ` (${user.email})` : '';
 
-  const [appVersion, setAppVersion] = useState('1.0.12');
+  const [appVersion, setAppVersion] = useState('1.0.15');
 
   const loadSettings = async () => {
     try {
@@ -55,6 +59,54 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
   useEffect(() => {
     loadSettings();
   }, [user]);
+
+  const handleCheckForUpdates = async () => {
+    setCheckingUpdate(true);
+    setUpdateStatus({ msg: 'Checking remote manifest...', isError: false });
+    try {
+      const res = await callApi('check_for_updates');
+      if (res && res.success) {
+        if (res.current_version) {
+          setAppVersion(res.current_version);
+        }
+        if (res.update_available) {
+          setUpdateStatus({
+            msg: `New version v${res.remote_version} available! Downloading update...`,
+            isError: false
+          });
+          const upRes = await callApi('download_and_apply_update', res.download_url);
+          if (upRes && !upRes.success) {
+            setUpdateStatus({
+              msg: `Update error: ${upRes.message || 'Failed to apply update.'}`,
+              isError: true
+            });
+          } else {
+            setUpdateStatus({
+              msg: `Update v${res.remote_version} applied successfully! Please restart application.`,
+              isError: false
+            });
+          }
+        } else {
+          setUpdateStatus({
+            msg: `You are on the latest version (v${res.current_version || appVersion}).`,
+            isError: false
+          });
+        }
+      } else {
+        setUpdateStatus({
+          msg: res?.message || 'Unable to check for updates.',
+          isError: true
+        });
+      }
+    } catch (err) {
+      setUpdateStatus({
+        msg: 'Error connecting to update server.',
+        isError: true
+      });
+    } finally {
+      setCheckingUpdate(false);
+    }
+  };
 
   const handleSaveSettings = async () => {
     try {
@@ -370,6 +422,52 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
             </button>
           </form>
         </div>
+      </div>
+
+      {/* Section 3: Software Updates */}
+      <div className="bg-white dark:bg-[#1e293b] border border-[#d9e0e8] dark:border-[#334155] rounded-lg p-5 shadow-2xs space-y-3">
+        <div className="flex items-center justify-between border-b border-[#d9e0e8] dark:border-[#334155] pb-3">
+          <div className="flex items-center gap-2">
+            <RefreshCw className="w-4 h-4 text-[#2563eb] dark:text-blue-400" />
+            <h2 className="font-semibold text-[#172033] dark:text-slate-100 text-sm">Software Updates</h2>
+          </div>
+          <span className="text-xs font-mono font-semibold text-[#2563eb] dark:text-blue-400 bg-[#eff6ff] dark:bg-blue-950/60 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-900">
+            v{appVersion}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between gap-4 p-3 bg-[#f8fafc] dark:bg-[#0f172a] border border-[#d9e0e8] dark:border-[#334155] rounded-md flex-wrap">
+          <div className="space-y-0.5">
+            <span className="font-semibold text-xs text-[#172033] dark:text-slate-200 block">
+              Check for Application Updates
+            </span>
+            <p className="text-[11px] text-[#64748b] dark:text-slate-400">
+              Check if a newer version of Smart Medication Scheduler is available.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            id="chk-update-btn"
+            disabled={checkingUpdate}
+            onClick={handleCheckForUpdates}
+            className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-medium text-xs px-3.5 py-1.5 rounded-md flex items-center gap-1.5 transition-colors shadow-2xs disabled:opacity-50 cursor-pointer shrink-0"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${checkingUpdate ? 'animate-spin' : ''}`} />
+            <span>{checkingUpdate ? 'Checking for updates...' : 'Check for Updates'}</span>
+          </button>
+        </div>
+
+        {updateStatus.msg && (
+          <div className={`p-2.5 rounded-md text-xs font-medium flex items-center gap-2 ${
+            updateStatus.isError
+              ? 'bg-[#fee2e2] text-[#b91c1c] border border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-900'
+              : 'bg-[#d1fae5] text-[#047857] border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-900'
+          }`}>
+            {updateStatus.isError ? <AlertCircle className="w-4 h-4 shrink-0" /> : <CheckCircle2 className="w-4 h-4 shrink-0" />}
+            <span>{updateStatus.msg}</span>
+          </div>
+        )}
       </div>
     </div>
   );
