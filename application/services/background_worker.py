@@ -186,7 +186,7 @@ class NotificationWorker:
                 </td>
                 <td style="padding: 14px 16px; text-align: right;">
                     <span style="background: #102d24; border: 1px solid #10b981; color: #10b981; font-weight: bold; font-size: 11px; padding: 4px 10px; border-radius: 6px;">
-                        DUE TODAY
+                        SCHEDULED
                     </span>
                 </td>
             </tr>
@@ -197,22 +197,22 @@ class NotificationWorker:
         <html>
         <head>
             <meta charset="utf-8">
-            <title>Medication Due Reminder</title>
+            <title>Medication Reminder</title>
         </head>
         <body style="margin: 0; padding: 24px; background-color: #0b0e17; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #e2e8f0;">
-            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #131726; border: 2px solid #10b981; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); overflow: hidden;">
-                <!-- Header Banner with prominent border -->
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #131726; border: 1px solid #272e45; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden;">
+                <!-- Header Banner -->
                 <tr>
-                    <td style="padding: 24px 28px; background: linear-gradient(135deg, #102d24 0%, #172239 100%); border-bottom: 2px solid #10b981;">
+                    <td style="padding: 24px 28px; background: #14192b; border-bottom: 1px solid #272e45;">
                         <table width="100%" border="0" cellpadding="0" cellspacing="0">
                             <tr>
                                 <td>
-                                    <h1 style="margin: 6px 0 0 0; font-size: 20px; color: #ffffff; letter-spacing: 0.5px;">Smart Medication Scheduler</h1>
-                                    <p style="margin: 4px 0 0 0; font-size: 12px; color: #10b981; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Due Today Reminder &bull; {today_str}</p>
+                                    <h1 style="margin: 0; font-size: 18px; color: #ffffff; font-weight: 700;">Medication Scheduler</h1>
+                                    <p style="margin: 4px 0 0 0; font-size: 12px; color: #94a3b8;">Reminder for Today &bull; {today_str}</p>
                                 </td>
                                 <td align="right">
-                                    <span style="display: inline-block; background: #10b981; color: #0b0e17; font-weight: 800; font-size: 12px; padding: 6px 14px; border-radius: 20px;">
-                                        {len(due_meds)} Dose(s) Due
+                                    <span style="display: inline-block; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; font-weight: 700; font-size: 12px; padding: 6px 14px; border-radius: 20px;">
+                                        {len(due_meds)} Scheduled
                                     </span>
                                 </td>
                             </tr>
@@ -223,22 +223,22 @@ class NotificationWorker:
                 <!-- Greeting and Intro -->
                 <tr>
                     <td style="padding: 24px 28px 12px 28px;">
-                        <h2 style="margin: 0 0 8px 0; color: #f8fafc; font-size: 16px;">Hello {user_name},</h2>
+                        <h2 style="margin: 0 0 8px 0; color: #f8fafc; font-size: 15px; font-weight: 600;">Hello {user_name},</h2>
                         <p style="margin: 0; color: #94a3b8; font-size: 13px; line-height: 1.5;">
-                            This is your automated reminder that you have medication dose(s) scheduled for <strong>today</strong> that are now due to be taken:
+                            Here is your reminder for your scheduled medication today:
                         </p>
                     </td>
                 </tr>
 
-                <!-- Medication Details Table with Borders -->
+                <!-- Medication Details Table -->
                 <tr>
                     <td style="padding: 12px 28px 20px 28px;">
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border: 1px solid #272e45; border-radius: 12px; overflow: hidden; background-color: #171c2e;">
+                        <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border: 1px solid #272e45; border-radius: 10px; overflow: hidden; background-color: #171c2e;">
                             <thead>
                                 <tr style="background-color: #1e2438; border-bottom: 1px solid #272e45;">
                                     <th align="left" style="padding: 10px 16px; font-size: 11px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">Medication</th>
                                     <th align="left" style="padding: 10px 16px; font-size: 11px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">Dosage</th>
-                                    <th align="left" style="padding: 10px 16px; font-size: 11px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">Scheduled</th>
+                                    <th align="left" style="padding: 10px 16px; font-size: 11px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">Time</th>
                                     <th align="right" style="padding: 10px 16px; font-size: 11px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">Status</th>
                                 </tr>
                             </thead>
@@ -249,26 +249,22 @@ class NotificationWorker:
                     </td>
                 </tr>
 
-                <!-- Health Notice -->
+                <!-- Notice -->
                 <tr>
                     <td style="padding: 0 28px 24px 28px;">
-                        <div style="background-color: rgba(16, 185, 129, 0.08); border: 1px dashed #10b981; border-radius: 10px; padding: 14px 16px;">
-                            <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                <tr>
-                                    <td style="font-size: 12px; color: #cbd5e1; line-height: 1.5;">
-                                        <strong>Intake Reminder:</strong> Please take your medications with a glass of water. After taking your dose, open your Medication Scheduler desktop app and click <strong>"Take Dose Now"</strong> to record your intake.
-                                    </td>
-                                </tr>
-                            </table>
+                        <div style="background-color: #171c2e; border: 1px solid #272e45; border-radius: 10px; padding: 14px 16px;">
+                            <p style="margin: 0; font-size: 12px; color: #cbd5e1; line-height: 1.5;">
+                                Please take your prescribed dosage and remember to mark it as taken in your app.
+                            </p>
                         </div>
                     </td>
                 </tr>
 
                 <!-- Footer -->
                 <tr>
-                    <td style="padding: 18px 28px; background-color: #0c0f1a; border-top: 1px solid #22273d; text-align: center;">
+                    <td style="padding: 16px 28px; background-color: #0c0f1a; border-top: 1px solid #22273d; text-align: center;">
                         <p style="margin: 0; font-size: 11px; color: #64748b;">
-                            Smart Medication Scheduler &bull; Secure Offline &amp; Online Notifications
+                            Medication Scheduler
                         </p>
                     </td>
                 </tr>
@@ -356,10 +352,11 @@ class NotificationWorker:
                             for m in user_new_due:
                                 self.db.mark_notified_today(u_id, m['med_id'], 'email', today_str)
 
-                            subject = f"⏰ Medication Due Reminder: {len(user_new_due)} Scheduled Dose(s) Today"
+                            dose_word = "dose" if len(user_new_due) == 1 else "doses"
+                            subject = f"Medication Reminder: {len(user_new_due)} scheduled {dose_word} today"
                             html_body = self._generate_email_html(u_name, user_new_due, today_str)
                             self.db.enqueue_email(subject, html_body, target_email, is_html=1)
-                            print(f"[NotificationWorker] Enqueued strictly 1x rich HTML email for {u_name} ({target_email}) with {len(user_new_due)} medications.")
+                            print(f"[NotificationWorker] Enqueued strictly 1x HTML email for {u_name} ({target_email}) with {len(user_new_due)} medications.")
 
             # 2. OFFLINE LOCAL NOTIFICATIONS:
             # ONLY trigger for the currently logged-in desktop user!
@@ -376,18 +373,18 @@ class NotificationWorker:
                             self.db.mark_notified_today(self.active_user_id, m['med_id'], 'offline', today_str)
 
                         self.last_alert_timestamp = now_ts
+                        title = "Medication Reminder"
                         if len(new_offline_due) == 1:
                             single_med = new_offline_due[0]
-                            title = "⏰ Medication Due Reminder (Today)"
-                            message = f"Time to take: {single_med['name']} ({single_med['dosage']}) scheduled at {single_med.get('time_value', 'now')}."
+                            time_str = single_med.get('time_value')
+                            time_text = f" scheduled at {time_str}" if time_str else ""
+                            message = f"Time to take {single_med['name']} ({single_med['dosage']}){time_text}."
                         elif len(new_offline_due) <= 3:
-                            title = "⏰ Medications Due Reminder (Today)"
                             med_names = ", ".join([f"{m['name']} ({m['dosage']})" for m in new_offline_due])
                             message = f"Time to take your scheduled doses: {med_names}."
                         else:
-                            title = "⏰ Medications Due Reminder (Today)"
                             sample_names = ", ".join([m['name'] for m in new_offline_due[:2]])
-                            message = f"You have {len(new_offline_due)} doses due today ({sample_names}, and more)."
+                            message = f"You have {len(new_offline_due)} doses scheduled today, including {sample_names}."
 
                         self._trigger_os_popup(title, message, medications=new_offline_due, show_dialog=False)
 

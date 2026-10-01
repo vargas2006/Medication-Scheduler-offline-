@@ -323,12 +323,12 @@ class PythonAPI:
             sender_email = (settings.get("sender_email") or "lbag5176@gmail.com").strip()
             sender_password = (settings.get("sender_password") or "ttqiembzpocswrid").strip()
 
-            subject = "Verification Code: Bind Gmail for Medication Notifications"
+            subject = "Verification Code: Medication Scheduler"
             html_body = f"""
             <div style="font-family: Arial, sans-serif; background-color: #0d1117; color: #e6edf3; padding: 24px; border-radius: 12px; max-width: 480px; margin: 0 auto; border: 1px solid #24293e;">
-              <h2 style="color: #38bdf8; margin-top: 0; font-size: 20px;">Smart Medication Scheduler</h2>
-              <h3 style="color: #ffffff; font-size: 16px;">Gmail Verification Code</h3>
-              <p style="color: #94a3b8; font-size: 13px;">You requested to bind this Gmail address to receive medication alerts. Enter the code below in your app settings:</p>
+              <h2 style="color: #38bdf8; margin-top: 0; font-size: 18px;">Medication Scheduler</h2>
+              <h3 style="color: #ffffff; font-size: 15px;">Verification Code</h3>
+              <p style="color: #94a3b8; font-size: 13px;">Use the verification code below to connect your Gmail address:</p>
               <div style="background-color: #161926; border: 1px solid #38bdf8; border-radius: 10px; padding: 18px; text-align: center; margin: 20px 0;">
                 <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #38bdf8;">{code}</span>
               </div>
@@ -337,7 +337,7 @@ class PythonAPI:
             """
 
             msg = MIMEMultipart("alternative")
-            msg['From'] = f"Smart Medication Scheduler <{sender_email}>"
+            msg['From'] = f"Medication Scheduler <{sender_email}>"
             msg['To'] = target_email
             msg['Subject'] = subject
             msg.attach(MIMEText(f"Your verification code is: {code}", "plain"))
@@ -485,14 +485,14 @@ class PythonAPI:
 
             # 1. Enqueue Due Medication Email in SQLite database ONLY if Gmail notifications are enabled
             if settings.get("enable_gmail_notifications") and settings.get("recipient_email"):
-                subject = f"Medication Due Reminder: {med_name} ({dosage})"
+                subject = f"Test Medication Reminder: {med_name} ({dosage})"
                 body = (
-                    f"Hello!\n\n"
-                    f"This is a test reminder that it is time to take your scheduled medication:\n"
-                    f"• Medication: {med_name}\n"
-                    f"• Dosage: {dosage}\n"
-                    f"• Time Scheduled: {time_val}\n\n"
-                    f"Please take your dose now and log it in your Smart Medication Scheduler app."
+                    f"Hello,\n\n"
+                    f"This is a test notification for your medication schedule:\n\n"
+                    f"- Medication: {med_name}\n"
+                    f"- Dosage: {dosage}\n"
+                    f"- Time: {time_val}\n\n"
+                    f"Your notification settings are working correctly."
                 )
                 db.enqueue_email(subject, body)
             
@@ -501,13 +501,13 @@ class PythonAPI:
                 from services.background_worker import NotificationWorker
                 worker = NotificationWorker()
                 worker._trigger_os_popup(
-                    "Medication Due Alert!",
-                    f"It is time to take your dose: {med_name} ({dosage}) at {time_val}."
+                    "Test Notification",
+                    f"Test reminder for {med_name} ({dosage}) scheduled at {time_val}."
                 )
             except Exception as ex:
                 print(f"[API] Error in popup trigger: {ex}")
                 
-            return {"success": True, "message": "Due medication test alert triggered!"}
+            return {"success": True, "message": "Test notification sent."}
         except Exception as e:
             return {"success": False, "message": str(e)}
 

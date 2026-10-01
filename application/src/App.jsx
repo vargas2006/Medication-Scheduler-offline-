@@ -151,7 +151,7 @@ export default function App() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-extrabold text-white text-sm tracking-wide">
-                    {activeAlert.title || 'Medication Due Reminder'}
+                    {activeAlert.title || 'Medication Reminder'}
                   </span>
                   <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-[#0b0e17]">
                     Today
@@ -209,7 +209,7 @@ export default function App() {
           {/* Health Tip / Instruction banner */}
           <div className="mb-4 px-3 py-2 bg-emerald-950/30 border border-emerald-500/20 rounded-xl flex items-center gap-2 text-[11px] text-emerald-300 font-medium">
             <Droplet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span>Take dose with water and log intake to update your schedule.</span>
+            <span>Remember to log your intake after taking your dose.</span>
           </div>
 
           {/* Action Buttons */}
