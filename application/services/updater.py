@@ -41,7 +41,6 @@ def get_current_version():
                 pass
     return "1.0.4"
 
-
 def compare_versions(v1, v2):
     """Return True if v2 > v1 (semver comparison e.g. 1.1.0 > 1.0.0)."""
     try:
@@ -51,15 +50,13 @@ def compare_versions(v1, v2):
     except Exception:
         return v2 != v1
 
-
 REMOTE_MANIFEST_URL = "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/version.json"
-
 
 def check_for_updates(manifest_url=REMOTE_MANIFEST_URL):
     """Check online manifest URL for remote updates."""
     try:
         current_ver = get_current_version()
-        # Append cache buster parameter to bypass GitHub raw CDN caching
+
         cache_buster_url = f"{manifest_url}{'&' if '?' in manifest_url else '?'}t={int(time.time())}"
         req = urllib.request.Request(
             cache_buster_url,
@@ -89,7 +86,6 @@ def check_for_updates(manifest_url=REMOTE_MANIFEST_URL):
             "update_available": False,
             "message": f"Unable to check for updates: {str(e)}"
         }
-
 
 def download_and_apply_update(download_url):
     """Download update zip, extract staging files, and launch background batch script to replace app files and restart."""
@@ -131,7 +127,6 @@ def download_and_apply_update(download_url):
         if not download_success:
             return {"success": False, "message": f"Update download failed: {last_err}"}
 
-        # Extract zip into staging directory using Python zipfile module for guaranteed extraction
         if os.path.exists(staging_dir):
             try:
                 import shutil
@@ -144,13 +139,11 @@ def download_and_apply_update(download_url):
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(staging_dir)
 
-        # Locate actual root of update payload (handle nested SmartMedicationScheduler folder)
         payload_dir = staging_dir
         sub_items = os.listdir(staging_dir)
         if len(sub_items) == 1 and os.path.isdir(os.path.join(staging_dir, sub_items[0])):
             payload_dir = os.path.join(staging_dir, sub_items[0])
 
-        # Ensure version.json is placed in both root and _internal in staging payload
         source_ver_path = None
         for v_candidate in [
             os.path.join(payload_dir, "version.json"),
@@ -172,7 +165,6 @@ def download_and_apply_update(download_url):
             except Exception:
                 pass
 
-        # Determine target install directory (where main executable or main.py resides)
         if getattr(sys, 'frozen', False):
             app_dir = os.path.dirname(sys.executable)
             exe_name = os.path.basename(sys.executable)
@@ -183,7 +175,6 @@ def download_and_apply_update(download_url):
         print(f"[Updater] Target app dir: {app_dir}, Exe name: {exe_name}")
         print(f"[Updater] Creating batch update script at {batch_path}...")
 
-        # Create self-terminating Windows batch script to swap files and relaunch
         bat_content = f"""@echo off
 title Smart Medication Scheduler Auto-Updater
 echo Applying update, please wait...
@@ -210,7 +201,6 @@ del "%~f0" > nul 2>&1
         with open(batch_path, 'w', encoding='utf-8') as f:
             f.write(bat_content)
 
-        # Launch the batch script silently in background
         print("[Updater] Launching background update swap process...")
         subprocess.Popen(
             f'cmd.exe /c "{batch_path}"',
@@ -218,7 +208,6 @@ del "%~f0" > nul 2>&1
             creationflags=subprocess.CREATE_NEW_CONSOLE if sys.platform == 'win32' else 0
         )
 
-        # Force quit current Python/PyWebView instance so the batch script can replace files
         time.sleep(0.5)
         sys.exit(0)
 

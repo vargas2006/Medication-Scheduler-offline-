@@ -6,7 +6,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
 
   return (
     <aside className="w-[240px] bg-[#121520] border-r border-[#1e2235] flex flex-col h-full shrink-0 select-none">
-      {/* Brand Header */}
+
       <div className="flex items-center gap-3 px-4 py-5 border-b border-[#1a1e2e]">
         <img
           src="/app_icon.png"
@@ -20,7 +20,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4">
-        {/* Section 1: OVERVIEW & CARE */}
+
         <div>
           <div className="bg-[#171b29] border border-[#2b3149] rounded-md px-3 py-1 mb-2 inline-flex items-center">
             <span className="text-[10px] font-bold text-[#c084fc] tracking-wide">● OVERVIEW & CARE</span>
@@ -65,7 +65,6 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
           </nav>
         </div>
 
-        {/* Section 2: RECORDS & SETTINGS */}
         <div>
           <div className="bg-[#171b29] border border-[#2b3149] rounded-md px-3 py-1 mb-2 inline-flex items-center">
             <span className="text-[10px] font-bold text-[#38bdf8] tracking-wide">● RECORDS & SETTINGS</span>
@@ -99,7 +98,6 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
         </div>
       </div>
 
-      {/* User Profile Footer Card */}
       <div className="p-3 border-t border-[#1a1e2e]">
         <div className="bg-[#161a29] border border-[#252b42] rounded-xl p-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">

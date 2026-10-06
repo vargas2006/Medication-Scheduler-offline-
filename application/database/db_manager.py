@@ -9,7 +9,7 @@ class DatabaseManager:
     def __new__(cls, db_name=None):
         if cls._instance is None:
             if db_name is None:
-                # 1. Determine user AppData directory for persistent DB storage across app updates
+
                 if sys.platform == 'win32':
                     app_data = os.environ.get('APPDATA', os.path.expanduser('~'))
                 elif sys.platform == 'darwin':
@@ -21,7 +21,6 @@ class DatabaseManager:
                 os.makedirs(data_dir, exist_ok=True)
                 target_db = os.path.join(data_dir, 'med_scheduler.db')
 
-                # 2. Migration: If APPDATA db does not exist, look for existing legacy db to preserve user data
                 if not os.path.exists(target_db):
                     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                     legacy_paths = [
@@ -51,7 +50,6 @@ class DatabaseManager:
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        # Users table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,7 +60,6 @@ class DatabaseManager:
             )
         ''')
 
-        # Add name and email to existing databases if missing
         try:
             cursor.execute("ALTER TABLE users ADD COLUMN name TEXT")
         except sqlite3.OperationalError:
@@ -72,7 +69,6 @@ class DatabaseManager:
         except sqlite3.OperationalError:
             pass
 
-        # Password resets table for OTP verification
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS password_resets (
                 email TEXT PRIMARY KEY,
@@ -81,7 +77,6 @@ class DatabaseManager:
             )
         ''')
 
-        # Medications table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS medications (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -95,13 +90,11 @@ class DatabaseManager:
             )
         ''')
 
-        # Add image_path to existing databases if it's missing
         try:
             cursor.execute("ALTER TABLE medications ADD COLUMN image_path TEXT")
         except sqlite3.OperationalError:
-            pass # Column already exists
+            pass                        
 
-        # Schedules table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS schedules (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -112,7 +105,6 @@ class DatabaseManager:
             )
         ''')
 
-        # Intake history table (preserves audit records even if medication is deleted)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS intake_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -125,13 +117,11 @@ class DatabaseManager:
             )
         ''')
 
-        # Add medication_name column to existing databases if missing
         try:
             cursor.execute("ALTER TABLE intake_log ADD COLUMN medication_name TEXT")
         except sqlite3.OperationalError:
             pass
 
-        # Populate missing medication_name values from medications table
         try:
             cursor.execute("""
                 UPDATE intake_log
@@ -144,7 +134,6 @@ class DatabaseManager:
         except Exception:
             pass
 
-        # Settings table (Single configuration row id=1)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS settings (
                 id INTEGER PRIMARY KEY,
@@ -161,7 +150,6 @@ class DatabaseManager:
         except sqlite3.OperationalError:
             pass
 
-        # Notifications sent tracking table to ensure strictly 1x notification per day
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS notifications_sent (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -200,7 +188,6 @@ class DatabaseManager:
             VALUES (1, 0, 0, '', '', '', 0, NULL)
         ''')
 
-        # Email queue table for offline email persistence
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS email_queue (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -251,7 +238,7 @@ class DatabaseManager:
         return row
 
     def get_settings(self, user_id=None):
-        # Fetch global sender credentials from row id=1 as fallback
+
         g_row = self.fetch_one("SELECT sender_email, sender_password FROM settings WHERE id = 1")
         global_sender = (g_row[0] or "").strip() if g_row else ""
         global_pass = (g_row[1] or "").strip() if g_row else ""
@@ -285,7 +272,6 @@ class DatabaseManager:
                 "is_email_verified": 0
             }
 
-        # Fallback to row id=1
         row = self.fetch_one("SELECT id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, is_email_verified FROM settings WHERE id = 1")
         if not row:
             self.execute_query("INSERT OR IGNORE INTO settings (id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, is_email_verified) VALUES (1, 0, 0, '', '', '', 0)")
@@ -330,7 +316,6 @@ class DatabaseManager:
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 ''', (user_id, int(enable_offline_popups), int(enable_gmail_notifications), clean_recipient, s_email, s_pass, int(verified_val)))
             return True
-
 
     def save_remember_me(self, user_id):
         self.execute_query("UPDATE settings SET remember_user_id = ? WHERE id = 1", (int(user_id),))

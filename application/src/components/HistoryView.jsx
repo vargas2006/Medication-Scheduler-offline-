@@ -7,7 +7,6 @@ export default function HistoryView({ user }) {
   const [loading, setLoading] = useState(true);
   const [exportMsg, setExportMsg] = useState('');
 
-  // Date / Timeline Filter State
   const [dateFilter, setDateFilter] = useState('ALL');
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
@@ -44,7 +43,6 @@ export default function HistoryView({ user }) {
     }
   };
 
-  // Date Filter logic for History Logs
   const filteredHistory = history.filter((log) => {
     if (dateFilter === 'ALL') return true;
     if (!log.timestamp) return true;
@@ -88,7 +86,7 @@ export default function HistoryView({ user }) {
   return (
     <div className="p-5 flex flex-col h-full overflow-hidden space-y-4">
       <div className="bg-[#161926] border border-[#24293e] rounded-2xl flex-1 flex flex-col overflow-hidden p-5">
-        {/* Header & Timeline Filter Controls */}
+
         <div className="flex flex-col gap-3 mb-4 pb-3 border-b border-[#22273a]">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
@@ -121,7 +119,6 @@ export default function HistoryView({ user }) {
             </div>
           </div>
 
-          {/* Custom Date Pickers */}
           {dateFilter === 'CUSTOM' && (
             <div className="flex items-center gap-2 bg-[#1c2033] border border-[#282f47] p-2 rounded-xl text-xs">
               <span className="text-slate-400 font-medium">Start Date:</span>
@@ -142,7 +139,6 @@ export default function HistoryView({ user }) {
           )}
         </div>
 
-        {/* Audit Log Items */}
         <div className="flex-1 overflow-y-auto space-y-2 pr-2">
           {loading ? (
             <div className="text-center text-slate-500 py-16 text-xs">Loading history logs...</div>
@@ -181,7 +177,6 @@ export default function HistoryView({ user }) {
         </div>
       </div>
 
-      {/* Footer Export Action */}
       <div className="flex items-center justify-between bg-[#161926] border border-[#24293e] rounded-xl px-5 py-3 shrink-0">
         <span className="text-xs text-slate-400 font-medium">
           {exportMsg || 'Generate downloadable CSV record of medication intake history.'}

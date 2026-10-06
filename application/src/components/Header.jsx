@@ -63,7 +63,7 @@ export default function Header({ activeTab, user, theme = 'dark', onToggleTheme 
       </div>
 
       <div className="flex items-center gap-2.5">
-        {/* Quick Theme Toggle Button */}
+
         <button
           type="button"
           onClick={onToggleTheme}
@@ -83,7 +83,6 @@ export default function Header({ activeTab, user, theme = 'dark', onToggleTheme 
           )}
         </button>
 
-        {/* Date Display Badge */}
         <div className="bg-[#161926] border border-[#24293e] rounded-xl px-3.5 py-2 flex items-center gap-2 text-xs font-semibold text-slate-400 shadow-sm">
           <Calendar className="w-4 h-4 text-slate-400" />
           <span>{dateStr}</span>

@@ -6,7 +6,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from database.db_manager import DatabaseManager
 
-
 class NotificationWorker:
     _instance = None
     _lock = threading.Lock()
@@ -67,7 +66,6 @@ class NotificationWorker:
         clean_title = title.replace("'", "").replace('"', "").replace("\n", " ")
         clean_message = message.replace("'", "").replace('"', "").replace("\n", " ")
 
-        # 1. In-App Custom Event for webview (Instant on-screen banner with rich details)
         try:
             import webview
             import json
@@ -85,13 +83,12 @@ class NotificationWorker:
         except Exception as e:
             pass
 
-        # 2. Native Windows Topmost Dialog (Guarded against multi-stacking)
         if show_dialog and not self.is_showing_dialog:
             self.is_showing_dialog = True
             def show_native_dialog():
                 try:
                     import ctypes
-                    # 0x40 = MB_ICONINFORMATION, 0x10000 = MB_SETFOREGROUND, 0x40000 = MB_TOPMOST
+
                     flags = 0x40 | 0x10000 | 0x40000
                     ctypes.windll.user32.MessageBoxW(0, message, title, flags)
                 except Exception as e:
@@ -101,7 +98,6 @@ class NotificationWorker:
 
             threading.Thread(target=show_native_dialog, daemon=True).start()
 
-        # 3. Modern Windows 10/11 Desktop Banner Toast
         try:
             import subprocess
             import os
@@ -128,7 +124,7 @@ class NotificationWorker:
                 [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($appId).Show($toast)
             }} catch {{}}
             '''
-            
+
             fd, tmp_path = tempfile.mkstemp(suffix=".ps1")
             with open(fd, "w", encoding="utf-8") as f:
                 f.write(ps_script)
@@ -153,7 +149,6 @@ class NotificationWorker:
         except Exception as ex:
             print(f"[NotificationWorker] Windows Toast Error: {ex}")
 
-        # 4. System audio notification chime
         def play_sound():
             try:
                 import winsound
@@ -290,7 +285,6 @@ class NotificationWorker:
             print("[NotificationWorker] Gmail sender credentials not configured. Skipping email queue.")
             return
 
-        # Send queued emails with rate limiting (max 3 at a time)
         for email_item in pending_emails[:3]:
             email_id = email_item[0]
             subject = email_item[1]
@@ -335,8 +329,6 @@ class NotificationWorker:
             now_ts = time.time()
             today_str = time.strftime("%Y-%m-%d")
 
-            # 1. ONLINE GMAIL NOTIFICATIONS:
-            # Check every user with Gmail notifications enabled and send ONLY their due medications to their email
             users = self.db.fetch_all("SELECT id, username, email FROM users")
             for u_id, u_name, u_email in users:
                 u_settings = self.db.get_settings(u_id)
@@ -344,11 +336,11 @@ class NotificationWorker:
                     target_email = (u_settings.get("recipient_email") or u_email or "").strip()
                     if target_email:
                         due_meds = dose_alert.get_due_medications(u_id)
-                        # Filter strictly for medications NOT yet notified via email today (strictly 1x per day)
+
                         user_new_due = [m for m in due_meds if not self.db.is_already_notified_today(u_id, m['med_id'], 'email', today_str)]
 
                         if user_new_due:
-                            # Immediately mark in persistent DB so it never repeats today
+
                             for m in user_new_due:
                                 self.db.mark_notified_today(u_id, m['med_id'], 'email', today_str)
 
@@ -358,17 +350,15 @@ class NotificationWorker:
                             self.db.enqueue_email(subject, html_body, target_email, is_html=1)
                             print(f"[NotificationWorker] Enqueued strictly 1x HTML email for {u_name} ({target_email}) with {len(user_new_due)} medications.")
 
-            # 2. OFFLINE LOCAL NOTIFICATIONS:
-            # ONLY trigger for the currently logged-in desktop user!
             if self.active_user_id:
                 active_settings = self.db.get_settings(self.active_user_id)
                 if active_settings.get("enable_offline_popups"):
                     active_due_meds = dose_alert.get_due_medications(self.active_user_id)
-                    # Filter strictly for medications NOT yet notified offline today (strictly 1x per day)
+
                     new_offline_due = [m for m in active_due_meds if not self.db.is_already_notified_today(self.active_user_id, m['med_id'], 'offline', today_str)]
 
                     if new_offline_due:
-                        # Immediately mark in persistent DB so it never repeats today
+
                         for m in new_offline_due:
                             self.db.mark_notified_today(self.active_user_id, m['med_id'], 'offline', today_str)
 

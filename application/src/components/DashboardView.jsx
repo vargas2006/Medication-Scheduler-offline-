@@ -58,23 +58,21 @@ export default function DashboardView({ user, onDataChange }) {
 
   return (
     <div className="p-5 space-y-5 overflow-y-auto h-full pr-6">
-      {/* 4 Stat Cards matching project medication reference styling */}
+
       <div className="grid grid-cols-4 gap-4">
-        {/* Card 1: Vibrant Purple Card */}
+
         <div className="bg-[#6b21a8] border border-[#9333ea] rounded-2xl p-4 h-[110px] flex flex-col justify-between shadow-lg shadow-purple-950/40">
           <span className="text-xs font-bold text-[#e9d5ff]">Active Medications</span>
           <span className="text-3xl font-extrabold text-white">{total_meds}</span>
           <span className="text-[10px] font-medium text-[#d8b4fe]">● In Active Inventory</span>
         </div>
 
-        {/* Card 2: Vibrant Cyan Card */}
         <div className="bg-[#0e7490] border border-[#06b6d4] rounded-2xl p-4 h-[110px] flex flex-col justify-between shadow-lg shadow-cyan-950/40">
           <span className="text-xs font-bold text-[#cffafe]">Adherence Rate</span>
           <span className="text-3xl font-extrabold text-white">{adherence_rate}</span>
           <span className="text-[10px] font-medium text-[#a5f3fc]">● Daily On-Schedule</span>
         </div>
 
-        {/* Card 3: Dark Card with Low Stock Alerts */}
         <div className="bg-[#161926] border border-[#24293e] rounded-2xl p-4 h-[110px] flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-400">Low Stock Alerts</span>
@@ -90,7 +88,6 @@ export default function DashboardView({ user, onDataChange }) {
           <span className="text-[10px] text-slate-500">Items below threshold</span>
         </div>
 
-        {/* Card 4: Dark Card with Total Doses Logged */}
         <div className="bg-[#161926] border border-[#24293e] rounded-2xl p-4 h-[110px] flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-400">Doses Logged</span>
@@ -103,9 +100,8 @@ export default function DashboardView({ user, onDataChange }) {
         </div>
       </div>
 
-      {/* Middle Section: Due Right Now & Weekly Chart */}
       <div className="grid grid-cols-10 gap-4">
-        {/* Left: Due Right Now (6 cols) */}
+
         <div className="col-span-6 bg-[#161926] border border-[#24293e] rounded-2xl h-[280px] flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#22273a]">
             <div className="flex items-center gap-2">
@@ -156,7 +152,6 @@ export default function DashboardView({ user, onDataChange }) {
           </div>
         </div>
 
-        {/* Right: Weekly Intake Adherence Chart (4 cols) */}
         <div className="col-span-4 bg-[#161926] border border-[#24293e] rounded-2xl h-[280px] flex flex-col p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-white text-xs flex items-center gap-2">
@@ -190,7 +185,6 @@ export default function DashboardView({ user, onDataChange }) {
         </div>
       </div>
 
-      {/* Bottom Section: Recent Activity Log */}
       <div className="bg-[#161926] border border-[#24293e] rounded-2xl h-[220px] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-[#22273a]">
           <h3 className="font-bold text-white text-xs flex items-center gap-2">

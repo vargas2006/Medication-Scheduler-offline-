@@ -43,7 +43,7 @@ class InventoryManager:
         self.db.execute_query("UPDATE medications SET stock = stock - 1 WHERE id = ? AND stock > 0", (med_id,))
 
     def delete_medication(self, med_id):
-        # Preserve medication name in history logs before deleting stock record
+
         row = self.db.fetch_one("SELECT name FROM medications WHERE id = ?", (med_id,))
         if row and row[0]:
             med_name = row[0]

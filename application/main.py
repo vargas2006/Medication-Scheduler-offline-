@@ -2,7 +2,6 @@ import os
 import sys
 import threading
 
-# Configure PYTHONNET_PYDLL environment variable BEFORE importing webview or pythonnet
 if getattr(sys, 'frozen', False):
     app_dir = getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
     try:
@@ -33,7 +32,6 @@ if sys.platform == 'win32':
 def main():
     db = DatabaseManager()
     api = PythonAPI()
-    
 
     worker = NotificationWorker(check_interval=30)
     worker.start()
@@ -82,6 +80,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 

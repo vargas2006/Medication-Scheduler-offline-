@@ -34,7 +34,7 @@ class DoseAlert:
         due_meds = []
         now = datetime.now()
         today_str = now.strftime("%Y-%m-%d")
-        
+
         query = '''
             SELECT m.id, m.name, m.dosage, s.schedule_type, s.time_value, s.schedule_date,
             (SELECT MAX(timestamp) FROM intake_log WHERE medication_id = m.id AND status = 'TAKEN') as last_taken
@@ -43,15 +43,14 @@ class DoseAlert:
             WHERE m.user_id = ?
         '''
         rows = self.db.fetch_all(query, (user_id,))
-        
+
         for med_id, med_name, dosage, sched_type, time_value, sched_date, last_taken_str in rows:
-            # 1. Date check: If a specific schedule_date is set, it MUST be today
+
             if sched_date and str(sched_date).strip():
                 clean_date = str(sched_date).strip()
                 if clean_date != today_str:
                     continue
 
-            # 2. Check if already taken today
             last_taken_time = None
             if last_taken_str:
                 try:
@@ -60,10 +59,9 @@ class DoseAlert:
                     pass
 
             if last_taken_time and last_taken_time.date() == now.date():
-                # Dose was already taken today
+
                 continue
 
-            # 3. Time check for today
             is_due = False
             if sched_type == 'DAILY_TIME':
                 try:
@@ -82,7 +80,7 @@ class DoseAlert:
                         is_due = True
                 except Exception:
                     pass
-            
+
             if is_due:
                 due_meds.append({
                     "med_id": med_id, 
@@ -91,5 +89,5 @@ class DoseAlert:
                     "time_value": time_value,
                     "schedule_date": sched_date or today_str
                 })
-                
+
         return due_meds

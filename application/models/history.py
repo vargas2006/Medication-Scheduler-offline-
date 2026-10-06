@@ -19,7 +19,7 @@ class ReportGenerator:
     def log_intake(self, user_id, med_id, status, timestamp=None):
         if not timestamp:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        # Fetch medication name to persist in history log
+
         row = self.db.fetch_one("SELECT name FROM medications WHERE id = ?", (med_id,))
         med_name = row[0] if row and row[0] else "Medication"
         self.db.execute_query(

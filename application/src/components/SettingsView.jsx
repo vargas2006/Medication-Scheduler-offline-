@@ -5,22 +5,18 @@ import { callApi } from '../utils/pywebview';
 export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
   const isDark = theme === 'dark';
 
-  // Persistent Settings
   const [enableOfflinePopups, setEnableOfflinePopups] = useState(false);
   const [enableGmailNotifications, setEnableGmailNotifications] = useState(false);
   const [boundEmail, setBoundEmail] = useState('');
   const [isEmailVerified, setIsEmailVerified] = useState(false);
 
-  // Binding OTP flow states
   const [inputGmail, setInputGmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [codeSent, setCodeSent] = useState(false);
 
-  // Status messages
   const [bindStatus, setBindStatus] = useState({ msg: '', isError: false });
   const [saveStatus, setSaveStatus] = useState('');
 
-  // Password change state
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
@@ -56,7 +52,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
     loadSettings();
   }, [user]);
 
-  // Save Settings button handler
   const handleSaveSettings = async () => {
     try {
       setSaveStatus('Saving...');
@@ -78,7 +73,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
     }
   };
 
-  // Step 1: Send 6-digit verification code to target Gmail
   const handleSendCode = async () => {
     const emailToVerify = inputGmail.trim();
     if (!emailToVerify || !emailToVerify.includes('@')) {
@@ -100,7 +94,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
     }
   };
 
-  // Step 2: Verify 6-digit code and bind Gmail
   const handleVerifyAndBind = async () => {
     const code = otpCode.trim();
     if (!code) {
@@ -125,7 +118,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
     }
   };
 
-  // Unbind / Change Gmail
   const handleUnbind = async () => {
     try {
       await callApi('unbind_gmail', user?.user_id);
@@ -142,7 +134,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
     }
   };
 
-  // Change password handler
   const handleChangePassword = async () => {
     if (!currentPw || !newPw || !confirmPw) {
       setPwStatus({ msg: 'Please fill in all password fields.', ok: false }); return;
@@ -171,11 +162,11 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
   return (
     <div className="p-5 h-full overflow-hidden">
       <div className="bg-[#161926] border border-[#24293e] rounded-2xl p-6 h-full space-y-6 overflow-y-auto">
-        {/* Appearance Section */}
+
         <div>
           <h3 className="text-base font-bold text-white mb-1">Appearance & Theme</h3>
           <p className="text-xs text-slate-400 mb-4">Toggle between high-contrast dark mode and light theme.</p>
-          
+
           <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-4 flex items-center justify-between max-w-lg">
             <div className="flex items-center gap-3">
               {isDark ? <Moon className="w-5 h-5 text-purple-400" /> : <Sun className="w-5 h-5 text-amber-400" />}
@@ -197,7 +188,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
 
         <hr className="border-[#24293e]" />
 
-        {/* Notifications & Alert System Section */}
         <div>
           <div className="flex items-center justify-between max-w-lg mb-1">
             <h3 className="text-base font-bold text-white">Notifications & Alerts</h3>
@@ -210,7 +200,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
           <p className="text-xs text-slate-400 mb-4">Configure system popups and verify Gmail for online medication alerts.</p>
 
           <div className="space-y-4 max-w-lg">
-            {/* Toggle 1: Local Desktop Notifications (Offline) */}
+
             <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Bell className="w-5 h-5 text-emerald-400" />
@@ -229,7 +219,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               </button>
             </div>
 
-            {/* Toggle 2: Gmail Notifications Toggle */}
             <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-sky-400" />
@@ -248,14 +237,13 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               </button>
             </div>
 
-            {/* Gmail Verification / Binding Box */}
             <div className="bg-[#161926] border border-[#2b334c] rounded-xl p-4 space-y-3.5">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-xs font-bold text-white block">Gmail Notification Binding</span>
                   <span className="text-[10px] text-slate-400">Verify your Gmail address using a 6-digit code to enable alerts.</span>
                 </div>
-                {/* Status Badge */}
+
                 <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full shrink-0 ${
                   isEmailVerified && boundEmail
                     ? 'bg-emerald-500/10 border border-emerald-500/20'
@@ -272,7 +260,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                 </div>
               </div>
 
-              {/* Status Alert */}
               {bindStatus.msg && (
                 <div className={`p-2.5 rounded-lg flex items-center gap-2 text-xs ${
                   bindStatus.isError ? 'bg-rose-950/60 border border-rose-800/80 text-rose-300' : 'bg-sky-950/60 border border-sky-800/80 text-sky-300'
@@ -282,7 +269,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                 </div>
               )}
 
-              {/* Scenario A: Already Verified & Bound */}
               {isEmailVerified && boundEmail ? (
                 <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-3 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -301,7 +287,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                   </button>
                 </div>
               ) : (
-                /* Scenario B: Not Yet Verified — Input + Send Code Flow */
+
                 <div className="space-y-3 border-t border-[#272e45] pt-3">
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1">Enter Gmail Address for Notifications</label>
@@ -323,7 +309,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                     </div>
                   </div>
 
-                  {/* Code Input Box (Visible after Send Code) */}
                   {codeSent && (
                     <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-3 space-y-2.5">
                       <label className="block text-xs font-semibold text-slate-300">Enter 6-Digit Verification Code</label>
@@ -350,7 +335,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               )}
             </div>
 
-            {/* Save Settings Action Button */}
             <div className="flex justify-end pt-1">
               <button
                 type="button"
@@ -366,7 +350,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
 
         <hr className="border-[#24293e]" />
 
-        {/* Account Section */}
         <div>
           <h3 className="text-base font-bold text-white mb-1">Account Information</h3>
           <p className="text-xs text-slate-400 mb-4">Active user credentials and profile details.</p>
@@ -388,7 +371,6 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               </div>
             </div>
 
-            {/* Change Password */}
             <div className="bg-[#161926] border border-[#2b334c] rounded-xl p-4 space-y-3">
               <div>
                 <span className="text-xs font-bold text-white block mb-0.5">Change Password</span>
@@ -433,7 +415,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                 )}
               </div>
             </div>
-            {/* Auto-Updater Section */}
+
             <div className="bg-[#161926] border border-[#2b334c] rounded-xl p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>

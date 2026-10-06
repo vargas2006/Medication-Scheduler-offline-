@@ -27,15 +27,12 @@ export default function IntakeView({ user, onDataChange }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [message, setMessage] = useState({ text: '', medId: null });
 
-  // View Mode: 'grid' | 'list'
   const [viewMode, setViewMode] = useState('grid');
 
-  // Timeline / Date Filter State
   const [dateFilter, setDateFilter] = useState('ALL');
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
 
-  // Modal & Form State
   const [showModal, setShowModal] = useState(false);
   const [selectedMedId, setSelectedMedId] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -123,7 +120,6 @@ export default function IntakeView({ user, onDataChange }) {
     { label: 'Night', value: '21:00' }
   ];
 
-  // Filtering search + date filter
   const filteredMeds = medications.filter((m) => {
     const matchesSearch =
       m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -173,10 +169,10 @@ export default function IntakeView({ user, onDataChange }) {
 
   return (
     <div className="p-5 flex flex-col h-full overflow-hidden space-y-4 relative">
-      {/* Top Controls Bar: Search, Timeline Filter & View Toggle */}
+
       <div className="bg-[#161926] border border-[#24293e] rounded-2xl p-4 flex flex-col gap-3 shrink-0">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          {/* Search Box */}
+
           <div className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
@@ -189,7 +185,7 @@ export default function IntakeView({ user, onDataChange }) {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* View Mode Toggle Switch (Matching Reference Image) */}
+
             <div className="flex items-center bg-[#1c2033] border border-[#282f47] p-1 rounded-xl shadow-inner">
               <button
                 type="button"
@@ -236,7 +232,6 @@ export default function IntakeView({ user, onDataChange }) {
           </div>
         </div>
 
-        {/* Timeline / Date Filter Selector Bar */}
         <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-[#22273a]">
           <div className="flex items-center gap-2 bg-[#1c2033] border border-[#282f47] px-3 py-1.5 rounded-xl text-xs">
             <Calendar className="w-3.5 h-3.5 text-[#38bdf8]" />
@@ -264,7 +259,6 @@ export default function IntakeView({ user, onDataChange }) {
           </div>
         </div>
 
-        {/* Custom Range Date Pickers */}
         {dateFilter === 'CUSTOM' && (
           <div className="flex items-center gap-2 bg-[#1c2033] border border-[#282f47] p-2 rounded-xl text-xs">
             <span className="text-slate-400 font-medium">Start Date:</span>
@@ -285,14 +279,13 @@ export default function IntakeView({ user, onDataChange }) {
         )}
       </div>
 
-      {/* Main Content Area (List View vs Grid View) */}
       <div className="flex-1 overflow-y-auto pr-1">
         {loading ? (
           <div className="text-center text-slate-500 py-20 text-xs">Loading medications for intake...</div>
         ) : filteredMeds.length === 0 ? (
           <div className="text-center text-slate-500 py-24 text-xs">No medications found matching filter.</div>
         ) : viewMode === 'grid' ? (
-          /* GRID VIEW LAYOUT */
+
           <div className="grid grid-cols-3 gap-4">
             {filteredMeds.map((med) => {
               const isOut = med.stock <= 0;
@@ -352,7 +345,7 @@ export default function IntakeView({ user, onDataChange }) {
             })}
           </div>
         ) : (
-          /* LIST VIEW LAYOUT */
+
           <div className="space-y-2.5">
             {filteredMeds.map((med) => {
               const isOut = med.stock <= 0;
@@ -409,11 +402,10 @@ export default function IntakeView({ user, onDataChange }) {
         )}
       </div>
 
-      {/* FORM MODAL: Create Intake Schedule with Calendar & Time Picker */}
       {showModal && (
         <div className="fixed inset-0 bg-[#090b12]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
           <div className="w-full max-w-lg bg-[#121520] border border-[#24293e] rounded-2xl p-6 shadow-2xl space-y-5">
-            {/* Modal Header */}
+
             <div className="flex items-center justify-between border-b border-[#1e2438] pb-3.5">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-[#2b2046] text-[#c084fc] flex items-center justify-center">
@@ -442,7 +434,7 @@ export default function IntakeView({ user, onDataChange }) {
             )}
 
             <form onSubmit={handleCreateIntakeSchedule} className="space-y-4">
-              {/* Medication Selection */}
+
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                   Select Medication
@@ -460,7 +452,6 @@ export default function IntakeView({ user, onDataChange }) {
                 </select>
               </div>
 
-              {/* Date Selection with Calendar & Quick Pills */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
@@ -478,7 +469,6 @@ export default function IntakeView({ user, onDataChange }) {
                   className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed] mb-2"
                 />
 
-                {/* Quick Date Selector Pills */}
                 <div className="grid grid-cols-4 gap-2">
                   <button
                     type="button"
@@ -511,7 +501,6 @@ export default function IntakeView({ user, onDataChange }) {
                 </div>
               </div>
 
-              {/* Time Selection with Presets & Input */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
@@ -529,7 +518,6 @@ export default function IntakeView({ user, onDataChange }) {
                   className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed] mb-2"
                 />
 
-                {/* Preset Time Pills */}
                 <div className="grid grid-cols-4 gap-2">
                   {timePresets.map((preset) => (
                     <button
@@ -548,7 +536,6 @@ export default function IntakeView({ user, onDataChange }) {
                 </div>
               </div>
 
-              {/* Intake Action Type / Status */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">Intake Status</label>
                 <div className="grid grid-cols-2 gap-3">
@@ -580,7 +567,6 @@ export default function IntakeView({ user, onDataChange }) {
                 </div>
               </div>
 
-              {/* Modal Actions */}
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1e2438]">
                 <button
                   type="button"

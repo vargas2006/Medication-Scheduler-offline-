@@ -106,7 +106,6 @@ class PythonAPI:
             low_stock = sum(1 for m in meds if m.is_low_stock())
             doses_taken = len([h for h in history if h.status == 'TAKEN'])
 
-            # Weekly intake counts (Mon to Sun: index 0 to 6)
             weekly_counts = [0] * 7
             for log in history:
                 if log.status == "TAKEN" and log.timestamp:
@@ -169,7 +168,7 @@ class PythonAPI:
             user_id = int(user_id)
             stock = int(stock)
             refill_threshold = int(refill_threshold)
-            
+
             med_id = self.inventory_manager.add_medication(
                 user_id, name, dosage, stock, refill_threshold, image_path
             )
@@ -233,15 +232,15 @@ class PythonAPI:
             clean_time = time_str.strip()
             clean_date = date_str.strip()
             timestamp_str = f"{clean_date} {clean_time}:00" if len(clean_time) == 5 else f"{clean_date} {clean_time}"
-            
+
             if status == "TAKEN":
                 self.inventory_manager.deduct_stock(med_id)
                 self.report_generator.log_intake(user_id, med_id, "TAKEN", timestamp_str)
             else:
-                # SCHEDULED reminder
+
                 self.report_generator.log_intake(user_id, med_id, "SCHEDULED", timestamp_str)
                 self.dose_alert.add_schedule(med_id, "DAILY_TIME", clean_time, schedule_date=clean_date)
-            
+
             return {"success": True, "message": f"Intake scheduled for {clean_date} at {clean_time}!"}
         except Exception as e:
             return {"success": False, "message": str(e)}
@@ -295,9 +294,8 @@ class PythonAPI:
                 return {"success": False, "message": "Please enter a valid Gmail address."}
 
             code = f"{random.randint(100000, 999999)}"
-            expires_at = int(time.time()) + 900  # 15 mins
+            expires_at = int(time.time()) + 900           
 
-            # Store code in password_resets table
             db.execute_query(
                 "INSERT OR REPLACE INTO password_resets (email, code, expires_at) VALUES (?, ?, ?)",
                 (target_email, code, expires_at)
@@ -305,7 +303,6 @@ class PythonAPI:
 
             user_id = int(user_id) if user_id else (self.user_manager.current_user.user_id if self.user_manager.current_user else None)
 
-            # Safety check: Ensure Gmail address is not already bound & verified by ANOTHER user account
             if user_id:
                 existing_owner = db.fetch_one(
                     "SELECT user_id FROM settings WHERE LOWER(recipient_email) = ? AND is_email_verified = 1 AND user_id != ?",
@@ -353,7 +350,7 @@ class PythonAPI:
                 return {"success": True, "message": f"Verification code sent to {target_email}! Check your inbox."}
             except Exception as primary_err:
                 print(f"[API] Primary SMTP error with {sender_email}: {primary_err}")
-                # Fallback to system default sender lbag5176@gmail.com
+
                 try:
                     fallback_sender = "lbag5176@gmail.com"
                     fallback_pass = "ttqiembzpocswrid"
@@ -370,7 +367,6 @@ class PythonAPI:
                     return {"success": False, "message": f"Failed to send email to {target_email}. Please check your internet connection."}
         except Exception as e:
             return {"success": False, "message": str(e)}
-
 
     def verify_and_bind_gmail(self, user_id, email, code):
         """Verify 6-digit OTP code and bind Gmail for notifications."""
@@ -397,7 +393,6 @@ class PythonAPI:
 
             user_id = int(user_id) if user_id else (self.user_manager.current_user.user_id if self.user_manager.current_user else None)
 
-            # Safety check: Ensure Gmail address is not already bound & verified by ANOTHER user account
             if user_id:
                 existing_owner = db.fetch_one(
                     "SELECT user_id FROM settings WHERE LOWER(recipient_email) = ? AND is_email_verified = 1 AND user_id != ?",
@@ -471,19 +466,16 @@ class PythonAPI:
         except Exception as e:
             return {"success": False, "message": str(e)}
 
-
-
     def send_test_notification(self):
         try:
             from database.db_manager import DatabaseManager
             db = DatabaseManager()
             settings = db.get_settings()
-            
+
             med_name = "Paracetamol"
             dosage = "500mg"
             time_val = datetime.now().strftime("%I:%M %p")
 
-            # 1. Enqueue Due Medication Email in SQLite database ONLY if Gmail notifications are enabled
             if settings.get("enable_gmail_notifications") and settings.get("recipient_email"):
                 subject = f"Test Medication Reminder: {med_name} ({dosage})"
                 body = (
@@ -495,8 +487,7 @@ class PythonAPI:
                     f"Your notification settings are working correctly."
                 )
                 db.enqueue_email(subject, body)
-            
-            # 2. Always trigger instant OS Desktop Popup on test
+
             try:
                 from services.background_worker import NotificationWorker
                 worker = NotificationWorker()
@@ -506,7 +497,7 @@ class PythonAPI:
                 )
             except Exception as ex:
                 print(f"[API] Error in popup trigger: {ex}")
-                
+
             return {"success": True, "message": "Test notification sent."}
         except Exception as e:
             return {"success": False, "message": str(e)}
@@ -527,7 +518,6 @@ class PythonAPI:
 
             stored_pw = row[2] or ""
 
-            # Verify current password (supports both plain-text legacy and hashed)
             if _is_hashed(stored_pw):
                 valid = _verify_password(current_password, stored_pw)
             else:
@@ -573,17 +563,14 @@ class PythonAPI:
             if not user_email:
                 return {"success": False, "message": "No email address is registered for this account."}
 
-            # Generate 6-digit code
             code = f"{random.randint(100000, 999999)}"
-            expires_at = int(time.time()) + 900  # 15 mins
+            expires_at = int(time.time()) + 900           
 
-            # Save in password_resets table
             db.execute_query(
                 "INSERT OR REPLACE INTO password_resets (email, code, expires_at) VALUES (?, ?, ?)",
                 (user_email.lower(), code, expires_at)
             )
 
-            # Get sender credentials
             settings = db.get_settings(user_id)
             sender_email = settings.get("sender_email")
             sender_password = settings.get("sender_password")
@@ -602,7 +589,6 @@ class PythonAPI:
             </div>
             """
 
-            # Direct SMTP send if sender credentials present
             sent_directly = False
             if sender_email and sender_password:
                 try:
@@ -624,10 +610,9 @@ class PythonAPI:
                     print(f"[API] Direct SMTP error: {smtp_err}. Enqueuing in email_queue fallback.")
 
             if not sent_directly:
-                # Enqueue for background worker
+
                 db.enqueue_email(subject, html_body, user_email, is_html=1)
 
-            # Mask email for privacy (e.g. j***5@gmail.com)
             parts = user_email.split("@")
             if len(parts) == 2:
                 uname, domain = parts
@@ -675,17 +660,13 @@ class PythonAPI:
             if int(time.time()) > expires_at:
                 return {"success": False, "message": "Verification code has expired. Please request a new one."}
 
-            # Hash new password & update user
             new_hash = _hash_password(new_pass)
             db.execute_query("UPDATE users SET password = ? WHERE LOWER(email) = ?", (new_hash, target_email))
 
-            # Delete used reset record
             db.execute_query("DELETE FROM password_resets WHERE email = ?", (target_email,))
             print(f"[API] Password successfully reset for {target_email}")
 
             return {"success": True, "message": "Password updated successfully! You can now sign in."}
         except Exception as e:
             return {"success": False, "message": str(e)}
-
-
 

@@ -31,18 +31,16 @@ export default function AppLoadingScreen({ onFinish }) {
       }`}
     >
       <div className="flex flex-col items-center">
-        {/* Brand Icon */}
+
         <img
           src="/app_icon.png"
           alt="MedScheduler Logo"
           className="w-16 h-16 object-contain drop-shadow-xl mb-4"
         />
 
-        {/* Brand Name & Subtitle */}
         <h1 className="text-xl font-bold text-white tracking-tight">MedScheduler</h1>
         <p className="text-xs text-slate-400 mt-1">Smart Care Monitor</p>
 
-        {/* Minimal Progress Bar */}
         <div className="w-48 bg-[#161926] border border-[#24293e] rounded-full h-1.5 overflow-hidden mt-6 mb-2">
           <div
             className="h-full bg-gradient-to-r from-[#7c3aed] to-[#38bdf8] transition-all duration-300 ease-out rounded-full"

@@ -53,13 +53,13 @@ export default function App() {
   useEffect(() => {
     async function checkAutoLogin() {
       try {
-        // 1. Try persistent SQLite session first (immune to webview profile clears)
+
         const res = await callApi('get_auto_login_user');
         if (res && res.success && res.user) {
           setUser(res.user);
           return;
         }
-        // 2. Fallback to localStorage session
+
         const savedSession = localStorage.getItem('med_user_session');
         if (savedSession) {
           const { user: savedUser, expiry } = JSON.parse(savedSession);
@@ -106,7 +106,7 @@ export default function App() {
 
   return (
     <div className="flex h-screen w-screen bg-[#0d0f17] text-slate-100 overflow-hidden select-none">
-      {/* Permanent Left Sidebar */}
+
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -114,12 +114,10 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      {/* Main Right Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#0d0f17]">
-        {/* Permanent Top Header */}
+
         <Header activeTab={activeTab} user={user} theme={theme} onToggleTheme={handleToggleTheme} />
 
-        {/* Dynamic Body Content */}
         <main className="flex-1 overflow-hidden relative">
           {activeTab === 'DashboardFrame' && (
             <DashboardView key={`dash-${dataRefreshKey}`} user={user} onDataChange={handleDataChange} />
@@ -139,10 +137,9 @@ export default function App() {
         </main>
       </div>
 
-      {/* Global In-App Medication Due Alert Card (Large, Detailed, Prominent Borders) */}
       {activeAlert && (
         <div className="fixed top-6 right-6 z-[9999] w-[500px] max-w-[94vw] bg-[#121626]/98 border-2 border-emerald-500 rounded-3xl p-5 shadow-[0_12px_45px_rgba(0,0,0,0.85),0_0_30px_rgba(16,185,129,0.35)] backdrop-blur-2xl animate-in fade-in slide-in-from-top-4 duration-300 ring-1 ring-white/10">
-          {/* Card Header */}
+
           <div className="flex items-start justify-between gap-3 pb-3 mb-3 border-b border-[#252d47]">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-emerald-500/20 border border-emerald-500/40 rounded-2xl text-emerald-400 shrink-0 shadow-inner">
@@ -173,7 +170,6 @@ export default function App() {
             </button>
           </div>
 
-          {/* Detailed Medications List or Message */}
           {activeAlert.medications && activeAlert.medications.length > 0 ? (
             <div className="space-y-2 mb-4 max-h-[220px] overflow-y-auto pr-1">
               {activeAlert.medications.map((m, idx) => (
@@ -206,13 +202,11 @@ export default function App() {
             </p>
           )}
 
-          {/* Health Tip / Instruction banner */}
           <div className="mb-4 px-3 py-2 bg-emerald-950/30 border border-emerald-500/20 rounded-xl flex items-center gap-2 text-[11px] text-emerald-300 font-medium">
             <Droplet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             <span>Remember to log your intake after taking your dose.</span>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#252d47]">
             <button
               type="button"

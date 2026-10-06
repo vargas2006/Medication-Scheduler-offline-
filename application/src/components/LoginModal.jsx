@@ -3,18 +3,16 @@ import { Pill, Lock, Mail, User, AlertCircle, CheckCircle, ArrowLeft, KeyRound, 
 import { callApi } from '../utils/pywebview';
 
 export default function LoginModal({ onLoginSuccess }) {
-  // viewMode: 'auth' | 'forgot_request' | 'forgot_verify'
+
   const [viewMode, setViewMode] = useState('auth');
   const [isRegister, setIsRegister] = useState(false);
 
-  // Form states
   const [name, setName] = useState('');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Forgot password states
   const [resetIdent, setResetIdent] = useState('');
   const [resetEmail, setResetEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
@@ -129,7 +127,7 @@ export default function LoginModal({ onLoginSuccess }) {
   return (
     <div className="fixed inset-0 bg-[#090b12] flex items-center justify-center p-4 z-50">
       <div className="w-full max-w-md bg-[#121520] border border-[#24293e] rounded-2xl p-8 shadow-2xl space-y-6">
-        {/* Brand logo */}
+
         <div className="flex flex-col items-center text-center">
           <img
             src="/app_icon.png"
@@ -140,10 +138,9 @@ export default function LoginModal({ onLoginSuccess }) {
           <p className="text-xs text-slate-400 mt-1">Real-time Care & Medication Management System</p>
         </div>
 
-        {/* --- VIEW MODE 1: SIGN IN / CREATE ACCOUNT --- */}
         {viewMode === 'auth' && (
           <>
-            {/* Tab switch */}
+
             <div className="grid grid-cols-2 bg-[#171b29] border border-[#252b42] p-1 rounded-xl">
               <button
                 type="button"
@@ -165,7 +162,6 @@ export default function LoginModal({ onLoginSuccess }) {
               </button>
             </div>
 
-            {/* Alert message */}
             {message.text && (
               <div className={`p-3 rounded-xl flex items-center gap-2.5 text-xs font-medium ${
                 message.isError ? 'bg-rose-950/60 border border-rose-800/80 text-rose-300' : 'bg-emerald-950/60 border border-emerald-800/80 text-emerald-300'
@@ -245,7 +241,6 @@ export default function LoginModal({ onLoginSuccess }) {
                     <span className="select-none font-medium text-[11px]">Remember me 30d</span>
                   </label>
 
-                  {/* Forgot Password Button */}
                   <button
                     type="button"
                     onClick={() => {
@@ -271,7 +266,6 @@ export default function LoginModal({ onLoginSuccess }) {
           </>
         )}
 
-        {/* --- VIEW MODE 2: FORGOT PASSWORD - REQUEST CODE --- */}
         {viewMode === 'forgot_request' && (
           <div className="space-y-4">
             <div className="bg-[#171b29] border border-[#252b42] p-4 rounded-xl text-center space-y-1">
@@ -284,7 +278,6 @@ export default function LoginModal({ onLoginSuccess }) {
               </p>
             </div>
 
-            {/* Alert message */}
             {message.text && (
               <div className={`p-3 rounded-xl flex items-center gap-2.5 text-xs font-medium ${
                 message.isError ? 'bg-rose-950/60 border border-rose-800/80 text-rose-300' : 'bg-emerald-950/60 border border-emerald-800/80 text-emerald-300'
@@ -329,7 +322,6 @@ export default function LoginModal({ onLoginSuccess }) {
           </div>
         )}
 
-        {/* --- VIEW MODE 3: FORGOT PASSWORD - VERIFY CODE & SET NEW PASSWORD --- */}
         {viewMode === 'forgot_verify' && (
           <div className="space-y-4">
             <div className="bg-[#171b29] border border-[#252b42] p-4 rounded-xl text-center space-y-1">
@@ -342,7 +334,6 @@ export default function LoginModal({ onLoginSuccess }) {
               </p>
             </div>
 
-            {/* Alert message */}
             {message.text && (
               <div className={`p-3 rounded-xl flex items-center gap-2.5 text-xs font-medium ${
                 message.isError ? 'bg-rose-950/60 border border-rose-800/80 text-rose-300' : 'bg-emerald-950/60 border border-emerald-800/80 text-emerald-300'
