@@ -1,5 +1,6 @@
-
+/** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: ['selector', '[data-theme="dark"]'],
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,12 +8,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        darkBg: "#0d0f17",
-        sidebarBg: "#121520",
-        cardBg: "#161926",
-        cardBorder: "#24293e",
-        accentPurple: "#7c3aed",
-        accentCyan: "#38bdf8",
+        darkBg: "#0b0e14",
+        sidebarBg: "#0f131d",
+        cardBg: "#151926",
+        cardBorder: "#222838",
+        accentPrimary: "#4f46e5",
       }
     },
   },

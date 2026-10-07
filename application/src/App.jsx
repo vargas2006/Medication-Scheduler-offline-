@@ -104,7 +104,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen w-screen bg-[#0b0e14] text-slate-100 overflow-hidden select-none">
+    <div className="flex h-screen w-screen bg-slate-100 dark:bg-[#0b0e14] text-slate-900 dark:text-slate-100 overflow-hidden select-none transition-colors duration-150">
 
       <Sidebar
         activeTab={activeTab}
@@ -113,7 +113,7 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#0b0e14]">
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-100 dark:bg-[#0b0e14]">
 
         <Header activeTab={activeTab} user={user} theme={theme} onToggleTheme={handleToggleTheme} />
 
@@ -137,23 +137,23 @@ export default function App() {
       </div>
 
       {activeAlert && (
-        <div className="fixed top-5 right-5 z-[9999] w-[460px] max-w-[94vw] bg-[#151926] border border-emerald-500/40 rounded-2xl p-5 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="fixed top-5 right-5 z-[9999] w-[460px] max-w-[94vw] bg-white dark:bg-[#151926] border border-emerald-500/40 rounded-2xl p-5 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-200">
 
-          <div className="flex items-start justify-between gap-3 pb-3 mb-3 border-b border-[#1e2436]">
+          <div className="flex items-start justify-between gap-3 pb-3 mb-3 border-b border-slate-200 dark:border-[#1e2436]">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 shrink-0">
+              <div className="p-2 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl dark:text-emerald-400 shrink-0">
                 <Bell className="w-4 h-4" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-white text-sm tracking-wide">
+                  <span className="font-semibold text-slate-900 dark:text-white text-sm tracking-wide">
                     {activeAlert.title || 'Medication Reminder'}
                   </span>
-                  <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30">
                     Today
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-400 font-normal">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">
                   {activeAlert.date || 'Scheduled for today'} &bull; {activeAlert.timestamp || 'Due Now'}
                 </p>
               </div>
@@ -162,7 +162,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setActiveAlert(null)}
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-[#1c2234] transition-colors"
+              className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1c2234] transition-colors"
               title="Dismiss"
             >
               <X className="w-4 h-4" />
@@ -174,21 +174,21 @@ export default function App() {
               {activeAlert.medications.map((m, idx) => (
                 <div
                   key={idx}
-                  className="bg-[#1c2234] border border-[#262f46] hover:border-emerald-500/40 rounded-xl p-3 flex items-center justify-between transition-all"
+                  className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] hover:border-emerald-500/40 rounded-xl p-3 flex items-center justify-between transition-all"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 flex items-center justify-center dark:text-emerald-400 shrink-0">
                       <Pill className="w-3.5 h-3.5" />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="font-semibold text-white text-xs truncate">{m.name}</h4>
-                      <span className="inline-block mt-0.5 text-[10px] font-semibold text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded-md">
+                      <h4 className="font-semibold text-slate-900 dark:text-white text-xs truncate">{m.name}</h4>
+                      <span className="inline-block mt-0.5 text-[10px] font-semibold text-sky-700 bg-sky-50 border border-sky-200 dark:text-sky-400 dark:bg-sky-500/10 dark:border-sky-500/20 px-2 py-0.5 rounded-md">
                         {m.dosage}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0">
+                  <div className="flex items-center gap-1.5 text-purple-700 bg-purple-50 border border-purple-200 dark:text-purple-400 dark:bg-purple-500/10 dark:border-purple-500/20 px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0">
                     <Clock className="w-3.5 h-3.5" />
                     <span>{m.time_value || 'Today'}</span>
                   </div>
@@ -196,21 +196,21 @@ export default function App() {
               ))}
             </div>
           ) : (
-            <p className="text-slate-300 text-xs leading-relaxed mb-4 p-3 bg-[#1c2234] border border-[#262f46] rounded-xl">
+            <p className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed mb-4 p-3 bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl">
               {activeAlert.message}
             </p>
           )}
 
-          <div className="mb-4 px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-2 text-[11px] text-emerald-300 font-medium">
-            <Droplet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <div className="mb-4 px-3 py-2 bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20 rounded-xl flex items-center gap-2 text-[11px] dark:text-emerald-300 font-medium">
+            <Droplet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>Remember to log your intake after taking your dose.</span>
           </div>
 
-          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#1e2436]">
+          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200 dark:border-[#1e2436]">
             <button
               type="button"
               onClick={() => setActiveAlert(null)}
-              className="px-4 py-1.5 bg-[#1c2234] hover:bg-[#222838] border border-[#262f46] text-slate-300 font-semibold rounded-xl text-xs transition-colors"
+              className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#1c2234] dark:hover:bg-[#222838] border border-slate-200 dark:border-[#262f46] text-slate-700 dark:text-slate-300 font-semibold rounded-xl text-xs transition-colors"
             >
               Dismiss
             </button>

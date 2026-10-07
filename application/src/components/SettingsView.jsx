@@ -160,20 +160,20 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
   };
 
   return (
-    <div className="p-5 h-full overflow-hidden">
-      <div className="bg-[#151926] border border-[#222838] rounded-2xl p-6 h-full space-y-6 overflow-y-auto shadow-sm">
+    <div className="p-5 h-full overflow-hidden transition-colors duration-150">
+      <div className="bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#222838] rounded-2xl p-6 h-full space-y-6 overflow-y-auto shadow-sm">
 
         {/* Section 1: Appearance & Theme */}
         <div>
-          <h3 className="text-base font-bold text-white mb-1">Appearance & Theme</h3>
-          <p className="text-xs text-slate-400 mb-4">Toggle between high-contrast dark mode and light theme.</p>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">Appearance & Theme</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Toggle between high-contrast dark mode and light theme.</p>
 
-          <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-4 flex items-center justify-between max-w-lg">
+          <div className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl p-4 flex items-center justify-between max-w-lg">
             <div className="flex items-center gap-3">
-              {isDark ? <Moon className="w-5 h-5 text-indigo-400" /> : <Sun className="w-5 h-5 text-amber-400" />}
+              {isDark ? <Moon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> : <Sun className="w-5 h-5 text-amber-500" />}
               <div>
-                <span className="text-xs font-semibold text-white block">Theme Mode</span>
-                <span className="text-[11px] text-slate-400">{isDark ? 'Dark Mode Active' : 'Light Mode Active'}</span>
+                <span className="text-xs font-semibold text-slate-900 dark:text-white block">Theme Mode</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">{isDark ? 'Dark Mode Active' : 'Light Mode Active'}</span>
               </div>
             </div>
 
@@ -187,78 +187,78 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
           </div>
         </div>
 
-        <hr className="border-[#1e2436]" />
+        <hr className="border-slate-200 dark:border-[#1e2436]" />
 
         {/* Section 2: Notifications & Alerts */}
         <div>
           <div className="flex items-center justify-between max-w-lg mb-1">
-            <h3 className="text-base font-bold text-white">Notifications & Alerts</h3>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Notifications & Alerts</h3>
             {saveStatus && (
-              <span className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" /> {saveStatus}
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-400 mb-4">Configure system popups and verify Gmail for online medication alerts.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Configure system popups and verify Gmail for online medication alerts.</p>
 
           <div className="space-y-4 max-w-lg">
 
             {/* Offline Popups Toggle */}
-            <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-4 flex items-center justify-between">
+            <div className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Bell className="w-5 h-5 text-emerald-400" />
+                <Bell className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 <div>
-                  <span className="text-xs font-semibold text-white block">Local Desktop Notifications (Offline)</span>
-                  <span className="text-[11px] text-slate-400">Trigger OS native popups for medication alerts</span>
+                  <span className="text-xs font-semibold text-slate-900 dark:text-white block">Local Desktop Notifications (Offline)</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Trigger OS native popups for medication alerts</span>
                 </div>
               </div>
 
               <button
                 type="button"
                 onClick={() => setEnableOfflinePopups(!enableOfflinePopups)}
-                className={`w-11 h-6 rounded-full p-1 transition-colors ${enableOfflinePopups ? 'bg-emerald-600' : 'bg-slate-700'}`}
+                className={`w-11 h-6 rounded-full p-1 transition-colors ${enableOfflinePopups ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'}`}
               >
                 <div className={`w-4 h-4 rounded-full bg-white transition-transform ${enableOfflinePopups ? 'translate-x-5' : 'translate-x-0'}`} />
               </button>
             </div>
 
             {/* Gmail Reminders Toggle */}
-            <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-4 flex items-center justify-between">
+            <div className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-sky-400" />
+                <Mail className="w-5 h-5 text-sky-600 dark:text-sky-400" />
                 <div>
-                  <span className="text-xs font-semibold text-white block">Gmail Reminders (Requires Internet)</span>
-                  <span className="text-[11px] text-slate-400">Receive medication reminders directly to verified Gmail</span>
+                  <span className="text-xs font-semibold text-slate-900 dark:text-white block">Gmail Reminders (Requires Internet)</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Receive medication reminders directly to verified Gmail</span>
                 </div>
               </div>
 
               <button
                 type="button"
                 onClick={() => setEnableGmailNotifications(!enableGmailNotifications)}
-                className={`w-11 h-6 rounded-full p-1 transition-colors ${enableGmailNotifications ? 'bg-sky-600' : 'bg-slate-700'}`}
+                className={`w-11 h-6 rounded-full p-1 transition-colors ${enableGmailNotifications ? 'bg-sky-600' : 'bg-slate-300 dark:bg-slate-700'}`}
               >
                 <div className={`w-4 h-4 rounded-full bg-white transition-transform ${enableGmailNotifications ? 'translate-x-5' : 'translate-x-0'}`} />
               </button>
             </div>
 
             {/* Gmail Notification Binding Box */}
-            <div className="bg-[#151926] border border-[#222838] rounded-xl p-4 space-y-3.5">
+            <div className="bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#222838] rounded-xl p-4 space-y-3.5">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold text-white block">Gmail Notification Binding</span>
-                  <span className="text-[10px] text-slate-400">Verify your Gmail address using a 6-digit code to enable alerts.</span>
+                  <span className="text-xs font-bold text-slate-900 dark:text-white block">Gmail Notification Binding</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Verify your Gmail address using a 6-digit code to enable alerts.</span>
                 </div>
 
                 <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full shrink-0 ${
                   isEmailVerified && boundEmail
-                    ? 'bg-emerald-500/10 border border-emerald-500/20'
-                    : 'bg-amber-500/10 border border-amber-500/20'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20'
+                    : 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20'
                 }`}>
                   <div className={`w-1.5 h-1.5 rounded-full ${
-                    isEmailVerified && boundEmail ? 'bg-emerald-400' : 'bg-amber-400'
+                    isEmailVerified && boundEmail ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-amber-500 dark:bg-amber-400'
                   }`} />
                   <span className={`text-[10px] font-semibold ${
-                    isEmailVerified && boundEmail ? 'text-emerald-400' : 'text-amber-400'
+                    isEmailVerified && boundEmail ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'
                   }`}>
                     {isEmailVerified && boundEmail ? 'Verified & Bound' : 'Not Verified'}
                   </span>
@@ -267,7 +267,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
 
               {bindStatus.msg && (
                 <div className={`p-2.5 rounded-lg flex items-center gap-2 text-xs ${
-                  bindStatus.isError ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300' : 'bg-sky-500/15 border border-sky-500/30 text-sky-300'
+                  bindStatus.isError ? 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/15 dark:border-rose-500/30 dark:text-rose-300' : 'bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-500/15 dark:border-sky-500/30 dark:text-sky-300'
                 }`}>
                   {bindStatus.isError ? <AlertCircle className="w-3.5 h-3.5 shrink-0" /> : <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />}
                   <span className="text-[11px] font-medium">{bindStatus.msg}</span>
@@ -275,34 +275,34 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               )}
 
               {isEmailVerified && boundEmail ? (
-                <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-3 flex items-center justify-between">
+                <div className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl p-3 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     <div>
-                      <span className="text-[10px] text-slate-400 block">Bound Gmail Address</span>
-                      <span className="text-xs font-mono font-bold text-sky-400">{boundEmail}</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Bound Gmail Address</span>
+                      <span className="text-xs font-mono font-bold text-sky-600 dark:text-sky-400">{boundEmail}</span>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={handleUnbind}
-                    className="text-[11px] font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 px-3 py-1.5 rounded-lg transition-colors"
+                    className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 bg-rose-50 hover:bg-rose-100 border border-rose-200 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:border-rose-500/20 px-3 py-1.5 rounded-lg transition-colors"
                   >
                     Unbind Gmail
                   </button>
                 </div>
               ) : (
 
-                <div className="space-y-3 border-t border-[#262f46] pt-3">
+                <div className="space-y-3 border-t border-slate-200 dark:border-[#262f46] pt-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Enter Gmail Address for Notifications</label>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Enter Gmail Address for Notifications</label>
                     <div className="flex gap-2">
                       <input
                         type="email"
                         placeholder="yourname@gmail.com"
                         value={inputGmail}
                         onChange={(e) => setInputGmail(e.target.value)}
-                        className="flex-1 bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
+                        className="flex-1 bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-sky-500"
                       />
                       <button
                         type="button"
@@ -315,8 +315,8 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                   </div>
 
                   {codeSent && (
-                    <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-3 space-y-2.5">
-                      <label className="block text-xs font-semibold text-slate-300">Enter 6-Digit Verification Code</label>
+                    <div className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl p-3 space-y-2.5">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Enter 6-Digit Verification Code</label>
                       <div className="flex gap-2">
                         <input
                           type="text"
@@ -324,7 +324,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                           placeholder="123456"
                           value={otpCode}
                           onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                          className="w-36 bg-[#151926] border border-[#262f46] rounded-xl px-3 py-2 text-center text-sm font-mono tracking-widest text-sky-400 focus:outline-none focus:border-sky-500"
+                          className="w-36 bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#262f46] rounded-xl px-3 py-2 text-center text-sm font-mono tracking-widest text-sky-600 dark:text-sky-400 focus:outline-none focus:border-sky-500"
                         />
                         <button
                           type="button"
@@ -353,35 +353,35 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
           </div>
         </div>
 
-        <hr className="border-[#1e2436]" />
+        <hr className="border-slate-200 dark:border-[#1e2436]" />
 
         {/* Section 3: Account Information */}
         <div>
-          <h3 className="text-base font-bold text-white mb-1">Account Information</h3>
-          <p className="text-xs text-slate-400 mb-4">Active user credentials and profile details.</p>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">Account Information</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Active user credentials and profile details.</p>
 
           <div className="space-y-3 max-w-lg">
-            <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-3.5 flex items-center gap-3">
-              <UserCheck className="w-5 h-5 text-sky-400" />
+            <div className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl p-3.5 flex items-center gap-3">
+              <UserCheck className="w-5 h-5 text-sky-600 dark:text-sky-400" />
               <div className="text-xs">
-                <span className="text-slate-400 block text-[10px]">Logged in as</span>
-                <span className="font-semibold text-white">{displayName}{emailInfo}</span>
+                <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Logged in as</span>
+                <span className="font-semibold text-slate-900 dark:text-white">{displayName}{emailInfo}</span>
               </div>
             </div>
 
-            <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-3.5 flex items-center gap-3">
-              <Shield className="w-5 h-5 text-purple-400" />
+            <div className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl p-3.5 flex items-center gap-3">
+              <Shield className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               <div className="text-xs">
-                <span className="text-slate-400 block text-[10px]">Password Security</span>
-                <span className="font-semibold text-white">PBKDF2-SHA256 Hashed &nbsp;<span className="text-emerald-400 text-[10px] font-normal">Secure</span></span>
+                <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Password Security</span>
+                <span className="font-semibold text-slate-900 dark:text-white">PBKDF2-SHA256 Hashed &nbsp;<span className="text-emerald-600 dark:text-emerald-400 text-[10px] font-normal">Secure</span></span>
               </div>
             </div>
 
             {/* Change Password Box */}
-            <div className="bg-[#151926] border border-[#222838] rounded-xl p-4 space-y-3">
+            <div className="bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#222838] rounded-xl p-4 space-y-3">
               <div>
-                <span className="text-xs font-bold text-white block mb-0.5">Change Password</span>
-                <span className="text-[10px] text-slate-400">Your password is securely hashed and never stored in plain text.</span>
+                <span className="text-xs font-bold text-slate-900 dark:text-white block mb-0.5">Change Password</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Your password is securely hashed and never stored in plain text.</span>
               </div>
               <div className="space-y-2">
                 <input
@@ -389,21 +389,21 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                   placeholder="Current password"
                   value={currentPw}
                   onChange={(e) => setCurrentPw(e.target.value)}
-                  className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
+                  className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-sky-500"
                 />
                 <input
                   type="password"
                   placeholder="New password (min. 6 characters)"
                   value={newPw}
                   onChange={(e) => setNewPw(e.target.value)}
-                  className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
+                  className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-sky-500"
                 />
                 <input
                   type="password"
                   placeholder="Confirm new password"
                   value={confirmPw}
                   onChange={(e) => setConfirmPw(e.target.value)}
-                  className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
+                  className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-sky-500"
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -416,19 +416,19 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                 </button>
                 {pwStatus.msg && (
                   <span className={`text-[11px] font-semibold ${
-                    pwStatus.ok === true ? 'text-emerald-400' :
-                    pwStatus.ok === false ? 'text-rose-400' : 'text-slate-400'
+                    pwStatus.ok === true ? 'text-emerald-600 dark:text-emerald-400' :
+                    pwStatus.ok === false ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400'
                   }`}>{pwStatus.msg}</span>
                 )}
               </div>
             </div>
 
             {/* Software Updates Box */}
-            <div className="bg-[#151926] border border-[#222838] rounded-xl p-4 space-y-3">
+            <div className="bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#222838] rounded-xl p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold text-white block">Software Updates</span>
-                  <span className="text-[10px] text-slate-400">Current App Version: <strong className="text-purple-400 font-mono">v{appVersion}</strong></span>
+                  <span className="text-xs font-bold text-slate-900 dark:text-white block">Software Updates</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Current App Version: <strong className="text-purple-600 dark:text-purple-400 font-mono">v{appVersion}</strong></span>
                 </div>
                 <button
                   type="button"
@@ -467,7 +467,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                   Check for Updates
                 </button>
               </div>
-              <div id="chk-update-status" className="text-[11px] font-medium text-slate-400"></div>
+              <div id="chk-update-status" className="text-[11px] font-medium text-slate-500 dark:text-slate-400"></div>
             </div>
           </div>
         </div>
