@@ -154,7 +154,10 @@ class PythonAPI:
                     "user_id": m.user_id,
                     "name": m.name,
                     "dosage": m.dosage,
+                    "strength": getattr(m, 'strength', '') or m.dosage,
+                    "dosage_form": getattr(m, 'dosage_form', '') or 'Tablet',
                     "stock": m.stock,
+                    "stock_unit": getattr(m, 'stock_unit', '') or 'tablets',
                     "refill_threshold": m.refill_threshold,
                     "image_path": m.image_path,
                     "is_low_stock": m.is_low_stock()
@@ -163,16 +166,21 @@ class PythonAPI:
         except Exception as e:
             return {"success": False, "error": str(e), "medications": []}
 
-    def add_medication(self, user_id, name, dosage, stock, refill_threshold, image_path=None, schedule_type=None, time_value=None, schedule_date=None):
+    def add_medication(self, user_id, name, dosage, stock, refill_threshold, image_path=None, strength=None, dosage_form='Tablet', stock_unit='tablets'):
         try:
             user_id = int(user_id)
             stock = int(stock)
             refill_threshold = int(refill_threshold)
+            clean_dosage = dosage.strip() if dosage else (strength.strip() if strength else '')
+            clean_strength = strength.strip() if strength else clean_dosage
+            clean_form = dosage_form.strip() if dosage_form else 'Tablet'
+            clean_unit = stock_unit.strip() if stock_unit else 'tablets'
 
             med_id = self.inventory_manager.add_medication(
-                user_id, name, dosage, stock, refill_threshold, image_path
+                user_id, name, clean_dosage, stock, refill_threshold, image_path,
+                strength=clean_strength, dosage_form=clean_form, stock_unit=clean_unit
             )
-            return {"success": True, "message": "Medication added successfully!", "med_id": med_id}
+            return {"success": True, "message": "Medication registered in inventory successfully!", "med_id": med_id}
         except Exception as e:
             return {"success": False, "message": str(e)}
 
@@ -184,13 +192,49 @@ class PythonAPI:
         except Exception as e:
             return {"success": False, "message": str(e)}
 
-    def take_dose(self, user_id, med_id):
+    def take_dose(self, user_id, med_id, amount=1):
         try:
             user_id = int(user_id)
             med_id = int(med_id)
-            self.inventory_manager.deduct_stock(med_id)
+            amt = int(amount) if amount else 1
+            self.inventory_manager.deduct_stock(med_id, amt)
             self.report_generator.log_intake(user_id, med_id, "TAKEN")
             return {"success": True, "message": "Dose logged as TAKEN."}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
+    def get_schedules(self, user_id):
+        try:
+            user_id = int(user_id)
+            schedules = self.dose_alert.get_user_schedules(user_id)
+            result = []
+            for s in schedules:
+                result.append({
+                    "schedule_id": s.schedule_id,
+                    "med_id": s.med_id,
+                    "med_name": s.med_name,
+                    "strength": s.strength,
+                    "time_value": s.time_value,
+                    "schedule_date": s.schedule_date,
+                    "dose_per_intake": s.dose_per_intake,
+                    "dose_unit": s.dose_unit,
+                    "frequency": s.frequency,
+                    "start_date": s.start_date,
+                    "end_date": s.end_date,
+                    "instructions": s.instructions,
+                    "status": s.status,
+                    "stock": s.stock,
+                    "stock_unit": s.stock_unit
+                })
+            return {"success": True, "schedules": result}
+        except Exception as e:
+            return {"success": False, "error": str(e), "schedules": []}
+
+    def delete_schedule(self, schedule_id):
+        try:
+            schedule_id = int(schedule_id)
+            self.dose_alert.delete_schedule(schedule_id)
+            return {"success": True, "message": "Schedule deleted successfully."}
         except Exception as e:
             return {"success": False, "message": str(e)}
 
@@ -221,21 +265,30 @@ class PythonAPI:
         except Exception as e:
             return {"success": False, "message": str(e)}
 
-    def create_intake_schedule(self, user_id, med_id, date_str, time_str, status="TAKEN"):
+    def create_intake_schedule(self, user_id, med_id, date_str, time_str, status="SCHEDULED", dose_per_intake=1, dose_unit="tablet", frequency="Every day", start_date=None, end_date=None, instructions=""):
         try:
             user_id = int(user_id)
             med_id = int(med_id)
-            clean_time = time_str.strip()
-            clean_date = date_str.strip()
+            clean_time = str(time_str).strip()
+            clean_date = str(date_str).strip() if date_str else None
 
             if status == "TAKEN":
-                timestamp_str = f"{clean_date} {clean_time}:00" if len(clean_time) == 5 else f"{clean_date} {clean_time}"
-                self.inventory_manager.deduct_stock(med_id)
+                timestamp_str = f"{clean_date or datetime.now().strftime('%Y-%m-%d')} {clean_time}:00" if len(clean_time) == 5 else f"{clean_date} {clean_time}"
+                self.inventory_manager.deduct_stock(med_id, int(dose_per_intake) if dose_per_intake else 1)
                 self.report_generator.log_intake(user_id, med_id, "TAKEN", timestamp_str)
-                return {"success": True, "message": f"Dose logged as TAKEN for {clean_date} at {clean_time}!"}
+                return {"success": True, "message": f"Dose logged as TAKEN for {clean_time}!"}
             else:
-                self.dose_alert.add_schedule(med_id, "DAILY_TIME", clean_time, schedule_date=clean_date)
-                return {"success": True, "message": f"Intake scheduled for {clean_date} at {clean_time}!"}
+                self.dose_alert.add_schedule(
+                    med_id, "DAILY_TIME", clean_time,
+                    schedule_date=clean_date,
+                    dose_per_intake=int(dose_per_intake) if dose_per_intake else 1,
+                    dose_unit=dose_unit or "tablet",
+                    frequency=frequency or "Every day",
+                    start_date=start_date or clean_date,
+                    end_date=end_date or None,
+                    instructions=instructions or ""
+                )
+                return {"success": True, "message": f"Intake scheduled for {clean_time}!"}
         except Exception as e:
             return {"success": False, "message": str(e)}
 

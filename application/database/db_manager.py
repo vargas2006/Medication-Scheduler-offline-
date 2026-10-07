@@ -93,7 +93,17 @@ class DatabaseManager:
         try:
             cursor.execute("ALTER TABLE medications ADD COLUMN image_path TEXT")
         except sqlite3.OperationalError:
-            pass                        
+            pass
+
+        for col_name, col_type in [
+            ("strength", "TEXT DEFAULT ''"),
+            ("dosage_form", "TEXT DEFAULT 'Tablet'"),
+            ("stock_unit", "TEXT DEFAULT 'tablets'")
+        ]:
+            try:
+                cursor.execute(f"ALTER TABLE medications ADD COLUMN {col_name} {col_type}")
+            except sqlite3.OperationalError:
+                pass
 
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS schedules (
@@ -104,6 +114,20 @@ class DatabaseManager:
                 FOREIGN KEY(medication_id) REFERENCES medications(id) ON DELETE CASCADE
             )
         ''')
+
+        for col_name, col_type in [
+            ("dose_per_intake", "INTEGER DEFAULT 1"),
+            ("dose_unit", "TEXT DEFAULT 'tablet'"),
+            ("frequency", "TEXT DEFAULT 'Every day'"),
+            ("start_date", "TEXT DEFAULT NULL"),
+            ("end_date", "TEXT DEFAULT NULL"),
+            ("instructions", "TEXT DEFAULT ''"),
+            ("status", "TEXT DEFAULT 'ACTIVE'")
+        ]:
+            try:
+                cursor.execute(f"ALTER TABLE schedules ADD COLUMN {col_name} {col_type}")
+            except sqlite3.OperationalError:
+                pass
 
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS intake_log (

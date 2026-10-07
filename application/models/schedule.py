@@ -2,22 +2,51 @@ from database.db_manager import DatabaseManager
 from datetime import datetime, timedelta
 
 class Schedule:
-    def __init__(self, schedule_id, med_id, schedule_type, time_value, schedule_date=None):
+    def __init__(self, schedule_id, med_id, schedule_type, time_value, schedule_date=None, dose_per_intake=1, dose_unit='tablet', frequency='Every day', start_date=None, end_date=None, instructions='', status='ACTIVE', med_name='', strength='', stock=0, stock_unit='tablets'):
         self.schedule_id = schedule_id
         self.med_id = med_id
         self.schedule_type = schedule_type
         self.time_value = time_value
         self.schedule_date = schedule_date
+        self.dose_per_intake = dose_per_intake or 1
+        self.dose_unit = dose_unit or 'tablet'
+        self.frequency = frequency or 'Every day'
+        self.start_date = start_date
+        self.end_date = end_date
+        self.instructions = instructions or ''
+        self.status = status or 'ACTIVE'
+        self.med_name = med_name
+        self.strength = strength
+        self.stock = stock
+        self.stock_unit = stock_unit or 'tablets'
 
 class DoseAlert:
     def __init__(self):
         self.db = DatabaseManager()
 
-    def add_schedule(self, med_id, schedule_type, time_value, schedule_date=None):
-        self.db.execute_query(
-            "INSERT INTO schedules (medication_id, schedule_type, time_value, schedule_date) VALUES (?, ?, ?, ?)",
-            (med_id, schedule_type, time_value, schedule_date)
+    def add_schedule(self, med_id, schedule_type, time_value, schedule_date=None, dose_per_intake=1, dose_unit='tablet', frequency='Every day', start_date=None, end_date=None, instructions=''):
+        return self.db.execute_query(
+            '''INSERT INTO schedules (medication_id, schedule_type, time_value, schedule_date, dose_per_intake, dose_unit, frequency, start_date, end_date, instructions, status)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE')''',
+            (med_id, schedule_type, time_value, schedule_date, dose_per_intake, dose_unit, frequency, start_date, end_date, instructions)
         )
+
+    def get_user_schedules(self, user_id):
+        query = '''
+            SELECT s.id, s.medication_id, s.schedule_type, s.time_value, s.schedule_date,
+                   COALESCE(s.dose_per_intake, 1), COALESCE(s.dose_unit, 'tablet'), COALESCE(s.frequency, 'Every day'),
+                   s.start_date, s.end_date, COALESCE(s.instructions, ''), COALESCE(s.status, 'ACTIVE'),
+                   m.name, COALESCE(NULLIF(m.strength, ''), m.dosage), m.stock, COALESCE(NULLIF(m.stock_unit, ''), 'tablets')
+            FROM schedules s
+            JOIN medications m ON s.medication_id = m.id
+            WHERE m.user_id = ?
+            ORDER BY s.id DESC
+        '''
+        rows = self.db.fetch_all(query, (user_id,))
+        return [Schedule(*row) for row in rows]
+
+    def delete_schedule(self, schedule_id):
+        self.db.execute_query("DELETE FROM schedules WHERE id = ?", (schedule_id,))
 
     def get_medication_schedules(self, med_id):
         rows = self.db.fetch_all("SELECT id, medication_id, schedule_type, time_value, schedule_date FROM schedules WHERE medication_id = ?", (med_id,))

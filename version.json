@@ -1,7 +1,7 @@
 {
-  "version": "1.0.24",
+  "version": "1.0.25",
   "release_date": "2026-10-07",
-  "release_notes": "Version 1.0.24: Separated Medication Stock inventory management from Intake scheduling and history creation.",
+  "release_notes": "Version 1.0.25: Fixed separation between Medication Stock inventory and Intake Medication schedule system. Stock items are inventory-only; Intake Medication requires explicit scheduling; Take Dose logs intake history and deducts stock count.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }
