@@ -12,7 +12,7 @@ export default {
         sidebarBg: "#0f131d",
         cardBg: "#151926",
         cardBorder: "#222838",
-        accentPrimary: "#4f46e5",
+        accentPrimary: "#7c3aed",
       }
     },
   },

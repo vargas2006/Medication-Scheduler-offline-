@@ -332,8 +332,8 @@ class NotificationWorker:
             users = self.db.fetch_all("SELECT id, username, email FROM users")
             for u_id, u_name, u_email in users:
                 u_settings = self.db.get_settings(u_id)
-                if u_settings.get("enable_gmail_notifications"):
-                    target_email = (u_settings.get("recipient_email") or u_email or "").strip()
+                if u_settings.get("enable_gmail_notifications") and u_settings.get("is_email_verified"):
+                    target_email = (u_settings.get("recipient_email") or "").strip()
                     if target_email:
                         due_meds = dose_alert.get_due_medications(u_id)
 

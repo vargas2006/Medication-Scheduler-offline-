@@ -170,7 +170,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
 
           <div className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl p-4 flex items-center justify-between max-w-lg">
             <div className="flex items-center gap-3">
-              {isDark ? <Moon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> : <Sun className="w-5 h-5 text-amber-500" />}
+              {isDark ? <Moon className="w-5 h-5 text-purple-600 dark:text-purple-400" /> : <Sun className="w-5 h-5 text-amber-500" />}
               <div>
                 <span className="text-xs font-semibold text-slate-900 dark:text-white block">Theme Mode</span>
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">{isDark ? 'Dark Mode Active' : 'Light Mode Active'}</span>
@@ -180,7 +180,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
             <button
               type="button"
               onClick={onToggleTheme}
-              className={`w-11 h-6 rounded-full p-1 transition-colors ${isDark ? 'bg-indigo-600' : 'bg-amber-500'}`}
+              className={`w-11 h-6 rounded-full p-1 transition-colors ${isDark ? 'bg-purple-600' : 'bg-amber-500'}`}
             >
               <div className={`w-4 h-4 rounded-full bg-white transition-transform ${isDark ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
@@ -302,12 +302,12 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                         placeholder="yourname@gmail.com"
                         value={inputGmail}
                         onChange={(e) => setInputGmail(e.target.value)}
-                        className="flex-1 bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-sky-500"
+                        className="flex-1 bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
                       />
                       <button
                         type="button"
                         onClick={handleSendCode}
-                        className="text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white px-3.5 py-2 rounded-xl transition-colors shrink-0"
+                        className="text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white px-3.5 py-2 rounded-xl transition-colors shrink-0"
                       >
                         {codeSent ? 'Resend Code' : 'Send Code'}
                       </button>
@@ -324,7 +324,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                           placeholder="123456"
                           value={otpCode}
                           onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                          className="w-36 bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#262f46] rounded-xl px-3 py-2 text-center text-sm font-mono tracking-widest text-sky-600 dark:text-sky-400 focus:outline-none focus:border-sky-500"
+                          className="w-36 bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#262f46] rounded-xl px-3 py-2 text-center text-sm font-mono tracking-widest text-purple-600 dark:text-purple-400 focus:outline-none focus:border-purple-500"
                         />
                         <button
                           type="button"
@@ -344,7 +344,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               <button
                 type="button"
                 onClick={handleSaveSettings}
-                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs px-5 py-2.5 rounded-xl shadow-sm transition-all"
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs px-5 py-2.5 rounded-xl shadow-sm transition-all"
               >
                 <Save className="w-4 h-4" />
                 Save Settings
@@ -389,28 +389,28 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                   placeholder="Current password"
                   value={currentPw}
                   onChange={(e) => setCurrentPw(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-sky-500"
+                  className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
                 />
                 <input
                   type="password"
                   placeholder="New password (min. 6 characters)"
                   value={newPw}
                   onChange={(e) => setNewPw(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-sky-500"
+                  className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
                 />
                 <input
                   type="password"
                   placeholder="Confirm new password"
                   value={confirmPw}
                   onChange={(e) => setConfirmPw(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-sky-500"
+                  className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
                 />
               </div>
               <div className="flex items-center justify-between">
                 <button
                   type="button"
                   onClick={handleChangePassword}
-                  className="text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg transition-colors"
+                  className="text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg transition-colors"
                 >
                   Update Password
                 </button>
@@ -462,7 +462,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                     }
                   }}
                   id="chk-update-btn"
-                  className="text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                  className="text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
                 >
                   Check for Updates
                 </button>

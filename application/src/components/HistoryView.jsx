@@ -91,11 +91,11 @@ export default function HistoryView({ user }) {
         <div className="flex flex-col gap-3 mb-4 pb-3 border-b border-slate-200 dark:border-[#1e2436]">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <History className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <History className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               <span>Intake History Audit</span>
             </h3>
 
-            <span className="text-xs font-semibold text-purple-700 bg-purple-50 border border-purple-200 dark:text-purple-400 dark:bg-purple-500/10 dark:border-purple-500/20 px-2.5 py-0.5 rounded-md">
+            <span className="text-xs font-semibold text-purple-700 bg-purple-50 border border-purple-200 dark:text-purple-300 dark:bg-purple-500/15 dark:border-purple-500/20 px-2.5 py-0.5 rounded-md">
               {filteredHistory.length} Logs
             </span>
           </div>
@@ -188,7 +188,7 @@ export default function HistoryView({ user }) {
         </span>
         <button
           onClick={handleExportCSV}
-          className="bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs px-4 py-2 rounded-xl flex items-center gap-2 transition-colors shadow-sm"
+          className="bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs px-4 py-2 rounded-xl flex items-center gap-2 transition-colors shadow-sm"
         >
           <FileSpreadsheet className="w-4 h-4" />
           <span>Export to CSV Report</span>

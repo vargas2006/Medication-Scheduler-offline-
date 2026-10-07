@@ -59,14 +59,14 @@ export default function DashboardView({ user, onDataChange }) {
   return (
     <div className="p-5 space-y-5 overflow-y-auto h-full pr-6 transition-colors duration-150">
 
-      {/* Top 4 Summary Cards */}
+      {/* Top 4 Summary Cards - Neutral Containers with Restrained Accent Hierarchy */}
       <div className="grid grid-cols-4 gap-4">
 
         {/* Stat 1: Active Medications */}
         <div className="bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#222838] rounded-2xl p-4 h-[115px] flex flex-col justify-between shadow-sm hover:border-slate-300 dark:hover:border-[#2b334a] transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Active Medications</span>
-            <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
               <Pill className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -96,14 +96,14 @@ export default function DashboardView({ user, onDataChange }) {
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Low Stock Alerts</span>
             <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${
               low_stock > 0
-                ? 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30'
+                ? 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30'
                 : 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30'
             }`}>
               {low_stock > 0 ? 'ATTENTION' : 'OPTIMAL'}
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={`text-3xl font-bold tracking-tight ${low_stock > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'}`}>
+            <span className={`text-3xl font-bold tracking-tight ${low_stock > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
               {low_stock}
             </span>
           </div>
@@ -114,7 +114,7 @@ export default function DashboardView({ user, onDataChange }) {
         <div className="bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#222838] rounded-2xl p-4 h-[115px] flex flex-col justify-between shadow-sm hover:border-slate-300 dark:hover:border-[#2b334a] transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Doses Logged</span>
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-500/15 dark:text-sky-400 dark:border-sky-500/30">
+            <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 dark:bg-[#1e2436] dark:text-slate-300 dark:border-slate-700/50">
               HISTORY
             </span>
           </div>
@@ -132,12 +132,12 @@ export default function DashboardView({ user, onDataChange }) {
         <div className="col-span-6 bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#222838] rounded-2xl h-[280px] flex flex-col overflow-hidden shadow-sm">
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-[#1e2436]">
             <div className="flex items-center gap-2">
-              <Bell className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <Bell className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               <h3 className="font-bold text-slate-900 dark:text-white text-sm">Due Right Now</h3>
             </div>
             <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${
               due_meds.length > 0
-                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-400 dark:border-indigo-500/30'
+                ? 'bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/30'
                 : 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30'
             }`}>
               {due_meds.length > 0 ? `${due_meds.length} Due` : 'Caught Up'}
@@ -155,10 +155,10 @@ export default function DashboardView({ user, onDataChange }) {
               due_meds.map((med) => (
                 <div
                   key={med.med_id}
-                  className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] hover:border-indigo-300 dark:hover:border-indigo-500/40 rounded-xl p-3 flex items-center justify-between transition-all"
+                  className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] hover:border-purple-300 dark:hover:border-purple-500/40 rounded-xl p-3 flex items-center justify-between transition-all"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
                       <Pill className="w-4 h-4" />
                     </div>
                     <div>
@@ -182,14 +182,14 @@ export default function DashboardView({ user, onDataChange }) {
           </div>
         </div>
 
-        {/* Weekly Adherence Chart (4 cols) */}
+        {/* Weekly Adherence Chart (4 cols) - Single Restrained Purple Palette */}
         <div className="col-span-4 bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#222838] rounded-2xl h-[280px] flex flex-col p-4 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              <BarChart3 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               <span>Weekly Intake Adherence</span>
             </h3>
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-500/15 dark:text-sky-400 dark:border-sky-500/30">
+            <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 dark:bg-[#1e2436] dark:text-slate-300 dark:border-slate-700/50">
               Mon - Sun
             </span>
           </div>
@@ -198,8 +198,7 @@ export default function DashboardView({ user, onDataChange }) {
             {days.map((day, idx) => {
               const val = weekly_counts[idx] || 0;
               const heightPct = Math.max(8, Math.round((val / maxWeekly) * 100));
-              const colors = ['bg-indigo-500', 'bg-sky-500', 'bg-teal-500', 'bg-purple-500', 'bg-indigo-400', 'bg-sky-400', 'bg-teal-400'];
-              const barColor = val === 0 ? 'bg-slate-200 dark:bg-[#222838]' : colors[idx % colors.length];
+              const barColor = val === 0 ? 'bg-slate-200 dark:bg-[#222838]' : 'bg-purple-600 dark:bg-purple-500';
 
               return (
                 <div key={day} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
@@ -220,7 +219,7 @@ export default function DashboardView({ user, onDataChange }) {
       <div className="bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#222838] rounded-2xl h-[220px] flex flex-col overflow-hidden shadow-sm">
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-[#1e2436]">
           <h3 className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-2">
-            <History className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <History className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             <span>Recent Activity Log</span>
           </h3>
           <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-[#1e2436] text-slate-600 dark:text-slate-400">

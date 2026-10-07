@@ -31,11 +31,11 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
               onClick={() => setActiveTab('DashboardFrame')}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
                 activeTab === 'DashboardFrame'
-                  ? 'bg-indigo-50 dark:bg-indigo-600/15 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 shadow-sm'
+                  ? 'bg-purple-50 text-purple-700 dark:bg-purple-600/15 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#171c2b] hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              <LayoutDashboard className={`w-4 h-4 ${activeTab === 'DashboardFrame' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
+              <LayoutDashboard className={`w-4 h-4 ${activeTab === 'DashboardFrame' ? 'text-purple-600 dark:text-purple-400' : 'text-slate-400'}`} />
               <span>Dashboard</span>
             </button>
 
@@ -43,11 +43,11 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
               onClick={() => setActiveTab('MedicationFrame')}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
                 activeTab === 'MedicationFrame'
-                  ? 'bg-indigo-50 dark:bg-indigo-600/15 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 shadow-sm'
+                  ? 'bg-purple-50 text-purple-700 dark:bg-purple-600/15 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#171c2b] hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              <Pill className={`w-4 h-4 ${activeTab === 'MedicationFrame' ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400'}`} />
+              <Pill className={`w-4 h-4 ${activeTab === 'MedicationFrame' ? 'text-purple-600 dark:text-purple-400' : 'text-slate-400'}`} />
               <span>Medication Stock</span>
             </button>
 
@@ -55,11 +55,11 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
               onClick={() => setActiveTab('IntakeFrame')}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
                 activeTab === 'IntakeFrame'
-                  ? 'bg-indigo-50 dark:bg-indigo-600/15 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 shadow-sm'
+                  ? 'bg-purple-50 text-purple-700 dark:bg-purple-600/15 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#171c2b] hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              <CheckCircle className={`w-4 h-4 ${activeTab === 'IntakeFrame' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`} />
+              <CheckCircle className={`w-4 h-4 ${activeTab === 'IntakeFrame' ? 'text-purple-600 dark:text-purple-400' : 'text-slate-400'}`} />
               <span>Intake Medication</span>
             </button>
           </nav>
@@ -75,7 +75,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
               onClick={() => setActiveTab('HistoryFrame')}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
                 activeTab === 'HistoryFrame'
-                  ? 'bg-indigo-50 dark:bg-indigo-600/15 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 shadow-sm'
+                  ? 'bg-purple-50 text-purple-700 dark:bg-purple-600/15 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#171c2b] hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
@@ -87,11 +87,11 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
               onClick={() => setActiveTab('SettingsFrame')}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
                 activeTab === 'SettingsFrame'
-                  ? 'bg-indigo-50 dark:bg-indigo-600/15 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 shadow-sm'
+                  ? 'bg-purple-50 text-purple-700 dark:bg-purple-600/15 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#171c2b] hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              <Settings className={`w-4 h-4 ${activeTab === 'SettingsFrame' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
+              <Settings className={`w-4 h-4 ${activeTab === 'SettingsFrame' ? 'text-purple-600 dark:text-purple-400' : 'text-slate-400'}`} />
               <span>Settings</span>
             </button>
           </nav>

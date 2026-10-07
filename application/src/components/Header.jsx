@@ -15,35 +15,30 @@ export default function Header({ activeTab, user, theme = 'dark', onToggleTheme 
       case 'MedicationFrame':
         return {
           tag: 'INVENTORY & STOCK',
-          tagColor: 'text-sky-700 bg-sky-50 border-sky-200 dark:text-sky-400 dark:bg-sky-500/10 dark:border-sky-500/20',
           title: 'Medication Stock',
           subtitle: 'Register new drugs, manage inventory levels, and configure refill alert thresholds.'
         };
       case 'IntakeFrame':
         return {
           tag: 'DOSE LOGGING',
-          tagColor: 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20',
           title: 'Intake Medication',
           subtitle: 'Select and log doses for your registered medications in real time.'
         };
       case 'HistoryFrame':
         return {
           tag: 'AUDIT & INTAKE LOGS',
-          tagColor: 'text-purple-700 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-500/10 dark:border-purple-500/20',
           title: 'Intake History',
           subtitle: 'Complete historical audit of your medication doses taken and schedule records.'
         };
       case 'SettingsFrame':
         return {
           tag: 'SYSTEM CONFIGURATION',
-          tagColor: 'text-indigo-700 bg-indigo-50 border-indigo-200 dark:text-indigo-400 dark:bg-indigo-500/10 dark:border-indigo-500/20',
           title: 'Settings & Preferences',
           subtitle: 'Personalize application theme, profile details, and alert notifications.'
         };
       default:
         return {
           tag: 'REALTIME CARE MONITOR',
-          tagColor: 'text-indigo-700 bg-indigo-50 border-indigo-200 dark:text-indigo-400 dark:bg-indigo-500/10 dark:border-indigo-500/20',
           title: 'Dashboard Overview',
           subtitle: `Welcome back, ${displayName}! Here is your medication schedule today.`
         };
@@ -55,7 +50,7 @@ export default function Header({ activeTab, user, theme = 'dark', onToggleTheme 
   return (
     <header className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-[#1e2436] bg-white dark:bg-[#0f131d] shrink-0 transition-colors duration-150">
       <div>
-        <div className={`inline-flex items-center px-2 py-0.5 mb-1 rounded border text-[10px] font-bold tracking-wider ${meta.tagColor}`}>
+        <div className="inline-flex items-center px-2 py-0.5 mb-1 rounded border text-[10px] font-bold tracking-wider text-purple-700 bg-purple-50 border-purple-200 dark:text-purple-300 dark:bg-purple-500/10 dark:border-purple-500/20">
           <span>{meta.tag}</span>
         </div>
         <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight">{meta.title}</h1>
@@ -77,7 +72,7 @@ export default function Header({ activeTab, user, theme = 'dark', onToggleTheme 
             </>
           ) : (
             <>
-              <Moon className="w-3.5 h-3.5 text-indigo-600" />
+              <Moon className="w-3.5 h-3.5 text-purple-600" />
               <span className="hidden sm:inline text-xs text-slate-700">Dark Mode</span>
             </>
           )}

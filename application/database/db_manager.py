@@ -257,7 +257,7 @@ class DatabaseManager:
                     "recipient_email": row[3] or "",
                     "sender_email": s_email,
                     "sender_password": s_pass,
-                    "is_email_verified": row[6] if len(row) > 6 and row[6] is not None else (1 if row[3] else 0)
+                    "is_email_verified": row[6] if len(row) > 6 and row[6] is not None else 0
                 }
             self.execute_query(
                 "INSERT INTO settings (user_id, enable_offline_popups, enable_gmail_notifications, recipient_email, sender_email, sender_password, is_email_verified) VALUES (?, 0, 0, '', '', '', 0)",
