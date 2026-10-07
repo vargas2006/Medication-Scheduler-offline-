@@ -1,7 +1,7 @@
 {
-  "version": "1.0.26",
+  "version": "1.0.27",
   "release_date": "2026-10-07",
-  "release_notes": "Version 1.0.26: Added Start Date and End Date to Medication Stock and Intake Medication cards, and updated Medication Stock inner card container layout to match Intake Medication design.",
+  "release_notes": "Version 1.0.27: Removed Start Date and End Date from Medication Stock inventory management, keeping the clean inner card container layout matching Intake Medication design.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }
