@@ -1,7 +1,7 @@
 {
-  "version": "1.0.21",
+  "version": "1.0.22",
   "release_date": "2026-10-07",
-  "release_notes": "Version 1.0.21: Complete UI/UX modern redesign, restrained purple hierarchy, dual-theme support, and Gmail verification security fix.",
+  "release_notes": "Version 1.0.22: Replaced browser confirmation dialog with custom native-feeling history deletion modal.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }
