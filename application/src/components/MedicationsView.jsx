@@ -32,7 +32,8 @@ export default function MedicationsView({ user, onDataChange }) {
 
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState('');
-  const [strength, setStrength] = useState('');
+  const [strengthVal, setStrengthVal] = useState('500');
+  const [strengthUnit, setStrengthUnit] = useState('mg');
   const [dosageForm, setDosageForm] = useState('Tablet');
   const [stock, setStock] = useState('30');
   const [stockUnit, setStockUnit] = useState('tablets');
@@ -59,14 +60,16 @@ export default function MedicationsView({ user, onDataChange }) {
     e.preventDefault();
     setFormMsg({ text: '', isError: false });
 
-    if (!name.trim() || !strength.trim()) {
-      setFormMsg({ text: 'Please fill in medication name and strength.', isError: true });
+    if (!name.trim() || !strengthVal.trim()) {
+      setFormMsg({ text: 'Please fill in medication name and strength amount.', isError: true });
       return;
     }
 
     setSubmitting(true);
     try {
-      const fullDosageStr = `${strength.trim()} ${dosageForm.trim()}`.trim();
+      const computedStrength = `${strengthVal.trim()} ${strengthUnit.trim()}`.trim();
+      const fullDosageStr = `${computedStrength} ${dosageForm.trim()}`.trim();
+
       const res = await callApi(
         'add_medication',
         user.user_id,
@@ -75,7 +78,7 @@ export default function MedicationsView({ user, onDataChange }) {
         parseInt(stock) || 0,
         parseInt(threshold) || 0,
         imagePath || null,
-        strength.trim(),
+        computedStrength,
         dosageForm.trim(),
         stockUnit.trim() || 'tablets'
       );
@@ -83,7 +86,8 @@ export default function MedicationsView({ user, onDataChange }) {
       if (res.success) {
         setFormMsg({ text: 'Medication registered in stock successfully!', isError: false });
         setName('');
-        setStrength('');
+        setStrengthVal('500');
+        setStrengthUnit('mg');
         setDosageForm('Tablet');
         setStock('30');
         setStockUnit('tablets');
@@ -316,7 +320,7 @@ export default function MedicationsView({ user, onDataChange }) {
           <div className="text-center text-slate-500 dark:text-slate-400 py-24 text-xs">No medications found in stock inventory.</div>
         ) : viewMode === 'grid' ? (
 
-          /* Grid View Layout - Clean Inventory Inner Box Matching App Design */
+          /* Grid View Layout */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredMeds.map((med) => {
               const thresh = med.refill_threshold || 10;
@@ -489,17 +493,37 @@ export default function MedicationsView({ user, onDataChange }) {
                 />
               </div>
 
+              {/* Strength Input with Unit Dropdown */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Strength</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. 500 mg"
-                    value={strength}
-                    onChange={(e) => setStrength(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 500"
+                      value={strengthVal}
+                      onChange={(e) => setStrengthVal(e.target.value)}
+                      className="flex-1 min-w-0 bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
+                    />
+                    <select
+                      value={strengthUnit}
+                      onChange={(e) => setStrengthUnit(e.target.value)}
+                      className="w-24 shrink-0 bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-2 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500 cursor-pointer font-medium"
+                    >
+                      <option value="mg">mg</option>
+                      <option value="g">g</option>
+                      <option value="mcg">mcg</option>
+                      <option value="ml">ml</option>
+                      <option value="IU">IU</option>
+                      <option value="%">%</option>
+                      <option value="mEq">mEq</option>
+                      <option value="mg/ml">mg/ml</option>
+                      <option value="puffs">puffs</option>
+                      <option value="drops">drops</option>
+                      <option value="units">units</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div>
@@ -507,7 +531,7 @@ export default function MedicationsView({ user, onDataChange }) {
                   <select
                     value={dosageForm}
                     onChange={(e) => setDosageForm(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
+                    className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500 cursor-pointer font-medium"
                   >
                     <option value="Tablet">Tablet</option>
                     <option value="Capsule">Capsule</option>
@@ -538,7 +562,7 @@ export default function MedicationsView({ user, onDataChange }) {
                   <select
                     value={stockUnit}
                     onChange={(e) => setStockUnit(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
+                    className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500 cursor-pointer font-medium"
                   >
                     <option value="tablets">tablets</option>
                     <option value="capsules">capsules</option>
