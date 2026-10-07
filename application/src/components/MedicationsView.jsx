@@ -81,7 +81,10 @@ export default function MedicationsView({ user, onDataChange }) {
         imagePath || null,
         computedStrength,
         dosageForm.trim(),
-        stockUnit.trim() || 'capsules'
+        stockUnit.trim() || 'capsules',
+        null,
+        null,
+        expirationDate || null
       );
 
       if (res.success) {
@@ -322,13 +325,14 @@ export default function MedicationsView({ user, onDataChange }) {
           <div className="text-center text-slate-500 dark:text-slate-400 py-24 text-xs">No medications found in stock inventory.</div>
         ) : viewMode === 'grid' ? (
 
-          /* Grid View Layout - Clear Inventory Card Design */
+          /* Grid View Layout - Form Stock Refill at Expires Status */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredMeds.map((med) => {
               const thresh = med.refill_threshold || 10;
               const isOut = med.stock <= 0;
               const isLow = !isOut && (med.is_low_stock || med.stock <= thresh);
               const unitStr = med.stock_unit || 'capsules';
+              const expiresStr = med.expiration_date ? med.expiration_date : 'Unknown';
 
               return (
                 <div
@@ -357,31 +361,38 @@ export default function MedicationsView({ user, onDataChange }) {
                     </button>
                   </div>
 
-                  {/* Inner Box Container Matching App Design */}
+                  {/* Inner Box Container with requested fields: Form, Stock, Refill at, Expires, Status */}
                   <div className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl p-3 space-y-2 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400">Type of Medicine:</span>
+                      <span className="text-slate-500 dark:text-slate-400">Form:</span>
                       <span className="font-medium text-slate-700 dark:text-slate-300">
                         {med.dosage_form || 'Capsule'}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400">How Many Do You Have?:</span>
+                      <span className="text-slate-500 dark:text-slate-400">Stock:</span>
                       <span className={`font-bold ${isOut ? 'text-rose-600 dark:text-rose-400' : isLow ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
                         {med.stock} {unitStr}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400">Alert When Stock Reaches:</span>
+                      <span className="text-slate-500 dark:text-slate-400">Refill at:</span>
                       <span className="font-medium text-slate-700 dark:text-slate-300">
                         {thresh} {unitStr}
                       </span>
                     </div>
 
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 dark:text-slate-400">Expires:</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300">
+                        {expiresStr}
+                      </span>
+                    </div>
+
                     <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-[#222838]">
-                      <span className="text-slate-500 dark:text-slate-400">Inventory Status:</span>
+                      <span className="text-slate-500 dark:text-slate-400">Status:</span>
                       <span className={`font-bold px-2 py-0.5 rounded text-[10px] ${
                         isOut
                           ? 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30'
@@ -406,6 +417,7 @@ export default function MedicationsView({ user, onDataChange }) {
               const isOut = med.stock <= 0;
               const isLow = !isOut && (med.is_low_stock || med.stock <= thresh);
               const unitStr = med.stock_unit || 'capsules';
+              const expiresStr = med.expiration_date ? med.expiration_date : 'Unknown';
 
               return (
                 <div
@@ -419,7 +431,7 @@ export default function MedicationsView({ user, onDataChange }) {
                     <div className="min-w-0">
                       <h4 className="font-semibold text-slate-900 dark:text-white text-xs truncate">{med.name} &bull; <span className="text-purple-600 dark:text-purple-400 font-bold">{med.strength || med.dosage}</span></h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                        Type: {med.dosage_form || 'Capsule'} &bull; Stock: <span className={isOut ? 'text-rose-600 dark:text-rose-400 font-bold' : isLow ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-slate-700 dark:text-slate-300 font-bold'}>{med.stock} {unitStr}</span> &bull; Alert Level: {thresh} {unitStr}
+                        Form: {med.dosage_form || 'Capsule'} &bull; Stock: <span className={isOut ? 'text-rose-600 dark:text-rose-400 font-bold' : isLow ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-slate-700 dark:text-slate-300 font-bold'}>{med.stock} {unitStr}</span> &bull; Refill: {thresh} {unitStr} &bull; Expires: {expiresStr}
                       </p>
                     </div>
                   </div>
@@ -450,7 +462,7 @@ export default function MedicationsView({ user, onDataChange }) {
         )}
       </div>
 
-      {/* Add Drug Modal - Clarified Wording & Field Labels */}
+      {/* Add Drug Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/40 dark:bg-[#090b12]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
           <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#222838] rounded-2xl p-6 shadow-2xl space-y-5 text-slate-900 dark:text-white">
@@ -593,7 +605,6 @@ export default function MedicationsView({ user, onDataChange }) {
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Expiration Date (Optional)</label>
                 <input
                   type="date"
-                  placeholder="MM/DD/YYYY"
                   value={expirationDate}
                   onChange={(e) => setExpirationDate(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"

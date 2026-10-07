@@ -1,7 +1,7 @@
 from database.db_manager import DatabaseManager
 
 class Medication:
-    def __init__(self, med_id, user_id, name, dosage, stock, refill_threshold, image_path=None, strength='', dosage_form='Tablet', stock_unit='tablets', start_date=None, end_date=None):
+    def __init__(self, med_id, user_id, name, dosage, stock, refill_threshold, image_path=None, strength='', dosage_form='Tablet', stock_unit='tablets', start_date=None, end_date=None, expiration_date=None):
         self.med_id = med_id
         self.user_id = user_id
         self.name = name
@@ -14,6 +14,7 @@ class Medication:
         self.stock_unit = stock_unit or 'tablets'
         self.start_date = start_date
         self.end_date = end_date
+        self.expiration_date = expiration_date
 
     def is_low_stock(self):
         return self.stock <= self.refill_threshold
@@ -23,7 +24,7 @@ class InventoryManager:
         self.db = DatabaseManager()
 
     def get_user_medications(self, user_id=None):
-        query = "SELECT id, user_id, name, dosage, stock, refill_threshold, image_path, COALESCE(NULLIF(strength, ''), dosage), COALESCE(NULLIF(dosage_form, ''), 'Tablet'), COALESCE(NULLIF(stock_unit, ''), 'tablets'), start_date, end_date FROM medications"
+        query = "SELECT id, user_id, name, dosage, stock, refill_threshold, image_path, COALESCE(NULLIF(strength, ''), dosage), COALESCE(NULLIF(dosage_form, ''), 'Tablet'), COALESCE(NULLIF(stock_unit, ''), 'tablets'), start_date, end_date, expiration_date FROM medications"
         if user_id is not None:
             rows = self.db.fetch_all(query + " WHERE user_id = ?", (user_id,))
         else:
@@ -33,26 +34,28 @@ class InventoryManager:
             medications.append(Medication(*row))
         return medications
 
-    def add_medication(self, user_id, name, dosage, stock, refill_threshold, image_path=None, strength=None, dosage_form='Tablet', stock_unit='tablets', start_date=None, end_date=None):
+    def add_medication(self, user_id, name, dosage, stock, refill_threshold, image_path=None, strength=None, dosage_form='Tablet', stock_unit='tablets', start_date=None, end_date=None, expiration_date=None):
         clean_strength = strength.strip() if strength else dosage.strip()
         clean_form = dosage_form.strip() if dosage_form else 'Tablet'
         clean_unit = stock_unit.strip() if stock_unit else 'tablets'
         clean_start = start_date.strip() if start_date else None
         clean_end = end_date.strip() if end_date else None
+        clean_exp = expiration_date.strip() if expiration_date else None
         return self.db.execute_query(
-            "INSERT INTO medications (user_id, name, dosage, stock, refill_threshold, image_path, strength, dosage_form, stock_unit, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (user_id, name, dosage, stock, refill_threshold, image_path, clean_strength, clean_form, clean_unit, clean_start, clean_end)
+            "INSERT INTO medications (user_id, name, dosage, stock, refill_threshold, image_path, strength, dosage_form, stock_unit, start_date, end_date, expiration_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (user_id, name, dosage, stock, refill_threshold, image_path, clean_strength, clean_form, clean_unit, clean_start, clean_end, clean_exp)
         )
 
-    def update_medication(self, med_id, name, dosage, stock, refill_threshold, image_path=None, strength=None, dosage_form='Tablet', stock_unit='tablets', start_date=None, end_date=None):
+    def update_medication(self, med_id, name, dosage, stock, refill_threshold, image_path=None, strength=None, dosage_form='Tablet', stock_unit='tablets', start_date=None, end_date=None, expiration_date=None):
         clean_strength = strength.strip() if strength else dosage.strip()
         clean_form = dosage_form.strip() if dosage_form else 'Tablet'
         clean_unit = stock_unit.strip() if stock_unit else 'tablets'
         clean_start = start_date.strip() if start_date else None
         clean_end = end_date.strip() if end_date else None
+        clean_exp = expiration_date.strip() if expiration_date else None
         self.db.execute_query(
-            "UPDATE medications SET name = ?, dosage = ?, stock = ?, refill_threshold = ?, image_path = ?, strength = ?, dosage_form = ?, stock_unit = ?, start_date = ?, end_date = ? WHERE id = ?",
-            (name, dosage, stock, refill_threshold, image_path, clean_strength, clean_form, clean_unit, clean_start, clean_end, med_id)
+            "UPDATE medications SET name = ?, dosage = ?, stock = ?, refill_threshold = ?, image_path = ?, strength = ?, dosage_form = ?, stock_unit = ?, start_date = ?, end_date = ?, expiration_date = ? WHERE id = ?",
+            (name, dosage, stock, refill_threshold, image_path, clean_strength, clean_form, clean_unit, clean_start, clean_end, clean_exp, med_id)
         )
 
     def deduct_stock(self, med_id, amount=1):

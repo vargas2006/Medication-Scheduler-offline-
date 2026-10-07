@@ -100,7 +100,8 @@ class DatabaseManager:
             ("dosage_form", "TEXT DEFAULT 'Tablet'"),
             ("stock_unit", "TEXT DEFAULT 'tablets'"),
             ("start_date", "TEXT DEFAULT NULL"),
-            ("end_date", "TEXT DEFAULT NULL")
+            ("end_date", "TEXT DEFAULT NULL"),
+            ("expiration_date", "TEXT DEFAULT NULL")
         ]:
             try:
                 cursor.execute(f"ALTER TABLE medications ADD COLUMN {col_name} {col_type}")
