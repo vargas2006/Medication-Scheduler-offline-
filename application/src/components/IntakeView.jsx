@@ -21,11 +21,55 @@ function MedImage({ src, alt }) {
   );
 }
 
+function formatTime(timeStr) {
+  if (!timeStr) return '';
+  const str = timeStr.trim();
+  if (/am|pm/i.test(str)) {
+    return str.toUpperCase();
+  }
+  const parts = str.split(':');
+  if (parts.length >= 2) {
+    let hours = parseInt(parts[0], 10);
+    const minutes = parts[1].padStart(2, '0');
+    if (isNaN(hours)) return str;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    if (hours === 0) hours = 12;
+    return `${hours}:${minutes} ${ampm}`;
+  }
+  return str;
+}
+
+function timeToMinutes(timeStr) {
+  if (!timeStr) return 0;
+  const str = timeStr.trim();
+  let hours = 0;
+  let minutes = 0;
+  if (/am|pm/i.test(str)) {
+    const isPM = /pm/i.test(str);
+    const clean = str.replace(/(am|pm)/i, '').trim();
+    const parts = clean.split(':');
+    hours = parseInt(parts[0], 10) || 0;
+    minutes = parseInt(parts[1], 10) || 0;
+    if (isPM && hours < 12) hours += 12;
+    if (!isPM && hours === 12) hours = 0;
+  } else {
+    const parts = str.split(':');
+    hours = parseInt(parts[0], 10) || 0;
+    minutes = parseInt(parts[1], 10) || 0;
+  }
+  return hours * 60 + minutes;
+}
+
 export default function IntakeView({ user, onDataChange }) {
   const [schedules, setSchedules] = useState([]);
   const [medications, setMedications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [dateFilter, setDateFilter] = useState('today'); // 'today', 'upcoming', 'all'
+  const [medFilter, setMedFilter] = useState('all'); // 'all' or medicine name
+  const [statusFilter, setStatusFilter] = useState('active'); // 'active', 'paused', 'all'
+  const [sortBy, setSortBy] = useState('time'); // 'time', 'name'
   const [message, setMessage] = useState({ text: '', schId: null });
 
   const [viewMode, setViewMode] = useState('grid');
@@ -157,15 +201,73 @@ export default function IntakeView({ user, onDataChange }) {
     { label: 'Night', value: '21:00' }
   ];
 
-  const filteredSchedules = schedules.filter((s) => {
-    const search = searchTerm.toLowerCase();
-    return (
-      s.med_name.toLowerCase().includes(search) ||
-      (s.strength || '').toLowerCase().includes(search) ||
-      (s.frequency || '').toLowerCase().includes(search) ||
-      (s.instructions || '').toLowerCase().includes(search)
-    );
-  });
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const filteredSchedules = schedules
+    .filter((sch) => {
+      if (searchTerm) {
+        const search = searchTerm.toLowerCase();
+        const formattedTime = formatTime(sch.time_value).toLowerCase();
+        const rawTime = (sch.time_value || '').toLowerCase();
+        const medName = (sch.med_name || '').toLowerCase();
+        const strength = (sch.strength || '').toLowerCase();
+        const freq = (sch.frequency || '').toLowerCase();
+        const inst = (sch.instructions || '').toLowerCase();
+
+        const matchesSearch =
+          medName.includes(search) ||
+          strength.includes(search) ||
+          rawTime.includes(search) ||
+          formattedTime.includes(search) ||
+          freq.includes(search) ||
+          inst.includes(search);
+
+        if (!matchesSearch) return false;
+      }
+
+      if (dateFilter === 'today') {
+        const schDate = sch.schedule_date;
+        const sDate = sch.start_date;
+        const eDate = sch.end_date;
+
+        const isTodaySpecific = schDate === todayStr;
+        const isRangeCurrent =
+          (!sDate || sDate <= todayStr) && (!eDate || eDate >= todayStr);
+
+        if (!isTodaySpecific && !isRangeCurrent && schDate && schDate !== todayStr) {
+          return false;
+        }
+      } else if (dateFilter === 'upcoming') {
+        const schDate = sch.schedule_date;
+        const sDate = sch.start_date;
+        const isFuture = (schDate && schDate > todayStr) || (sDate && sDate > todayStr);
+        if (!isFuture) return false;
+      }
+
+      if (medFilter !== 'all') {
+        if (sch.med_name !== medFilter && sch.med_id?.toString() !== medFilter) {
+          return false;
+        }
+      }
+
+      if (statusFilter === 'active') {
+        const status = (sch.status || 'ACTIVE').toUpperCase();
+        if (status === 'PAUSED' || status === 'INACTIVE') return false;
+      } else if (statusFilter === 'paused') {
+        const status = (sch.status || '').toUpperCase();
+        if (status !== 'PAUSED' && status !== 'INACTIVE') return false;
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'time') {
+        return timeToMinutes(a.time_value) - timeToMinutes(b.time_value);
+      } else if (sortBy === 'name') {
+        return (a.med_name || '').localeCompare(b.med_name || '');
+      }
+      return 0;
+    });
 
   const selectedMedObj = medications.find((m) => m.med_id.toString() === selectedMedId.toString());
 
@@ -177,11 +279,11 @@ export default function IntakeView({ user, onDataChange }) {
         <div className="flex items-center justify-between gap-3 flex-wrap">
 
           {/* Search Input */}
-          <div className="relative flex-1 max-w-md">
+          <div className="relative flex-1 min-w-[200px] max-w-md">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
             <input
               type="text"
-              placeholder="Search scheduled intake by medicine name or time..."
+              placeholder="Search medication or time..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl pl-10 pr-4 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
@@ -238,6 +340,57 @@ export default function IntakeView({ user, onDataChange }) {
               <span>Add Intake Schedule</span>
             </button>
           </div>
+        </div>
+
+        {/* Filter & Sort Controls Row */}
+        <div className="flex items-center gap-2.5 flex-wrap pt-2 border-t border-slate-100 dark:border-[#1e2436]">
+
+          {/* Date Filter */}
+          <select
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+            className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] text-slate-700 dark:text-slate-300 font-semibold text-xs px-3 py-1.5 rounded-xl focus:outline-none focus:border-purple-500 cursor-pointer"
+          >
+            <option value="today">Today</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="all">All Schedules</option>
+          </select>
+
+          {/* Medicine Filter */}
+          <select
+            value={medFilter}
+            onChange={(e) => setMedFilter(e.target.value)}
+            className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] text-slate-700 dark:text-slate-300 font-semibold text-xs px-3 py-1.5 rounded-xl focus:outline-none focus:border-purple-500 cursor-pointer"
+          >
+            <option value="all">All Medicines</option>
+            {Array.from(new Set(schedules.map((s) => s.med_name))).map((medName) => (
+              <option key={medName} value={medName}>
+                {medName}
+              </option>
+            ))}
+          </select>
+
+          {/* Status Filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] text-slate-700 dark:text-slate-300 font-semibold text-xs px-3 py-1.5 rounded-xl focus:outline-none focus:border-purple-500 cursor-pointer"
+          >
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+            <option value="all">All Statuses</option>
+          </select>
+
+          {/* Sort Filter */}
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] text-slate-700 dark:text-slate-300 font-semibold text-xs px-3 py-1.5 rounded-xl focus:outline-none focus:border-purple-500 cursor-pointer"
+          >
+            <option value="time">Sort: Time</option>
+            <option value="name">Sort: Medication Name</option>
+          </select>
+
         </div>
       </div>
 
@@ -298,7 +451,7 @@ export default function IntakeView({ user, onDataChange }) {
                       <span className="text-slate-500 dark:text-slate-400">Scheduled Time:</span>
                       <span className="font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" />
-                        {sch.time_value}
+                        {formatTime(sch.time_value)}
                       </span>
                     </div>
 
@@ -376,7 +529,7 @@ export default function IntakeView({ user, onDataChange }) {
                     <div className="min-w-0">
                       <h4 className="font-semibold text-slate-900 dark:text-white text-xs truncate">{sch.med_name} ({sch.strength})</h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                        Time: <span className="font-bold text-purple-600 dark:text-purple-400">{sch.time_value}</span> &bull; Dose: {doseAmt} {unitStr} &bull; Freq: {sch.frequency || 'Every day'} &bull; Stock: <span className={isOut ? 'text-rose-600 font-bold' : 'text-emerald-600 font-bold'}>{stockAmt} {sch.stock_unit || 'tablets'}</span>
+                        Time: <span className="font-bold text-purple-600 dark:text-purple-400">{formatTime(sch.time_value)}</span> &bull; Dose: {doseAmt} {unitStr} &bull; Freq: {sch.frequency || 'Every day'} &bull; Stock: <span className={isOut ? 'text-rose-600 font-bold' : 'text-emerald-600 font-bold'}>{stockAmt} {sch.stock_unit || 'tablets'}</span>
                       </p>
                     </div>
                   </div>

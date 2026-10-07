@@ -62,6 +62,11 @@ class InventoryManager:
         amt = int(amount) if amount else 1
         self.db.execute_query("UPDATE medications SET stock = MAX(0, stock - ?) WHERE id = ?", (amt, med_id))
 
+    def add_stock(self, med_id, amount):
+        amt = int(amount) if amount else 0
+        if amt > 0:
+            self.db.execute_query("UPDATE medications SET stock = stock + ? WHERE id = ?", (amt, med_id))
+
     def delete_medication(self, med_id):
         row = self.db.fetch_one("SELECT name FROM medications WHERE id = ?", (med_id,))
         if row and row[0]:

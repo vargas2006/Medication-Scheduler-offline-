@@ -1,7 +1,7 @@
 {
-  "version": "1.0.30",
+  "version": "1.0.31",
   "release_date": "2026-10-08",
-  "release_notes": "Version 1.0.30: Added Expiration Date support to Medication Stock inventory with concise card field labels (Form, Stock, Refill at, Expires, Status) and default 'Unknown' fallback.",
+  "release_notes": "Version 1.0.31: Added Search/Filters/Sort and readable 12-hour time format to Medication Schedule, and Restock Stock inventory functionality.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }

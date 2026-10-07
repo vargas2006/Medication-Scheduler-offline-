@@ -207,6 +207,17 @@ class PythonAPI:
         except Exception as e:
             return {"success": False, "message": str(e)}
 
+    def restock_medication(self, med_id, amount):
+        try:
+            med_id = int(med_id)
+            amt = int(amount)
+            if amt <= 0:
+                return {"success": False, "message": "Please enter a valid positive quantity to add."}
+            self.inventory_manager.add_stock(med_id, amt)
+            return {"success": True, "message": f"Successfully added {amt} to stock!"}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
     def get_schedules(self, user_id):
         try:
             user_id = int(user_id)

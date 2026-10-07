@@ -43,6 +43,51 @@ export default function MedicationsView({ user, onDataChange }) {
   const [formMsg, setFormMsg] = useState({ text: '', isError: false });
   const [submitting, setSubmitting] = useState(false);
 
+  const [showRestockModal, setShowRestockModal] = useState(false);
+  const [restockMedObj, setRestockMedObj] = useState(null);
+  const [addStockAmount, setAddStockAmount] = useState('30');
+  const [restockMsg, setRestockMsg] = useState({ text: '', isError: false });
+  const [restocking, setRestocking] = useState(false);
+
+  const handleOpenRestockModal = (med) => {
+    setRestockMedObj(med);
+    setAddStockAmount('30');
+    setRestockMsg({ text: '', isError: false });
+    setShowRestockModal(true);
+  };
+
+  const handleConfirmRestock = async (e) => {
+    e.preventDefault();
+    if (!restockMedObj) return;
+
+    const amt = parseInt(addStockAmount, 10);
+    if (isNaN(amt) || amt <= 0) {
+      setRestockMsg({ text: 'Please enter a valid amount greater than 0.', isError: true });
+      return;
+    }
+
+    setRestocking(true);
+    try {
+      const res = await callApi('restock_medication', restockMedObj.med_id, amt);
+      if (res.success) {
+        setRestockMsg({ text: `Successfully added ${amt} ${restockMedObj.stock_unit || 'capsules'} to stock!`, isError: false });
+        fetchMeds();
+        if (onDataChange) onDataChange();
+        setTimeout(() => {
+          setShowRestockModal(false);
+          setRestockMedObj(null);
+          setRestockMsg({ text: '', isError: false });
+        }, 1000);
+      } else {
+        setRestockMsg({ text: res.message || 'Failed to add stock.', isError: true });
+      }
+    } catch (err) {
+      setRestockMsg({ text: 'Error adding stock.', isError: true });
+    } finally {
+      setRestocking(false);
+    }
+  };
+
   const fetchMeds = async () => {
     if (!user?.user_id) return;
     setLoading(true);
@@ -404,6 +449,19 @@ export default function MedicationsView({ user, onDataChange }) {
                       </span>
                     </div>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOpenRestockModal(med)}
+                    className={`w-full py-2 rounded-xl font-semibold text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm ${
+                      isOut || isLow
+                        ? 'bg-amber-500 hover:bg-amber-400 text-white'
+                        : 'bg-purple-600 hover:bg-purple-500 text-white'
+                    }`}
+                  >
+                    <Boxes className="w-3.5 h-3.5" />
+                    <span>{isOut || isLow ? 'Restock Now' : 'Add Stock'}</span>
+                  </button>
                 </div>
               );
             })}
@@ -446,6 +504,19 @@ export default function MedicationsView({ user, onDataChange }) {
                     }`}>
                       {isOut ? 'OUT OF STOCK' : isLow ? 'LOW STOCK' : 'IN STOCK'}
                     </span>
+
+                    <button
+                      type="button"
+                      onClick={() => handleOpenRestockModal(med)}
+                      className={`px-3 py-1.5 rounded-lg font-semibold text-xs transition-all flex items-center gap-1.5 ${
+                        isOut || isLow
+                          ? 'bg-amber-500 hover:bg-amber-400 text-white'
+                          : 'bg-purple-600 hover:bg-purple-500 text-white'
+                      }`}
+                    >
+                      <Boxes className="w-3.5 h-3.5" />
+                      <span>{isOut || isLow ? 'Restock Now' : 'Add Stock'}</span>
+                    </button>
 
                     <button
                       onClick={() => handleDeleteMedication(med.med_id)}
@@ -625,6 +696,98 @@ export default function MedicationsView({ user, onDataChange }) {
                   className="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs rounded-xl shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   <span>{submitting ? 'Saving...' : 'Add to Stock Inventory'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Add Stock Modal */}
+      {showRestockModal && restockMedObj && (
+        <div className="fixed inset-0 bg-slate-900/40 dark:bg-[#090b12]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="w-full max-w-md bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#222838] rounded-2xl p-6 shadow-2xl space-y-5 text-slate-900 dark:text-white">
+
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-[#1e2436] pb-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                  <Boxes className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">Add Stock</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">{restockMedObj.name} ({restockMedObj.strength || restockMedObj.dosage})</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowRestockModal(false);
+                  setRestockMedObj(null);
+                }}
+                className="w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1c2234] text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {restockMsg.text && (
+              <div className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${
+                restockMsg.isError ? 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/15 dark:border-rose-500/30 dark:text-rose-300' : 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:border-emerald-500/30 dark:text-emerald-300'
+              }`}>
+                {restockMsg.isError ? <AlertCircle className="w-4 h-4 shrink-0" /> : <Check className="w-4 h-4 shrink-0" />}
+                <span>{restockMsg.text}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleConfirmRestock} className="space-y-4">
+              <div className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl p-3 flex items-center justify-between text-xs">
+                <span className="text-slate-500 dark:text-slate-400">Current Stock:</span>
+                <span className="font-bold text-slate-900 dark:text-white">
+                  {restockMedObj.stock} {restockMedObj.stock_unit || 'capsules'}
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Amount to Add:</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={addStockAmount}
+                    onChange={(e) => setAddStockAmount(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
+                  />
+                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">
+                    {restockMedObj.stock_unit || 'capsules'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 rounded-xl p-3 flex items-center justify-between text-xs">
+                <span className="text-purple-700 dark:text-purple-300 font-semibold">New Stock:</span>
+                <span className="font-extrabold text-purple-600 dark:text-purple-400 text-sm">
+                  {(restockMedObj.stock || 0) + (parseInt(addStockAmount, 10) || 0)} {restockMedObj.stock_unit || 'capsules'}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-[#1e2436]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRestockModal(false);
+                    setRestockMedObj(null);
+                  }}
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#262f46] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-semibold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={restocking}
+                  className="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs rounded-xl shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
+                >
+                  <span>{restocking ? 'Adding...' : 'Add Stock'}</span>
                 </button>
               </div>
             </form>
