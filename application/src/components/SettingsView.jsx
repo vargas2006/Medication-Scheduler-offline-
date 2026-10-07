@@ -25,7 +25,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
   const displayName = user?.name || user?.username || 'User';
   const emailInfo = user?.email ? ` (${user.email})` : '';
 
-  const [appVersion, setAppVersion] = useState('1.0.5');
+  const [appVersion, setAppVersion] = useState('1.0.30');
 
   const loadSettings = async () => {
     try {

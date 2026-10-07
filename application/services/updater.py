@@ -16,8 +16,12 @@ def get_current_version():
         search_paths.extend([
             os.path.join(meipass, "version.json"),
             os.path.join(app_dir, "version.json"),
+            os.path.join(meipass, "application", "version.json"),
+            os.path.join(app_dir, "application", "version.json"),
             os.path.join(meipass, "_internal", "version.json"),
-            os.path.join(app_dir, "_internal", "version.json")
+            os.path.join(app_dir, "_internal", "version.json"),
+            os.path.abspath("version.json"),
+            os.path.abspath("application/version.json")
         ])
     else:
         curr_dir = os.path.dirname(os.path.abspath(__file__))
@@ -26,7 +30,9 @@ def get_current_version():
         search_paths.extend([
             os.path.join(root_dir, "version.json"),
             os.path.join(app_dir, "version.json"),
-            os.path.join(curr_dir, "version.json")
+            os.path.join(curr_dir, "version.json"),
+            os.path.abspath("version.json"),
+            os.path.abspath("application/version.json")
         ])
 
     for path in search_paths:
@@ -39,7 +45,7 @@ def get_current_version():
                         return str(ver).strip()
             except Exception:
                 pass
-    return "1.0.4"
+    return "1.0.30"
 
 def compare_versions(v1, v2):
     """Return True if v2 > v1 (semver comparison e.g. 1.1.0 > 1.0.0)."""
