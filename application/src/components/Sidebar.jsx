@@ -60,7 +60,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
               }`}
             >
               <CheckCircle className={`w-4 h-4 ${activeTab === 'IntakeFrame' ? 'text-purple-600 dark:text-purple-400' : 'text-slate-400'}`} />
-              <span>Intake Medication</span>
+              <span>Medication Schedule</span>
             </button>
           </nav>
         </div>
