@@ -161,17 +161,18 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
 
   return (
     <div className="p-5 h-full overflow-hidden">
-      <div className="bg-[#161926] border border-[#24293e] rounded-2xl p-6 h-full space-y-6 overflow-y-auto">
+      <div className="bg-[#151926] border border-[#222838] rounded-2xl p-6 h-full space-y-6 overflow-y-auto shadow-sm">
 
+        {/* Section 1: Appearance & Theme */}
         <div>
           <h3 className="text-base font-bold text-white mb-1">Appearance & Theme</h3>
           <p className="text-xs text-slate-400 mb-4">Toggle between high-contrast dark mode and light theme.</p>
 
-          <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-4 flex items-center justify-between max-w-lg">
+          <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-4 flex items-center justify-between max-w-lg">
             <div className="flex items-center gap-3">
-              {isDark ? <Moon className="w-5 h-5 text-purple-400" /> : <Sun className="w-5 h-5 text-amber-400" />}
+              {isDark ? <Moon className="w-5 h-5 text-indigo-400" /> : <Sun className="w-5 h-5 text-amber-400" />}
               <div>
-                <span className="text-xs font-bold text-white block">Theme Mode</span>
+                <span className="text-xs font-semibold text-white block">Theme Mode</span>
                 <span className="text-[11px] text-slate-400">{isDark ? 'Dark Mode Active' : 'Light Mode Active'}</span>
               </div>
             </div>
@@ -179,20 +180,21 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
             <button
               type="button"
               onClick={onToggleTheme}
-              className={`w-12 h-6 rounded-full p-1 transition-colors ${isDark ? 'bg-[#7c3aed]' : 'bg-amber-500'}`}
+              className={`w-11 h-6 rounded-full p-1 transition-colors ${isDark ? 'bg-indigo-600' : 'bg-amber-500'}`}
             >
-              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${isDark ? 'translate-x-6' : 'translate-x-0'}`} />
+              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${isDark ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
           </div>
         </div>
 
-        <hr className="border-[#24293e]" />
+        <hr className="border-[#1e2436]" />
 
+        {/* Section 2: Notifications & Alerts */}
         <div>
           <div className="flex items-center justify-between max-w-lg mb-1">
             <h3 className="text-base font-bold text-white">Notifications & Alerts</h3>
             {saveStatus && (
-              <span className="text-[11px] text-[#10b981] font-semibold flex items-center gap-1">
+              <span className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" /> {saveStatus}
               </span>
             )}
@@ -201,11 +203,12 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
 
           <div className="space-y-4 max-w-lg">
 
-            <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-4 flex items-center justify-between">
+            {/* Offline Popups Toggle */}
+            <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Bell className="w-5 h-5 text-emerald-400" />
                 <div>
-                  <span className="text-xs font-bold text-white block">Local Desktop Notifications (Offline)</span>
+                  <span className="text-xs font-semibold text-white block">Local Desktop Notifications (Offline)</span>
                   <span className="text-[11px] text-slate-400">Trigger OS native popups for medication alerts</span>
                 </div>
               </div>
@@ -213,17 +216,18 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               <button
                 type="button"
                 onClick={() => setEnableOfflinePopups(!enableOfflinePopups)}
-                className={`w-12 h-6 rounded-full p-1 transition-colors ${enableOfflinePopups ? 'bg-[#10b981]' : 'bg-slate-700'}`}
+                className={`w-11 h-6 rounded-full p-1 transition-colors ${enableOfflinePopups ? 'bg-emerald-600' : 'bg-slate-700'}`}
               >
-                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${enableOfflinePopups ? 'translate-x-6' : 'translate-x-0'}`} />
+                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${enableOfflinePopups ? 'translate-x-5' : 'translate-x-0'}`} />
               </button>
             </div>
 
-            <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-4 flex items-center justify-between">
+            {/* Gmail Reminders Toggle */}
+            <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-sky-400" />
                 <div>
-                  <span className="text-xs font-bold text-white block">Gmail Reminders (Requires Internet)</span>
+                  <span className="text-xs font-semibold text-white block">Gmail Reminders (Requires Internet)</span>
                   <span className="text-[11px] text-slate-400">Receive medication reminders directly to verified Gmail</span>
                 </div>
               </div>
@@ -231,13 +235,14 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               <button
                 type="button"
                 onClick={() => setEnableGmailNotifications(!enableGmailNotifications)}
-                className={`w-12 h-6 rounded-full p-1 transition-colors ${enableGmailNotifications ? 'bg-[#38bdf8]' : 'bg-slate-700'}`}
+                className={`w-11 h-6 rounded-full p-1 transition-colors ${enableGmailNotifications ? 'bg-sky-600' : 'bg-slate-700'}`}
               >
-                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${enableGmailNotifications ? 'translate-x-6' : 'translate-x-0'}`} />
+                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${enableGmailNotifications ? 'translate-x-5' : 'translate-x-0'}`} />
               </button>
             </div>
 
-            <div className="bg-[#161926] border border-[#2b334c] rounded-xl p-4 space-y-3.5">
+            {/* Gmail Notification Binding Box */}
+            <div className="bg-[#151926] border border-[#222838] rounded-xl p-4 space-y-3.5">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-xs font-bold text-white block">Gmail Notification Binding</span>
@@ -250,7 +255,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                     : 'bg-amber-500/10 border border-amber-500/20'
                 }`}>
                   <div className={`w-1.5 h-1.5 rounded-full ${
-                    isEmailVerified && boundEmail ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                    isEmailVerified && boundEmail ? 'bg-emerald-400' : 'bg-amber-400'
                   }`} />
                   <span className={`text-[10px] font-semibold ${
                     isEmailVerified && boundEmail ? 'text-emerald-400' : 'text-amber-400'
@@ -262,7 +267,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
 
               {bindStatus.msg && (
                 <div className={`p-2.5 rounded-lg flex items-center gap-2 text-xs ${
-                  bindStatus.isError ? 'bg-rose-950/60 border border-rose-800/80 text-rose-300' : 'bg-sky-950/60 border border-sky-800/80 text-sky-300'
+                  bindStatus.isError ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300' : 'bg-sky-500/15 border border-sky-500/30 text-sky-300'
                 }`}>
                   {bindStatus.isError ? <AlertCircle className="w-3.5 h-3.5 shrink-0" /> : <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />}
                   <span className="text-[11px] font-medium">{bindStatus.msg}</span>
@@ -270,7 +275,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               )}
 
               {isEmailVerified && boundEmail ? (
-                <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-3 flex items-center justify-between">
+                <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-3 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <ShieldCheck className="w-4 h-4 text-emerald-400" />
                     <div>
@@ -288,7 +293,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                 </div>
               ) : (
 
-                <div className="space-y-3 border-t border-[#272e45] pt-3">
+                <div className="space-y-3 border-t border-[#262f46] pt-3">
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1">Enter Gmail Address for Notifications</label>
                     <div className="flex gap-2">
@@ -297,12 +302,12 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                         placeholder="yourname@gmail.com"
                         value={inputGmail}
                         onChange={(e) => setInputGmail(e.target.value)}
-                        className="flex-1 bg-[#1c2033] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#38bdf8]"
+                        className="flex-1 bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
                       />
                       <button
                         type="button"
                         onClick={handleSendCode}
-                        className="text-xs font-bold bg-[#38bdf8] hover:bg-[#0ea5e9] text-[#0b0e17] px-3.5 py-2 rounded-xl transition-colors shrink-0"
+                        className="text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white px-3.5 py-2 rounded-xl transition-colors shrink-0"
                       >
                         {codeSent ? 'Resend Code' : 'Send Code'}
                       </button>
@@ -310,7 +315,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                   </div>
 
                   {codeSent && (
-                    <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-3 space-y-2.5">
+                    <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-3 space-y-2.5">
                       <label className="block text-xs font-semibold text-slate-300">Enter 6-Digit Verification Code</label>
                       <div className="flex gap-2">
                         <input
@@ -319,12 +324,12 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                           placeholder="123456"
                           value={otpCode}
                           onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                          className="w-36 bg-[#161926] border border-[#272e45] rounded-xl px-3 py-2 text-center text-sm font-mono tracking-widest text-sky-400 focus:outline-none focus:border-[#38bdf8]"
+                          className="w-36 bg-[#151926] border border-[#262f46] rounded-xl px-3 py-2 text-center text-sm font-mono tracking-widest text-sky-400 focus:outline-none focus:border-sky-500"
                         />
                         <button
                           type="button"
                           onClick={handleVerifyAndBind}
-                          className="flex-1 text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-white px-4 py-2 rounded-xl transition-colors"
+                          className="flex-1 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl transition-colors"
                         >
                           Verify & Bind Gmail
                         </button>
@@ -339,7 +344,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               <button
                 type="button"
                 onClick={handleSaveSettings}
-                className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-purple-900/30 transition-all"
+                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs px-5 py-2.5 rounded-xl shadow-sm transition-all"
               >
                 <Save className="w-4 h-4" />
                 Save Settings
@@ -348,30 +353,32 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
           </div>
         </div>
 
-        <hr className="border-[#24293e]" />
+        <hr className="border-[#1e2436]" />
 
+        {/* Section 3: Account Information */}
         <div>
           <h3 className="text-base font-bold text-white mb-1">Account Information</h3>
           <p className="text-xs text-slate-400 mb-4">Active user credentials and profile details.</p>
 
           <div className="space-y-3 max-w-lg">
-            <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-3.5 flex items-center gap-3">
-              <UserCheck className="w-5 h-5 text-[#38bdf8]" />
+            <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-3.5 flex items-center gap-3">
+              <UserCheck className="w-5 h-5 text-sky-400" />
               <div className="text-xs">
                 <span className="text-slate-400 block text-[10px]">Logged in as</span>
-                <span className="font-bold text-white">{displayName}{emailInfo}</span>
+                <span className="font-semibold text-white">{displayName}{emailInfo}</span>
               </div>
             </div>
 
-            <div className="bg-[#1c2033] border border-[#272e45] rounded-xl p-3.5 flex items-center gap-3">
-              <Shield className="w-5 h-5 text-[#c084fc]" />
+            <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-3.5 flex items-center gap-3">
+              <Shield className="w-5 h-5 text-purple-400" />
               <div className="text-xs">
                 <span className="text-slate-400 block text-[10px]">Password Security</span>
-                <span className="font-bold text-white">PBKDF2-SHA256 Hashed &nbsp;<span className="text-emerald-400 text-[10px] font-normal">Secure</span></span>
+                <span className="font-semibold text-white">PBKDF2-SHA256 Hashed &nbsp;<span className="text-emerald-400 text-[10px] font-normal">Secure</span></span>
               </div>
             </div>
 
-            <div className="bg-[#161926] border border-[#2b334c] rounded-xl p-4 space-y-3">
+            {/* Change Password Box */}
+            <div className="bg-[#151926] border border-[#222838] rounded-xl p-4 space-y-3">
               <div>
                 <span className="text-xs font-bold text-white block mb-0.5">Change Password</span>
                 <span className="text-[10px] text-slate-400">Your password is securely hashed and never stored in plain text.</span>
@@ -382,28 +389,28 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                   placeholder="Current password"
                   value={currentPw}
                   onChange={(e) => setCurrentPw(e.target.value)}
-                  className="w-full bg-[#1c2033] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#38bdf8]"
+                  className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
                 />
                 <input
                   type="password"
                   placeholder="New password (min. 6 characters)"
                   value={newPw}
                   onChange={(e) => setNewPw(e.target.value)}
-                  className="w-full bg-[#1c2033] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#38bdf8]"
+                  className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
                 />
                 <input
                   type="password"
                   placeholder="Confirm new password"
                   value={confirmPw}
                   onChange={(e) => setConfirmPw(e.target.value)}
-                  className="w-full bg-[#1c2033] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#38bdf8]"
+                  className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
                 />
               </div>
               <div className="flex items-center justify-between">
                 <button
                   type="button"
                   onClick={handleChangePassword}
-                  className="text-xs font-semibold bg-[#38bdf8] hover:bg-[#0ea5e9] text-[#0b0e17] px-4 py-1.5 rounded-lg transition-colors"
+                  className="text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg transition-colors"
                 >
                   Update Password
                 </button>
@@ -416,7 +423,8 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
               </div>
             </div>
 
-            <div className="bg-[#161926] border border-[#2b334c] rounded-xl p-4 space-y-3">
+            {/* Software Updates Box */}
+            <div className="bg-[#151926] border border-[#222838] rounded-xl p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-xs font-bold text-white block">Software Updates</span>
@@ -454,7 +462,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                     }
                   }}
                   id="chk-update-btn"
-                  className="text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl transition-all shadow-md shadow-purple-900/30 flex items-center gap-1.5 disabled:opacity-50"
+                  className="text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
                 >
                   Check for Updates
                 </button>
@@ -467,4 +475,3 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
     </div>
   );
 }
-

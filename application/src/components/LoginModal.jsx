@@ -3,7 +3,6 @@ import { Pill, Lock, Mail, User, AlertCircle, CheckCircle, ArrowLeft, KeyRound, 
 import { callApi } from '../utils/pywebview';
 
 export default function LoginModal({ onLoginSuccess }) {
-
   const [viewMode, setViewMode] = useState('auth');
   const [isRegister, setIsRegister] = useState(false);
 
@@ -64,7 +63,7 @@ export default function LoginModal({ onLoginSuccess }) {
 
   const handleRequestReset = async (e) => {
     e.preventDefault();
-    if (!resetIdent.strip?.() && !resetIdent) {
+    if (!resetIdent.trim?.() && !resetIdent) {
       setMessage({ text: 'Please enter your username or registered email.', isError: true });
       return;
     }
@@ -125,28 +124,29 @@ export default function LoginModal({ onLoginSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-[#090b12] flex items-center justify-center p-4 z-50">
-      <div className="w-full max-w-md bg-[#121520] border border-[#24293e] rounded-2xl p-8 shadow-2xl space-y-6">
+    <div className="fixed inset-0 bg-[#090b12]/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="w-full max-w-md bg-[#151926] border border-[#222838] rounded-2xl p-8 shadow-2xl space-y-6">
 
+        {/* Modal Brand Header */}
         <div className="flex flex-col items-center text-center">
           <img
             src="/app_icon.png"
             alt="MedScheduler Logo"
-            className="w-16 h-16 object-contain drop-shadow-xl mb-3"
+            className="w-14 h-14 object-contain drop-shadow-md mb-3"
           />
-          <h2 className="text-2xl font-bold text-white tracking-tight">Smart Medication Scheduler</h2>
+          <h2 className="text-xl font-bold text-white tracking-tight">Smart Medication Scheduler</h2>
           <p className="text-xs text-slate-400 mt-1">Real-time Care & Medication Management System</p>
         </div>
 
         {viewMode === 'auth' && (
           <>
-
-            <div className="grid grid-cols-2 bg-[#171b29] border border-[#252b42] p-1 rounded-xl">
+            {/* Auth Mode Tabs */}
+            <div className="grid grid-cols-2 bg-[#1c2234] border border-[#262f46] p-1 rounded-xl">
               <button
                 type="button"
                 onClick={() => { setIsRegister(false); setMessage({ text: '', isError: false }); }}
-                className={`py-2 text-xs font-bold rounded-lg transition-all ${
-                  !isRegister ? 'bg-[#7c3aed] text-white shadow-md' : 'text-slate-400 hover:text-white'
+                className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+                  !isRegister ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 Sign In
@@ -154,17 +154,18 @@ export default function LoginModal({ onLoginSuccess }) {
               <button
                 type="button"
                 onClick={() => { setIsRegister(true); setMessage({ text: '', isError: false }); }}
-                className={`py-2 text-xs font-bold rounded-lg transition-all ${
-                  isRegister ? 'bg-[#7c3aed] text-white shadow-md' : 'text-slate-400 hover:text-white'
+                className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+                  isRegister ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 Create Account
               </button>
             </div>
 
+            {/* Alert Message Box */}
             {message.text && (
               <div className={`p-3 rounded-xl flex items-center gap-2.5 text-xs font-medium ${
-                message.isError ? 'bg-rose-950/60 border border-rose-800/80 text-rose-300' : 'bg-emerald-950/60 border border-emerald-800/80 text-emerald-300'
+                message.isError ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300' : 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300'
               }`}>
                 {message.isError ? <AlertCircle className="w-4 h-4 shrink-0" /> : <CheckCircle className="w-4 h-4 shrink-0" />}
                 <span>{message.text}</span>
@@ -183,16 +184,14 @@ export default function LoginModal({ onLoginSuccess }) {
                       placeholder="Rene Baterbonia"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-[#161926] border border-[#272e45] rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#7c3aed]"
+                      className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl pl-9 pr-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  {isRegister ? 'Email / Username' : 'Email / Username'}
-                </label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Email / Username</label>
                 <div className="relative">
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input
@@ -201,7 +200,7 @@ export default function LoginModal({ onLoginSuccess }) {
                     placeholder="name@gmail.com"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    className="w-full bg-[#161926] border border-[#272e45] rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#7c3aed]"
+                    className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl pl-9 pr-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                   />
                 </div>
               </div>
@@ -216,7 +215,7 @@ export default function LoginModal({ onLoginSuccess }) {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[#161926] border border-[#272e45] rounded-xl pl-9 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-[#7c3aed]"
+                    className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl pl-9 pr-10 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                   />
                   <button
                     type="button"
@@ -236,7 +235,7 @@ export default function LoginModal({ onLoginSuccess }) {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-[#272e45] bg-[#161926] text-[#7c3aed] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#7c3aed]"
+                      className="w-3.5 h-3.5 rounded border-[#262f46] bg-[#1c2234] text-indigo-600 focus:ring-0 cursor-pointer accent-indigo-600"
                     />
                     <span className="select-none font-medium text-[11px]">Remember me 30d</span>
                   </label>
@@ -248,7 +247,7 @@ export default function LoginModal({ onLoginSuccess }) {
                       setResetIdent(identifier);
                       setMessage({ text: '', isError: false });
                     }}
-                    className="text-[11px] font-semibold text-[#38bdf8] hover:text-sky-300 transition-colors"
+                    className="text-[11px] font-semibold text-sky-400 hover:text-sky-300 transition-colors"
                   >
                     Forgot password?
                   </button>
@@ -258,7 +257,7 @@ export default function LoginModal({ onLoginSuccess }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-sm rounded-xl shadow-lg shadow-purple-900/30 transition-all disabled:opacity-50"
+                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl shadow-sm transition-all disabled:opacity-50"
               >
                 {loading ? 'Processing...' : isRegister ? 'Register Account' : 'Sign In to Dashboard'}
               </button>
@@ -268,9 +267,9 @@ export default function LoginModal({ onLoginSuccess }) {
 
         {viewMode === 'forgot_request' && (
           <div className="space-y-4">
-            <div className="bg-[#171b29] border border-[#252b42] p-4 rounded-xl text-center space-y-1">
-              <div className="w-10 h-10 rounded-full bg-sky-500/10 border border-sky-500/20 text-[#38bdf8] mx-auto flex items-center justify-center">
-                <KeyRound className="w-5 h-5" />
+            <div className="bg-[#1c2234] border border-[#262f46] p-4 rounded-xl text-center space-y-1">
+              <div className="w-9 h-9 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 mx-auto flex items-center justify-center">
+                <KeyRound className="w-4 h-4" />
               </div>
               <h3 className="text-sm font-bold text-white pt-1">Reset Password</h3>
               <p className="text-[11px] text-slate-400">
@@ -280,7 +279,7 @@ export default function LoginModal({ onLoginSuccess }) {
 
             {message.text && (
               <div className={`p-3 rounded-xl flex items-center gap-2.5 text-xs font-medium ${
-                message.isError ? 'bg-rose-950/60 border border-rose-800/80 text-rose-300' : 'bg-emerald-950/60 border border-emerald-800/80 text-emerald-300'
+                message.isError ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300' : 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300'
               }`}>
                 {message.isError ? <AlertCircle className="w-4 h-4 shrink-0" /> : <CheckCircle className="w-4 h-4 shrink-0" />}
                 <span>{message.text}</span>
@@ -298,7 +297,7 @@ export default function LoginModal({ onLoginSuccess }) {
                     placeholder="name@gmail.com"
                     value={resetIdent}
                     onChange={(e) => setResetIdent(e.target.value)}
-                    className="w-full bg-[#161926] border border-[#272e45] rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#38bdf8]"
+                    className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl pl-9 pr-4 py-2.5 text-xs text-white focus:outline-none focus:border-sky-500"
                   />
                 </div>
               </div>
@@ -306,7 +305,7 @@ export default function LoginModal({ onLoginSuccess }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-[#38bdf8] hover:bg-[#0ea5e9] text-[#0b0e17] font-bold text-sm rounded-xl shadow-lg shadow-sky-900/30 transition-all disabled:opacity-50"
+                className="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs rounded-xl shadow-sm transition-all disabled:opacity-50"
               >
                 {loading ? 'Sending Code...' : 'Send Verification Code'}
               </button>
@@ -324,9 +323,9 @@ export default function LoginModal({ onLoginSuccess }) {
 
         {viewMode === 'forgot_verify' && (
           <div className="space-y-4">
-            <div className="bg-[#171b29] border border-[#252b42] p-4 rounded-xl text-center space-y-1">
-              <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5" />
+            <div className="bg-[#1c2234] border border-[#262f46] p-4 rounded-xl text-center space-y-1">
+              <div className="w-9 h-9 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center">
+                <ShieldCheck className="w-4 h-4" />
               </div>
               <h3 className="text-sm font-bold text-white pt-1">Enter Verification Code</h3>
               <p className="text-[11px] text-slate-400">
@@ -336,7 +335,7 @@ export default function LoginModal({ onLoginSuccess }) {
 
             {message.text && (
               <div className={`p-3 rounded-xl flex items-center gap-2.5 text-xs font-medium ${
-                message.isError ? 'bg-rose-950/60 border border-rose-800/80 text-rose-300' : 'bg-emerald-950/60 border border-emerald-800/80 text-emerald-300'
+                message.isError ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300' : 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300'
               }`}>
                 {message.isError ? <AlertCircle className="w-4 h-4 shrink-0" /> : <CheckCircle className="w-4 h-4 shrink-0" />}
                 <span>{message.text}</span>
@@ -353,7 +352,7 @@ export default function LoginModal({ onLoginSuccess }) {
                   placeholder="123456"
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-4 py-2.5 text-center text-lg font-mono tracking-widest text-[#38bdf8] focus:outline-none focus:border-[#38bdf8]"
+                  className="w-full bg-[#151926] border border-[#262f46] rounded-xl px-4 py-2.5 text-center text-base font-mono tracking-widest text-sky-400 focus:outline-none focus:border-sky-500"
                 />
               </div>
 
@@ -367,7 +366,7 @@ export default function LoginModal({ onLoginSuccess }) {
                     placeholder="Min 6 characters"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-[#161926] border border-[#272e45] rounded-xl pl-9 pr-10 py-2 text-sm text-white focus:outline-none focus:border-[#7c3aed]"
+                    className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl pl-9 pr-10 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                   />
                   <button
                     type="button"
@@ -390,7 +389,7 @@ export default function LoginModal({ onLoginSuccess }) {
                     placeholder="Confirm password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-[#161926] border border-[#272e45] rounded-xl pl-9 pr-10 py-2 text-sm text-white focus:outline-none focus:border-[#7c3aed]"
+                    className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl pl-9 pr-10 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                   />
                   <button
                     type="button"
@@ -406,7 +405,7 @@ export default function LoginModal({ onLoginSuccess }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-900/30 transition-all disabled:opacity-50 mt-2"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl shadow-sm transition-all disabled:opacity-50 mt-2"
               >
                 {loading ? 'Verifying & Updating...' : 'Reset & Update Password'}
               </button>

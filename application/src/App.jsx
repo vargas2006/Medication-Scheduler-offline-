@@ -53,7 +53,6 @@ export default function App() {
   useEffect(() => {
     async function checkAutoLogin() {
       try {
-
         const res = await callApi('get_auto_login_user');
         if (res && res.success && res.user) {
           setUser(res.user);
@@ -105,7 +104,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen w-screen bg-[#0d0f17] text-slate-100 overflow-hidden select-none">
+    <div className="flex h-screen w-screen bg-[#0b0e14] text-slate-100 overflow-hidden select-none">
 
       <Sidebar
         activeTab={activeTab}
@@ -114,7 +113,7 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#0d0f17]">
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#0b0e14]">
 
         <Header activeTab={activeTab} user={user} theme={theme} onToggleTheme={handleToggleTheme} />
 
@@ -138,23 +137,23 @@ export default function App() {
       </div>
 
       {activeAlert && (
-        <div className="fixed top-6 right-6 z-[9999] w-[500px] max-w-[94vw] bg-[#121626]/98 border-2 border-emerald-500 rounded-3xl p-5 shadow-[0_12px_45px_rgba(0,0,0,0.85),0_0_30px_rgba(16,185,129,0.35)] backdrop-blur-2xl animate-in fade-in slide-in-from-top-4 duration-300 ring-1 ring-white/10">
+        <div className="fixed top-5 right-5 z-[9999] w-[460px] max-w-[94vw] bg-[#151926] border border-emerald-500/40 rounded-2xl p-5 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-200">
 
-          <div className="flex items-start justify-between gap-3 pb-3 mb-3 border-b border-[#252d47]">
+          <div className="flex items-start justify-between gap-3 pb-3 mb-3 border-b border-[#1e2436]">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-emerald-500/20 border border-emerald-500/40 rounded-2xl text-emerald-400 shrink-0 shadow-inner">
-                <Bell className="w-5 h-5 animate-bounce" />
+              <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 shrink-0">
+                <Bell className="w-4 h-4" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-white text-sm tracking-wide">
+                  <span className="font-semibold text-white text-sm tracking-wide">
                     {activeAlert.title || 'Medication Reminder'}
                   </span>
-                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-[#0b0e17]">
+                  <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     Today
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-400 font-medium">
+                <p className="text-[11px] text-slate-400 font-normal">
                   {activeAlert.date || 'Scheduled for today'} &bull; {activeAlert.timestamp || 'Due Now'}
                 </p>
               </div>
@@ -163,7 +162,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setActiveAlert(null)}
-              className="text-slate-400 hover:text-white p-1 rounded-xl hover:bg-[#202740] transition-colors"
+              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-[#1c2234] transition-colors"
               title="Dismiss"
             >
               <X className="w-4 h-4" />
@@ -175,21 +174,21 @@ export default function App() {
               {activeAlert.medications.map((m, idx) => (
                 <div
                   key={idx}
-                  className="bg-[#171d33] border border-[#2b3558] hover:border-emerald-500/40 rounded-2xl p-3 flex items-center justify-between transition-all"
+                  className="bg-[#1c2234] border border-[#262f46] hover:border-emerald-500/40 rounded-xl p-3 flex items-center justify-between transition-all"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-                      <Pill className="w-4 h-4" />
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                      <Pill className="w-3.5 h-3.5" />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="font-bold text-white text-xs truncate">{m.name}</h4>
-                      <span className="inline-block mt-0.5 text-[10px] font-semibold text-sky-300 bg-sky-950/70 border border-sky-500/30 px-2 py-0.5 rounded-md">
+                      <h4 className="font-semibold text-white text-xs truncate">{m.name}</h4>
+                      <span className="inline-block mt-0.5 text-[10px] font-semibold text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded-md">
                         {m.dosage}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-purple-300 bg-purple-950/70 border border-purple-500/30 px-2.5 py-1 rounded-xl text-[11px] font-bold shrink-0">
+                  <div className="flex items-center gap-1.5 text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0">
                     <Clock className="w-3.5 h-3.5" />
                     <span>{m.time_value || 'Today'}</span>
                   </div>
@@ -197,21 +196,21 @@ export default function App() {
               ))}
             </div>
           ) : (
-            <p className="text-slate-300 text-xs leading-relaxed mb-4 p-3 bg-[#171d33] border border-[#2b3558] rounded-2xl">
+            <p className="text-slate-300 text-xs leading-relaxed mb-4 p-3 bg-[#1c2234] border border-[#262f46] rounded-xl">
               {activeAlert.message}
             </p>
           )}
 
-          <div className="mb-4 px-3 py-2 bg-emerald-950/30 border border-emerald-500/20 rounded-xl flex items-center gap-2 text-[11px] text-emerald-300 font-medium">
+          <div className="mb-4 px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-2 text-[11px] text-emerald-300 font-medium">
             <Droplet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             <span>Remember to log your intake after taking your dose.</span>
           </div>
 
-          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#252d47]">
+          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#1e2436]">
             <button
               type="button"
               onClick={() => setActiveAlert(null)}
-              className="px-4 py-2 bg-[#1c2238] hover:bg-[#252c48] border border-[#2e375b] text-slate-300 font-bold rounded-xl text-xs transition-colors"
+              className="px-4 py-1.5 bg-[#1c2234] hover:bg-[#222838] border border-[#262f46] text-slate-300 font-semibold rounded-xl text-xs transition-colors"
             >
               Dismiss
             </button>
@@ -221,9 +220,9 @@ export default function App() {
                 setActiveAlert(null);
                 setActiveTab('IntakeFrame');
               }}
-              className="px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold rounded-xl text-xs shadow-lg shadow-emerald-950/50 flex items-center gap-2 transition-all transform active:scale-95"
+              className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-xs shadow-sm flex items-center gap-1.5 transition-all"
             >
-              <Check className="w-4 h-4" />
+              <Check className="w-3.5 h-3.5" />
               <span>Take Dose Now</span>
             </button>
           </div>

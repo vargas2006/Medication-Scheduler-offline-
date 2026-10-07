@@ -6,7 +6,7 @@ function MedImage({ src, alt }) {
   const [hasError, setHasError] = useState(false);
 
   if (!src || hasError) {
-    return <Pill className="w-5 h-5 text-purple-400" />;
+    return <Pill className="w-5 h-5 text-indigo-400" />;
   }
 
   const imageSrc = src.startsWith('http') ? src : `file:///${src.replace(/\\/g, '/')}`;
@@ -28,9 +28,7 @@ export default function MedicationsView({ user, onDataChange }) {
   const [message, setMessage] = useState({ text: '', isError: false });
 
   const [viewMode, setViewMode] = useState('grid');
-
   const [stockFilter, setStockFilter] = useState('ALL');
-
   const [sortBy, setSortBy] = useState('DEFAULT');
 
   const [showModal, setShowModal] = useState(false);
@@ -162,30 +160,33 @@ export default function MedicationsView({ user, onDataChange }) {
   return (
     <div className="p-5 flex flex-col h-full overflow-hidden space-y-4 relative">
 
-      <div className="bg-[#161926] border border-[#24293e] rounded-2xl p-4 flex flex-col gap-3 shrink-0">
+      {/* Desktop Toolbar Container */}
+      <div className="bg-[#151926] border border-[#222838] rounded-2xl p-4 flex flex-col gap-3 shrink-0 shadow-sm">
         <div className="flex items-center justify-between gap-3 flex-wrap">
 
+          {/* Search Input */}
           <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
             <input
               type="text"
               placeholder="Search medication stock by name or dosage..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#1c2033] border border-[#272e45] rounded-xl pl-10 pr-4 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
+              className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl pl-10 pr-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
             />
           </div>
 
           <div className="flex items-center gap-3">
 
-            <div className="flex items-center bg-[#1c2033] border border-[#282f47] p-1 rounded-xl shadow-inner">
+            {/* View Mode Switcher */}
+            <div className="flex items-center bg-[#1c2234] border border-[#262f46] p-1 rounded-xl">
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
                 title="List View"
-                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-xs font-bold ${
+                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-xs font-semibold ${
                   viewMode === 'list'
-                    ? 'bg-[#7c3aed] text-white shadow-md'
+                    ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -193,15 +194,15 @@ export default function MedicationsView({ user, onDataChange }) {
                 <span>List View</span>
               </button>
 
-              <div className="w-[1px] h-4 bg-[#2b324d] mx-1" />
+              <div className="w-[1px] h-4 bg-[#262f46] mx-1" />
 
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
                 title="Grid View"
-                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-xs font-bold ${
+                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-xs font-semibold ${
                   viewMode === 'grid'
-                    ? 'bg-[#7c3aed] text-white shadow-md'
+                    ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -210,25 +211,28 @@ export default function MedicationsView({ user, onDataChange }) {
               </button>
             </div>
 
+            {/* Primary Action Button */}
             <button
               onClick={() => setShowModal(true)}
-              className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-purple-900/30 shrink-0"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs px-4 py-2 rounded-xl flex items-center gap-2 transition-all shadow-sm shrink-0"
             >
+              <Plus className="w-4 h-4" />
               <span>Add Drug</span>
             </button>
           </div>
         </div>
 
-        <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-[#22273a]">
+        {/* Filter and Sort Sub-Bar */}
+        <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-[#1e2436]">
 
           <div className="flex items-center gap-1.5 flex-wrap">
             <button
               type="button"
               onClick={() => setStockFilter('ALL')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
                 stockFilter === 'ALL'
-                  ? 'bg-[#2b3558] text-white shadow-sm border border-[#3b4772]'
-                  : 'bg-[#1c2033] border border-[#272e45] text-slate-400 hover:text-white'
+                  ? 'bg-[#222838] text-white border border-[#2b334a]'
+                  : 'bg-[#1c2234] border border-[#262f46] text-slate-400 hover:text-white'
               }`}
             >
               <Boxes className="w-3.5 h-3.5" />
@@ -241,16 +245,16 @@ export default function MedicationsView({ user, onDataChange }) {
             <button
               type="button"
               onClick={() => setStockFilter('LOW_STOCK')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
                 stockFilter === 'LOW_STOCK'
-                  ? 'bg-amber-950/80 text-amber-300 border border-amber-500/60 shadow-sm'
-                  : 'bg-[#1c2033] border border-[#272e45] text-slate-400 hover:text-amber-400'
+                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                  : 'bg-[#1c2234] border border-[#262f46] text-slate-400 hover:text-amber-400'
               }`}
             >
               <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
               <span>Low Stock (Need Refill)</span>
               <span className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                lowStockCount > 0 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-slate-800 text-slate-400'
+                lowStockCount > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-800 text-slate-400'
               }`}>
                 {lowStockCount}
               </span>
@@ -259,16 +263,16 @@ export default function MedicationsView({ user, onDataChange }) {
             <button
               type="button"
               onClick={() => setStockFilter('OUT_OF_STOCK')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
                 stockFilter === 'OUT_OF_STOCK'
-                  ? 'bg-rose-950/80 text-rose-300 border border-rose-500/60 shadow-sm'
-                  : 'bg-[#1c2033] border border-[#272e45] text-slate-400 hover:text-rose-400'
+                  ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
+                  : 'bg-[#1c2234] border border-[#262f46] text-slate-400 hover:text-rose-400'
               }`}
             >
               <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
               <span>Out of Stock</span>
               <span className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                outOfStockCount > 0 ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-slate-800 text-slate-400'
+                outOfStockCount > 0 ? 'bg-rose-500/20 text-rose-400' : 'bg-slate-800 text-slate-400'
               }`}>
                 {outOfStockCount}
               </span>
@@ -277,39 +281,39 @@ export default function MedicationsView({ user, onDataChange }) {
             <button
               type="button"
               onClick={() => setStockFilter('IN_STOCK')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
                 stockFilter === 'IN_STOCK'
-                  ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/60 shadow-sm'
-                  : 'bg-[#1c2033] border border-[#272e45] text-slate-400 hover:text-emerald-400'
+                  ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                  : 'bg-[#1c2234] border border-[#262f46] text-slate-400 hover:text-emerald-400'
               }`}
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
               <span>In Stock (Optimal)</span>
-              <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-400">
                 {inStockCount}
               </span>
             </button>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-[#1c2033] border border-[#282f47] px-3 py-1.5 rounded-xl text-xs">
+            <div className="flex items-center gap-2 bg-[#1c2234] border border-[#262f46] px-3 py-1.5 rounded-xl text-xs">
               <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
-              <span className="text-slate-400 font-semibold">Sort By:</span>
+              <span className="text-slate-400 font-medium">Sort By:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="bg-transparent text-white font-bold focus:outline-none cursor-pointer"
               >
-                <option value="DEFAULT" className="bg-[#161926]">Default</option>
-                <option value="STOCK_ASC" className="bg-[#161926]">Stock (Low to High - Refills First)</option>
-                <option value="STOCK_DESC" className="bg-[#161926]">Stock (High to Low)</option>
-                <option value="NAME_AZ" className="bg-[#161926]">Medication Name (A - Z)</option>
+                <option value="DEFAULT" className="bg-[#151926]">Default</option>
+                <option value="STOCK_ASC" className="bg-[#151926]">Stock (Low to High - Refills First)</option>
+                <option value="STOCK_DESC" className="bg-[#151926]">Stock (High to Low)</option>
+                <option value="NAME_AZ" className="bg-[#151926]">Medication Name (A - Z)</option>
               </select>
             </div>
 
             <div className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
               <span>Showing:</span>
-              <span className="bg-[#10273f] text-[#38bdf8] font-bold px-2 py-0.5 rounded-md">
+              <span className="bg-[#1c2234] text-sky-400 border border-[#262f46] font-bold px-2 py-0.5 rounded-md">
                 {filteredMeds.length}
               </span>
             </div>
@@ -317,13 +321,15 @@ export default function MedicationsView({ user, onDataChange }) {
         </div>
       </div>
 
+      {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto pr-1">
         {loading ? (
-          <div className="text-center text-slate-500 py-20 text-xs">Loading medication inventory...</div>
+          <div className="text-center text-slate-400 py-20 text-xs">Loading medication inventory...</div>
         ) : filteredMeds.length === 0 ? (
-          <div className="text-center text-slate-500 py-24 text-xs">No medications found matching search or stock quantity filter.</div>
+          <div className="text-center text-slate-400 py-24 text-xs">No medications found matching search or stock quantity filter.</div>
         ) : viewMode === 'grid' ? (
 
+          /* Grid View Layout */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredMeds.map((med) => {
               const isOut = med.stock <= 0;
@@ -331,22 +337,22 @@ export default function MedicationsView({ user, onDataChange }) {
               return (
                 <div
                   key={med.med_id}
-                  className="bg-[#161926] border border-[#24293e] hover:border-[#38bdf8]/40 rounded-2xl p-4 flex flex-col justify-between space-y-4 transition-all shadow-sm"
+                  className="bg-[#151926] border border-[#222838] hover:border-sky-500/40 rounded-2xl p-4 flex flex-col justify-between space-y-4 transition-all shadow-sm"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-11 h-11 rounded-xl bg-[#272d47] border border-[#3b4366] flex items-center justify-center text-xl shrink-0 overflow-hidden shadow-sm">
+                      <div className="w-10 h-10 rounded-xl bg-[#1c2234] border border-[#262f46] flex items-center justify-center text-lg shrink-0 overflow-hidden shadow-sm">
                         <MedImage src={med.image_path} alt={med.name} />
                       </div>
                       <div className="min-w-0">
-                        <h4 className="font-bold text-white text-sm truncate">{med.name}</h4>
+                        <h4 className="font-semibold text-white text-sm truncate">{med.name}</h4>
                         <p className="text-xs text-slate-400 truncate">{med.dosage}</p>
                       </div>
                     </div>
 
                     <button
                       onClick={() => handleDeleteMedication(med.med_id)}
-                      className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-950/60 hover:text-rose-300 transition-colors shrink-0"
+                      className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors shrink-0"
                       title="Delete Medication"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -354,7 +360,7 @@ export default function MedicationsView({ user, onDataChange }) {
                   </div>
 
                   <div className="space-y-2">
-                    <div className="bg-[#1c2033] border border-[#282f47] rounded-xl p-2.5 flex items-center justify-between text-xs">
+                    <div className="bg-[#1c2234] border border-[#262f46] rounded-xl p-2.5 flex items-center justify-between text-xs">
                       <span className="text-slate-400">Stock Remaining:</span>
                       <span className={`font-bold text-sm ${isOut ? 'text-rose-400' : 'text-white'}`}>
                         {med.stock} doses
@@ -364,7 +370,7 @@ export default function MedicationsView({ user, onDataChange }) {
                     <div className="flex items-center justify-between text-[11px] text-slate-400">
                       <span>Refill Threshold: {med.refill_threshold || 10}</span>
                       <span className={`font-bold px-2 py-0.5 rounded ${
-                        isOut ? 'bg-[#3d1822] text-[#ef4444]' : med.is_low_stock ? 'bg-amber-950/80 text-amber-400' : 'bg-[#102d24] text-[#10b981]'
+                        isOut ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : med.is_low_stock ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                       }`}>
                         {isOut ? 'OUT OF STOCK' : med.is_low_stock ? 'REFILL LOW' : 'OPTIMAL'}
                       </span>
@@ -376,21 +382,22 @@ export default function MedicationsView({ user, onDataChange }) {
           </div>
         ) : (
 
-          <div className="space-y-2.5">
+          /* List View Layout */
+          <div className="space-y-2">
             {filteredMeds.map((med) => {
               const isOut = med.stock <= 0;
 
               return (
                 <div
                   key={med.med_id}
-                  className="bg-[#161926] border border-[#24293e] hover:border-[#38bdf8]/40 rounded-xl p-3.5 flex items-center justify-between transition-all"
+                  className="bg-[#151926] border border-[#222838] hover:border-sky-500/40 rounded-xl p-3 flex items-center justify-between transition-all"
                 >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-10 h-10 rounded-lg bg-[#272d47] border border-[#3b4366] flex items-center justify-center text-lg shrink-0 overflow-hidden shadow-sm">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-[#1c2234] border border-[#262f46] flex items-center justify-center text-base shrink-0 overflow-hidden shadow-sm">
                       <MedImage src={med.image_path} alt={med.name} />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="font-bold text-white text-xs truncate">{med.name}</h4>
+                      <h4 className="font-semibold text-white text-xs truncate">{med.name}</h4>
                       <p className="text-[11px] text-slate-400 truncate">
                         {med.dosage} &bull; Stock: <span className={isOut ? 'text-rose-400 font-bold' : 'text-slate-300'}>{med.stock} doses</span>
                       </p>
@@ -399,14 +406,14 @@ export default function MedicationsView({ user, onDataChange }) {
 
                   <div className="flex items-center gap-3 shrink-0">
                     <span className={`text-[9px] font-bold px-2.5 py-1 rounded ${
-                      isOut ? 'bg-[#3d1822] text-[#ef4444]' : med.is_low_stock ? 'bg-amber-950/80 text-amber-400' : 'bg-[#102d24] text-[#10b981]'
+                      isOut ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : med.is_low_stock ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                     }`}>
                       {isOut ? 'OUT OF STOCK' : med.is_low_stock ? 'REFILL LOW' : 'OPTIMAL'}
                     </span>
 
                     <button
                       onClick={() => handleDeleteMedication(med.med_id)}
-                      className="p-2 rounded-lg text-rose-400 hover:bg-rose-950/60 hover:text-rose-300 transition-colors"
+                      className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors"
                       title="Delete Medication"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -419,14 +426,15 @@ export default function MedicationsView({ user, onDataChange }) {
         )}
       </div>
 
+      {/* Add Drug Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-[#090b12]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#121520] border border-[#24293e] rounded-2xl p-6 shadow-2xl space-y-5">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#151926] border border-[#222838] rounded-2xl p-6 shadow-2xl space-y-5">
 
-            <div className="flex items-center justify-between border-b border-[#1e2438] pb-3.5">
+            <div className="flex items-center justify-between border-b border-[#1e2436] pb-3.5">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#2b2046] text-[#c084fc] flex items-center justify-center text-lg">
-                  <Pill className="w-5 h-5 text-[#c084fc]" />
+                <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                  <Pill className="w-4 h-4" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-white leading-tight">Register New Drug</h3>
@@ -435,7 +443,7 @@ export default function MedicationsView({ user, onDataChange }) {
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="w-8 h-8 rounded-lg hover:bg-[#1f2438] text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+                className="w-7 h-7 rounded-lg hover:bg-[#1c2234] text-slate-400 hover:text-white flex items-center justify-center transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -443,7 +451,7 @@ export default function MedicationsView({ user, onDataChange }) {
 
             {formMsg.text && (
               <div className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${
-                formMsg.isError ? 'bg-rose-950/60 border border-rose-800 text-rose-300' : 'bg-emerald-950/60 border border-emerald-800 text-emerald-300'
+                formMsg.isError ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300' : 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300'
               }`}>
                 {formMsg.isError ? <AlertCircle className="w-4 h-4 shrink-0" /> : <Check className="w-4 h-4 shrink-0" />}
                 <span>{formMsg.text}</span>
@@ -459,7 +467,7 @@ export default function MedicationsView({ user, onDataChange }) {
                   placeholder="e.g. Paracetamol"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
+                  className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
@@ -471,7 +479,7 @@ export default function MedicationsView({ user, onDataChange }) {
                   placeholder="e.g. 500mg Tablet"
                   value={dosage}
                   onChange={(e) => setDosage(e.target.value)}
-                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
+                  className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
@@ -483,7 +491,7 @@ export default function MedicationsView({ user, onDataChange }) {
                     min="0"
                     value={stock}
                     onChange={(e) => setStock(e.target.value)}
-                    className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
+                    className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -494,7 +502,7 @@ export default function MedicationsView({ user, onDataChange }) {
                     min="0"
                     value={threshold}
                     onChange={(e) => setThreshold(e.target.value)}
-                    className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
+                    className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                   />
                 </div>
               </div>
@@ -504,7 +512,7 @@ export default function MedicationsView({ user, onDataChange }) {
                 <select
                   value={schedType}
                   onChange={(e) => setSchedType(e.target.value)}
-                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed]"
+                  className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                 >
                   <option value="DAILY_TIME">DAILY TIME (Specific Time &amp; Date)</option>
                   <option value="INTERVAL">INTERVAL (Every X Hours)</option>
@@ -514,7 +522,7 @@ export default function MedicationsView({ user, onDataChange }) {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-[#38bdf8]" />
+                    <Calendar className="w-3.5 h-3.5 text-sky-400" />
                     <span>Choose Schedule Date</span>
                   </label>
                   <span className="text-[10px] text-slate-400 font-mono">{selectedDate}</span>
@@ -525,35 +533,35 @@ export default function MedicationsView({ user, onDataChange }) {
                   required
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed] mb-2"
+                  className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 mb-2"
                 />
 
                 <div className="grid grid-cols-4 gap-2">
                   <button
                     type="button"
                     onClick={() => setQuickDate(0)}
-                    className="py-1.5 px-2 bg-[#1c2033] hover:bg-[#252b45] border border-[#2b324d] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
+                    className="py-1.5 px-2 bg-[#1c2234] hover:bg-[#222838] border border-[#262f46] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
                   >
                     Today
                   </button>
                   <button
                     type="button"
                     onClick={() => setQuickDate(1)}
-                    className="py-1.5 px-2 bg-[#1c2033] hover:bg-[#252b45] border border-[#2b324d] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
+                    className="py-1.5 px-2 bg-[#1c2234] hover:bg-[#222838] border border-[#262f46] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
                   >
                     Tomorrow
                   </button>
                   <button
                     type="button"
                     onClick={() => setQuickDate(2)}
-                    className="py-1.5 px-2 bg-[#1c2033] hover:bg-[#252b45] border border-[#2b324d] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
+                    className="py-1.5 px-2 bg-[#1c2234] hover:bg-[#222838] border border-[#262f46] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
                   >
                     In 2 Days
                   </button>
                   <button
                     type="button"
                     onClick={() => setQuickDate(3)}
-                    className="py-1.5 px-2 bg-[#1c2033] hover:bg-[#252b45] border border-[#2b324d] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
+                    className="py-1.5 px-2 bg-[#1c2234] hover:bg-[#222838] border border-[#262f46] rounded-lg text-[10px] font-bold text-slate-300 transition-colors"
                   >
                     In 3 Days
                   </button>
@@ -563,7 +571,7 @@ export default function MedicationsView({ user, onDataChange }) {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-[#c084fc]" />
+                    <Clock className="w-3.5 h-3.5 text-purple-400" />
                     <span>Choose Intake Time</span>
                   </label>
                   <span className="text-[10px] text-slate-400 font-mono">{selectedTime}</span>
@@ -575,7 +583,7 @@ export default function MedicationsView({ user, onDataChange }) {
                   placeholder={schedType === 'DAILY_TIME' ? '08:00' : 'Interval in hours (e.g. 6)'}
                   value={selectedTime}
                   onChange={(e) => setSelectedTime(e.target.value)}
-                  className="w-full bg-[#161926] border border-[#272e45] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#7c3aed] mb-2"
+                  className="w-full bg-[#1c2234] border border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 mb-2"
                 />
 
                 {schedType === 'DAILY_TIME' && (
@@ -587,8 +595,8 @@ export default function MedicationsView({ user, onDataChange }) {
                         onClick={() => setSelectedTime(preset.value)}
                         className={`py-1.5 px-2 border rounded-lg text-[10px] font-bold transition-all ${
                           selectedTime === preset.value
-                            ? 'bg-[#7c3aed] border-[#9333ea] text-white shadow-sm'
-                            : 'bg-[#1c2033] hover:bg-[#252b45] border-[#2b324d] text-slate-300'
+                            ? 'bg-indigo-600 border-indigo-500 text-white shadow-sm'
+                            : 'bg-[#1c2234] hover:bg-[#222838] border-[#262f46] text-slate-300'
                         }`}
                       >
                         {preset.label} ({preset.value})
@@ -598,18 +606,18 @@ export default function MedicationsView({ user, onDataChange }) {
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1e2438]">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1e2436]">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2.5 rounded-xl border border-[#272e45] text-slate-400 hover:text-white text-xs font-semibold transition-colors"
+                  className="px-4 py-2 rounded-xl border border-[#262f46] text-slate-400 hover:text-white text-xs font-semibold transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-900/30 transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   <span>{submitting ? 'Adding...' : 'Add Drug'}</span>
                 </button>

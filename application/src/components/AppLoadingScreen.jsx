@@ -26,7 +26,7 @@ export default function AppLoadingScreen({ onFinish }) {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0d0f17] text-slate-100 select-none transition-opacity duration-300 ${
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0b0e14] text-slate-100 select-none transition-opacity duration-300 ${
         fadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
@@ -35,20 +35,20 @@ export default function AppLoadingScreen({ onFinish }) {
         <img
           src="/app_icon.png"
           alt="MedScheduler Logo"
-          className="w-16 h-16 object-contain drop-shadow-xl mb-4"
+          className="w-14 h-14 object-contain drop-shadow-md mb-4"
         />
 
-        <h1 className="text-xl font-bold text-white tracking-tight">MedScheduler</h1>
-        <p className="text-xs text-slate-400 mt-1">Smart Care Monitor</p>
+        <h1 className="text-lg font-bold text-white tracking-tight">MedScheduler</h1>
+        <p className="text-xs text-slate-400 mt-0.5">Smart Care Monitor</p>
 
-        <div className="w-48 bg-[#161926] border border-[#24293e] rounded-full h-1.5 overflow-hidden mt-6 mb-2">
+        <div className="w-48 bg-[#151926] border border-[#222838] rounded-full h-1.5 overflow-hidden mt-6 mb-2">
           <div
-            className="h-full bg-gradient-to-r from-[#7c3aed] to-[#38bdf8] transition-all duration-300 ease-out rounded-full"
+            className="h-full bg-indigo-500 transition-all duration-300 ease-out rounded-full"
             style={{ width: `${progress}%` }}
           />
         </div>
 
-        <span className="text-[11px] text-slate-500 font-medium">
+        <span className="text-[11px] text-slate-400 font-medium">
           Loading application...
         </span>
       </div>
