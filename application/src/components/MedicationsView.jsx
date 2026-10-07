@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, AlertCircle, AlertTriangle, Check, CheckCircle2, Search, ArrowUpDown, Boxes, X, LayoutList, LayoutGrid, Pill } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, AlertTriangle, Check, CheckCircle2, Search, ArrowUpDown, Boxes, X, LayoutList, LayoutGrid, Pill, Calendar } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
 
 function MedImage({ src, alt }) {
@@ -37,6 +37,8 @@ export default function MedicationsView({ user, onDataChange }) {
   const [stock, setStock] = useState('30');
   const [stockUnit, setStockUnit] = useState('tablets');
   const [threshold, setThreshold] = useState('10');
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState('');
   const [imagePath, setImagePath] = useState('');
   const [formMsg, setFormMsg] = useState({ text: '', isError: false });
   const [submitting, setSubmitting] = useState(false);
@@ -77,7 +79,9 @@ export default function MedicationsView({ user, onDataChange }) {
         imagePath || null,
         strength.trim(),
         dosageForm.trim(),
-        stockUnit.trim() || 'tablets'
+        stockUnit.trim() || 'tablets',
+        startDate || null,
+        endDate || null
       );
 
       if (res.success) {
@@ -88,6 +92,8 @@ export default function MedicationsView({ user, onDataChange }) {
         setStock('30');
         setStockUnit('tablets');
         setThreshold('10');
+        setStartDate(new Date().toISOString().split('T')[0]);
+        setEndDate('');
         setImagePath('');
         fetchMeds();
         if (onDataChange) onDataChange();
@@ -316,7 +322,7 @@ export default function MedicationsView({ user, onDataChange }) {
           <div className="text-center text-slate-500 dark:text-slate-400 py-24 text-xs">No medications found in stock inventory.</div>
         ) : viewMode === 'grid' ? (
 
-          /* Grid View Layout */
+          /* Grid View Layout - Matching Intake View Inner Box Structure */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredMeds.map((med) => {
               const thresh = med.refill_threshold || 10;
@@ -351,17 +357,39 @@ export default function MedicationsView({ user, onDataChange }) {
                     </button>
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl p-2.5 flex items-center justify-between text-xs">
+                  {/* Inner Box Container matching Intake View */}
+                  <div className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl p-3 space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
                       <span className="text-slate-500 dark:text-slate-400">Stock Remaining:</span>
-                      <span className={`font-bold text-sm ${isOut ? 'text-rose-600 dark:text-rose-400' : isLow ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
+                      <span className={`font-bold ${isOut ? 'text-rose-600 dark:text-rose-400' : isLow ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
                         {med.stock} {unitStr}
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                      <span>Refill Threshold: {thresh} {unitStr}</span>
-                      <span className={`font-bold px-2 py-0.5 rounded ${
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 dark:text-slate-400">Refill Threshold:</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300">
+                        {thresh} {unitStr}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 dark:text-slate-400">Start Date:</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300">
+                        {med.start_date || 'N/A'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 dark:text-slate-400">End Date:</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300">
+                        {med.end_date || 'Continuous'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-[#222838]">
+                      <span className="text-slate-500 dark:text-slate-400">Inventory Status:</span>
+                      <span className={`font-bold px-2 py-0.5 rounded text-[10px] ${
                         isOut
                           ? 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30'
                           : isLow
@@ -398,7 +426,7 @@ export default function MedicationsView({ user, onDataChange }) {
                     <div className="min-w-0">
                       <h4 className="font-semibold text-slate-900 dark:text-white text-xs truncate">{med.name}</h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                        {med.strength || med.dosage} ({med.dosage_form || 'Tablet'}) &bull; Stock: <span className={isOut ? 'text-rose-600 dark:text-rose-400 font-bold' : isLow ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-slate-700 dark:text-slate-300 font-bold'}>{med.stock} {unitStr}</span> &bull; Refill Alert: {thresh} {unitStr}
+                        {med.strength || med.dosage} ({med.dosage_form || 'Tablet'}) &bull; Stock: <span className={isOut ? 'text-rose-600 dark:text-rose-400 font-bold' : isLow ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-slate-700 dark:text-slate-300 font-bold'}>{med.stock} {unitStr}</span> &bull; Dates: {med.start_date || 'N/A'} - {med.end_date || 'Continuous'}
                       </p>
                     </div>
                   </div>
@@ -441,7 +469,7 @@ export default function MedicationsView({ user, onDataChange }) {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">Register New Drug</h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Add drug to stock inventory only. Does NOT create schedules or logs.</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Add drug to stock inventory with start & end dates.</p>
                 </div>
               </div>
               <button
@@ -541,6 +569,28 @@ export default function MedicationsView({ user, onDataChange }) {
                     required
                     value={threshold}
                     onChange={(e) => setThreshold(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Start Date</label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">End Date (Optional)</label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
                     className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
                   />
                 </div>

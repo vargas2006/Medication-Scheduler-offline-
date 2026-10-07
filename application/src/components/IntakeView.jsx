@@ -316,6 +316,20 @@ export default function IntakeView({ user, onDataChange }) {
                       </span>
                     </div>
 
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 dark:text-slate-400">Start Date:</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300">
+                        {sch.start_date || 'N/A'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 dark:text-slate-400">End Date:</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300">
+                        {sch.end_date || 'Continuous'}
+                      </span>
+                    </div>
+
                     <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-[#222838]">
                       <span className="text-slate-500 dark:text-slate-400">Stock Available:</span>
                       <span className={`font-bold ${isOut ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>

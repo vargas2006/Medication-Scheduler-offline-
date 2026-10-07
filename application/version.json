@@ -1,7 +1,7 @@
 {
-  "version": "1.0.25",
+  "version": "1.0.26",
   "release_date": "2026-10-07",
-  "release_notes": "Version 1.0.25: Fixed separation between Medication Stock inventory and Intake Medication schedule system. Stock items are inventory-only; Intake Medication requires explicit scheduling; Take Dose logs intake history and deducts stock count.",
+  "release_notes": "Version 1.0.26: Added Start Date and End Date to Medication Stock and Intake Medication cards, and updated Medication Stock inner card container layout to match Intake Medication design.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }

@@ -160,13 +160,15 @@ class PythonAPI:
                     "stock_unit": getattr(m, 'stock_unit', '') or 'tablets',
                     "refill_threshold": m.refill_threshold,
                     "image_path": m.image_path,
+                    "start_date": getattr(m, 'start_date', None),
+                    "end_date": getattr(m, 'end_date', None),
                     "is_low_stock": m.is_low_stock()
                 })
             return {"success": True, "medications": result}
         except Exception as e:
             return {"success": False, "error": str(e), "medications": []}
 
-    def add_medication(self, user_id, name, dosage, stock, refill_threshold, image_path=None, strength=None, dosage_form='Tablet', stock_unit='tablets'):
+    def add_medication(self, user_id, name, dosage, stock, refill_threshold, image_path=None, strength=None, dosage_form='Tablet', stock_unit='tablets', start_date=None, end_date=None):
         try:
             user_id = int(user_id)
             stock = int(stock)
@@ -178,7 +180,8 @@ class PythonAPI:
 
             med_id = self.inventory_manager.add_medication(
                 user_id, name, clean_dosage, stock, refill_threshold, image_path,
-                strength=clean_strength, dosage_form=clean_form, stock_unit=clean_unit
+                strength=clean_strength, dosage_form=clean_form, stock_unit=clean_unit,
+                start_date=start_date, end_date=end_date
             )
             return {"success": True, "message": "Medication registered in inventory successfully!", "med_id": med_id}
         except Exception as e:
