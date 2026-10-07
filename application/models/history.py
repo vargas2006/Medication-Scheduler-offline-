@@ -38,7 +38,7 @@ class ReportGenerator:
                        l.timestamp, l.status 
                 FROM intake_log l
                 LEFT JOIN medications m ON l.medication_id = m.id
-                WHERE l.user_id = ?
+                WHERE l.user_id = ? AND l.status = 'TAKEN'
                 ORDER BY l.timestamp DESC
             '''
             rows = self.db.fetch_all(query, (user_id,))
@@ -49,6 +49,7 @@ class ReportGenerator:
                        l.timestamp, l.status 
                 FROM intake_log l
                 LEFT JOIN medications m ON l.medication_id = m.id
+                WHERE l.status = 'TAKEN'
                 ORDER BY l.timestamp DESC
             '''
             rows = self.db.fetch_all(query)

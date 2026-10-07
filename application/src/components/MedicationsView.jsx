@@ -88,10 +88,7 @@ export default function MedicationsView({ user, onDataChange }) {
         dosage,
         parseInt(stock) || 0,
         parseInt(threshold) || 0,
-        imagePath || null,
-        schedType,
-        selectedTime,
-        selectedDate
+        imagePath || null
       );
 
       if (res.success) {
@@ -100,8 +97,6 @@ export default function MedicationsView({ user, onDataChange }) {
         setDosage('');
         setStock('30');
         setThreshold('10');
-        setSelectedTime('08:00');
-        setSelectedDate(new Date().toISOString().split('T')[0]);
         setImagePath('');
         fetchMeds();
         if (onDataChange) onDataChange();
@@ -110,7 +105,7 @@ export default function MedicationsView({ user, onDataChange }) {
           setFormMsg({ text: '', isError: false });
         }, 1200);
       } else {
-        setFormMsg({ text: res.message || 'Failed to add medication.', isError: true });
+        setFormMsg({ text: res.message || 'Failed to register medication.', isError: true });
       }
     } catch (err) {
       setFormMsg({ text: 'Error adding medication to stock.', isError: true });
@@ -513,105 +508,6 @@ export default function MedicationsView({ user, onDataChange }) {
                     className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Schedule Type</label>
-                <select
-                  value={schedType}
-                  onChange={(e) => setSchedType(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
-                >
-                  <option value="DAILY_TIME">DAILY TIME (Specific Time &amp; Date)</option>
-                  <option value="INTERVAL">INTERVAL (Every X Hours)</option>
-                </select>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                    <span>Choose Schedule Date</span>
-                  </label>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">{selectedDate}</span>
-                </div>
-
-                <input
-                  type="date"
-                  required
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500 mb-2"
-                />
-
-                <div className="grid grid-cols-4 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setQuickDate(0)}
-                    className="py-1.5 px-2 bg-slate-100 dark:bg-[#1c2234] hover:bg-slate-200 dark:hover:bg-[#222838] border border-slate-200 dark:border-[#262f46] rounded-lg text-[10px] font-bold text-slate-700 dark:text-slate-300 transition-colors"
-                  >
-                    Today
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setQuickDate(1)}
-                    className="py-1.5 px-2 bg-slate-100 dark:bg-[#1c2234] hover:bg-slate-200 dark:hover:bg-[#222838] border border-slate-200 dark:border-[#262f46] rounded-lg text-[10px] font-bold text-slate-700 dark:text-slate-300 transition-colors"
-                  >
-                    Tomorrow
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setQuickDate(2)}
-                    className="py-1.5 px-2 bg-slate-100 dark:bg-[#1c2234] hover:bg-slate-200 dark:hover:bg-[#222838] border border-slate-200 dark:border-[#262f46] rounded-lg text-[10px] font-bold text-slate-700 dark:text-slate-300 transition-colors"
-                  >
-                    In 2 Days
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setQuickDate(3)}
-                    className="py-1.5 px-2 bg-slate-100 dark:bg-[#1c2234] hover:bg-slate-200 dark:hover:bg-[#222838] border border-slate-200 dark:border-[#262f46] rounded-lg text-[10px] font-bold text-slate-700 dark:text-slate-300 transition-colors"
-                  >
-                    In 3 Days
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                    <span>Choose Intake Time</span>
-                  </label>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">{selectedTime}</span>
-                </div>
-
-                <input
-                  type={schedType === 'DAILY_TIME' ? 'time' : 'text'}
-                  required
-                  placeholder={schedType === 'DAILY_TIME' ? '08:00' : 'Interval in hours (e.g. 6)'}
-                  value={selectedTime}
-                  onChange={(e) => setSelectedTime(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500 mb-2"
-                />
-
-                {schedType === 'DAILY_TIME' && (
-                  <div className="grid grid-cols-4 gap-2">
-                    {timePresets.map((preset) => (
-                      <button
-                        key={preset.value}
-                        type="button"
-                        onClick={() => setSelectedTime(preset.value)}
-                        className={`py-1.5 px-2 border rounded-lg text-[10px] font-bold transition-all ${
-                          selectedTime === preset.value
-                            ? 'bg-purple-600 border-purple-500 text-white shadow-sm'
-                            : 'bg-slate-100 dark:bg-[#1c2234] hover:bg-slate-200 dark:hover:bg-[#222838] border-slate-200 dark:border-[#262f46] text-slate-700 dark:text-slate-300'
-                        }`}
-                      >
-                        {preset.label} ({preset.value})
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-[#1e2436]">

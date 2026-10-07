@@ -163,7 +163,7 @@ class PythonAPI:
         except Exception as e:
             return {"success": False, "error": str(e), "medications": []}
 
-    def add_medication(self, user_id, name, dosage, stock, refill_threshold, image_path=None, schedule_type="DAILY_TIME", time_value="08:00", schedule_date=None):
+    def add_medication(self, user_id, name, dosage, stock, refill_threshold, image_path=None, schedule_type=None, time_value=None, schedule_date=None):
         try:
             user_id = int(user_id)
             stock = int(stock)
@@ -172,10 +172,6 @@ class PythonAPI:
             med_id = self.inventory_manager.add_medication(
                 user_id, name, dosage, stock, refill_threshold, image_path
             )
-            if schedule_type and time_value:
-                clean_date = str(schedule_date).strip() if schedule_date else None
-                self.dose_alert.add_schedule(med_id, schedule_type, time_value, schedule_date=clean_date)
-
             return {"success": True, "message": "Medication added successfully!", "med_id": med_id}
         except Exception as e:
             return {"success": False, "message": str(e)}
@@ -231,17 +227,15 @@ class PythonAPI:
             med_id = int(med_id)
             clean_time = time_str.strip()
             clean_date = date_str.strip()
-            timestamp_str = f"{clean_date} {clean_time}:00" if len(clean_time) == 5 else f"{clean_date} {clean_time}"
 
             if status == "TAKEN":
+                timestamp_str = f"{clean_date} {clean_time}:00" if len(clean_time) == 5 else f"{clean_date} {clean_time}"
                 self.inventory_manager.deduct_stock(med_id)
                 self.report_generator.log_intake(user_id, med_id, "TAKEN", timestamp_str)
+                return {"success": True, "message": f"Dose logged as TAKEN for {clean_date} at {clean_time}!"}
             else:
-
-                self.report_generator.log_intake(user_id, med_id, "SCHEDULED", timestamp_str)
                 self.dose_alert.add_schedule(med_id, "DAILY_TIME", clean_time, schedule_date=clean_date)
-
-            return {"success": True, "message": f"Intake scheduled for {clean_date} at {clean_time}!"}
+                return {"success": True, "message": f"Intake scheduled for {clean_date} at {clean_time}!"}
         except Exception as e:
             return {"success": False, "message": str(e)}
 
