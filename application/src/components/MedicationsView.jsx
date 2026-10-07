@@ -34,10 +34,11 @@ export default function MedicationsView({ user, onDataChange }) {
   const [name, setName] = useState('');
   const [strengthVal, setStrengthVal] = useState('500');
   const [strengthUnit, setStrengthUnit] = useState('mg');
-  const [dosageForm, setDosageForm] = useState('Tablet');
+  const [dosageForm, setDosageForm] = useState('Capsule');
   const [stock, setStock] = useState('30');
-  const [stockUnit, setStockUnit] = useState('tablets');
+  const [stockUnit, setStockUnit] = useState('capsules');
   const [threshold, setThreshold] = useState('10');
+  const [expirationDate, setExpirationDate] = useState('');
   const [imagePath, setImagePath] = useState('');
   const [formMsg, setFormMsg] = useState({ text: '', isError: false });
   const [submitting, setSubmitting] = useState(false);
@@ -61,7 +62,7 @@ export default function MedicationsView({ user, onDataChange }) {
     setFormMsg({ text: '', isError: false });
 
     if (!name.trim() || !strengthVal.trim()) {
-      setFormMsg({ text: 'Please fill in medication name and strength amount.', isError: true });
+      setFormMsg({ text: 'Please fill in Medicine Name and Medicine Strength.', isError: true });
       return;
     }
 
@@ -80,7 +81,7 @@ export default function MedicationsView({ user, onDataChange }) {
         imagePath || null,
         computedStrength,
         dosageForm.trim(),
-        stockUnit.trim() || 'tablets'
+        stockUnit.trim() || 'capsules'
       );
 
       if (res.success) {
@@ -88,10 +89,11 @@ export default function MedicationsView({ user, onDataChange }) {
         setName('');
         setStrengthVal('500');
         setStrengthUnit('mg');
-        setDosageForm('Tablet');
+        setDosageForm('Capsule');
         setStock('30');
-        setStockUnit('tablets');
+        setStockUnit('capsules');
         setThreshold('10');
+        setExpirationDate('');
         setImagePath('');
         fetchMeds();
         if (onDataChange) onDataChange();
@@ -320,13 +322,13 @@ export default function MedicationsView({ user, onDataChange }) {
           <div className="text-center text-slate-500 dark:text-slate-400 py-24 text-xs">No medications found in stock inventory.</div>
         ) : viewMode === 'grid' ? (
 
-          /* Grid View Layout */
+          /* Grid View Layout - Clear Inventory Card Design */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredMeds.map((med) => {
               const thresh = med.refill_threshold || 10;
               const isOut = med.stock <= 0;
               const isLow = !isOut && (med.is_low_stock || med.stock <= thresh);
-              const unitStr = med.stock_unit || 'tablets';
+              const unitStr = med.stock_unit || 'capsules';
 
               return (
                 <div
@@ -340,8 +342,8 @@ export default function MedicationsView({ user, onDataChange }) {
                       </div>
                       <div className="min-w-0">
                         <h4 className="font-semibold text-slate-900 dark:text-white text-sm truncate">{med.name}</h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                          {med.strength || med.dosage} &bull; <span className="font-medium text-slate-700 dark:text-slate-300">{med.dosage_form || 'Tablet'}</span>
+                        <p className="text-xs text-purple-600 dark:text-purple-400 font-semibold truncate">
+                          {med.strength || med.dosage}
                         </p>
                       </div>
                     </div>
@@ -355,24 +357,24 @@ export default function MedicationsView({ user, onDataChange }) {
                     </button>
                   </div>
 
-                  {/* Inner Box Container Matching App Design (Inventory Only) */}
+                  {/* Inner Box Container Matching App Design */}
                   <div className="bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl p-3 space-y-2 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400">Stock Remaining:</span>
+                      <span className="text-slate-500 dark:text-slate-400">Type of Medicine:</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300">
+                        {med.dosage_form || 'Capsule'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 dark:text-slate-400">How Many Do You Have?:</span>
                       <span className={`font-bold ${isOut ? 'text-rose-600 dark:text-rose-400' : isLow ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
                         {med.stock} {unitStr}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400">Dosage Form:</span>
-                      <span className="font-medium text-slate-700 dark:text-slate-300">
-                        {med.dosage_form || 'Tablet'}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400">Refill Threshold:</span>
+                      <span className="text-slate-500 dark:text-slate-400">Alert When Stock Reaches:</span>
                       <span className="font-medium text-slate-700 dark:text-slate-300">
                         {thresh} {unitStr}
                       </span>
@@ -403,7 +405,7 @@ export default function MedicationsView({ user, onDataChange }) {
               const thresh = med.refill_threshold || 10;
               const isOut = med.stock <= 0;
               const isLow = !isOut && (med.is_low_stock || med.stock <= thresh);
-              const unitStr = med.stock_unit || 'tablets';
+              const unitStr = med.stock_unit || 'capsules';
 
               return (
                 <div
@@ -415,9 +417,9 @@ export default function MedicationsView({ user, onDataChange }) {
                       <MedImage src={med.image_path} alt={med.name} />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-xs truncate">{med.name}</h4>
+                      <h4 className="font-semibold text-slate-900 dark:text-white text-xs truncate">{med.name} &bull; <span className="text-purple-600 dark:text-purple-400 font-bold">{med.strength || med.dosage}</span></h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                        {med.strength || med.dosage} ({med.dosage_form || 'Tablet'}) &bull; Stock: <span className={isOut ? 'text-rose-600 dark:text-rose-400 font-bold' : isLow ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-slate-700 dark:text-slate-300 font-bold'}>{med.stock} {unitStr}</span> &bull; Refill Alert: {thresh} {unitStr}
+                        Type: {med.dosage_form || 'Capsule'} &bull; Stock: <span className={isOut ? 'text-rose-600 dark:text-rose-400 font-bold' : isLow ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-slate-700 dark:text-slate-300 font-bold'}>{med.stock} {unitStr}</span> &bull; Alert Level: {thresh} {unitStr}
                       </p>
                     </div>
                   </div>
@@ -448,7 +450,7 @@ export default function MedicationsView({ user, onDataChange }) {
         )}
       </div>
 
-      {/* Add Drug Modal */}
+      {/* Add Drug Modal - Clarified Wording & Field Labels */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/40 dark:bg-[#090b12]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
           <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#222838] rounded-2xl p-6 shadow-2xl space-y-5 text-slate-900 dark:text-white">
@@ -460,7 +462,7 @@ export default function MedicationsView({ user, onDataChange }) {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">Register New Drug</h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Add drug to stock inventory only.</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Add new medicine to stock inventory.</p>
                 </div>
               </div>
               <button
@@ -493,15 +495,15 @@ export default function MedicationsView({ user, onDataChange }) {
                 />
               </div>
 
-              {/* Strength Input with Unit Dropdown */}
+              {/* Medicine Strength & Type of Medicine */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Strength</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Medicine Strength</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       required
-                      placeholder="e.g. 500"
+                      placeholder="500"
                       value={strengthVal}
                       onChange={(e) => setStrengthVal(e.target.value)}
                       className="flex-1 min-w-0 bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
@@ -527,14 +529,14 @@ export default function MedicationsView({ user, onDataChange }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Dosage Form</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Type of Medicine</label>
                   <select
                     value={dosageForm}
                     onChange={(e) => setDosageForm(e.target.value)}
                     className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500 cursor-pointer font-medium"
                   >
-                    <option value="Tablet">Tablet</option>
                     <option value="Capsule">Capsule</option>
+                    <option value="Tablet">Tablet</option>
                     <option value="Syrup">Syrup</option>
                     <option value="Injection">Injection</option>
                     <option value="Drops">Drops</option>
@@ -544,45 +546,58 @@ export default function MedicationsView({ user, onDataChange }) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              {/* Stock Quantity & Refill Threshold */}
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Stock Quantity</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">How Many Do You Have?</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      placeholder="30"
+                      value={stock}
+                      onChange={(e) => setStock(e.target.value)}
+                      className="flex-1 min-w-0 bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
+                    />
+                    <select
+                      value={stockUnit}
+                      onChange={(e) => setStockUnit(e.target.value)}
+                      className="w-28 shrink-0 bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-2 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500 cursor-pointer font-medium"
+                    >
+                      <option value="capsules">capsules</option>
+                      <option value="tablets">tablets</option>
+                      <option value="doses">doses</option>
+                      <option value="ml">ml</option>
+                      <option value="pills">pills</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Alert Me When Stock Reaches</label>
                   <input
                     type="number"
                     min="0"
                     required
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Stock Unit</label>
-                  <select
-                    value={stockUnit}
-                    onChange={(e) => setStockUnit(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500 cursor-pointer font-medium"
-                  >
-                    <option value="tablets">tablets</option>
-                    <option value="capsules">capsules</option>
-                    <option value="doses">doses</option>
-                    <option value="ml">ml</option>
-                    <option value="pills">pills</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Refill Threshold</label>
-                  <input
-                    type="number"
-                    min="0"
-                    required
+                    placeholder="10"
                     value={threshold}
                     onChange={(e) => setThreshold(e.target.value)}
                     className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
                   />
                 </div>
+              </div>
+
+              {/* Expiration Date Field */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Expiration Date (Optional)</label>
+                <input
+                  type="date"
+                  placeholder="MM/DD/YYYY"
+                  value={expirationDate}
+                  onChange={(e) => setExpirationDate(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-[#1c2234] border border-slate-200 dark:border-[#262f46] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
+                />
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-[#1e2436]">

@@ -1,7 +1,7 @@
 {
-  "version": "1.0.28",
+  "version": "1.0.29",
   "release_date": "2026-10-08",
-  "release_notes": "Version 1.0.28: Added Strength Unit dropdown (mg, g, mcg, ml, IU, %, mEq, mg/ml, puffs, drops, units) to Register New Drug form in Medication Stock.",
+  "release_notes": "Version 1.0.29: Improved Register New Drug form clarity and field labels (Medicine Name, Medicine Strength, Type of Medicine, How Many Do You Have?, Alert Me When Stock Reaches, Expiration Date).",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }
