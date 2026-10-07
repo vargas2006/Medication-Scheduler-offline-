@@ -52,6 +52,52 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
     loadSettings();
   }, [user]);
 
+  const handleToggleOfflinePopups = async () => {
+    const newVal = !enableOfflinePopups;
+    setEnableOfflinePopups(newVal);
+    setSaveStatus('Saving...');
+    try {
+      await callApi(
+        'save_settings',
+        newVal ? 1 : 0,
+        enableGmailNotifications ? 1 : 0,
+        boundEmail,
+        '',
+        '',
+        user?.user_id,
+        isEmailVerified ? 1 : 0
+      );
+      setSaveStatus('Saved!');
+      setTimeout(() => setSaveStatus(''), 2500);
+    } catch (e) {
+      console.error('Failed to save offline popup setting:', e);
+      setSaveStatus('Error saving');
+    }
+  };
+
+  const handleToggleGmailNotifications = async () => {
+    const newVal = !enableGmailNotifications;
+    setEnableGmailNotifications(newVal);
+    setSaveStatus('Saving...');
+    try {
+      await callApi(
+        'save_settings',
+        enableOfflinePopups ? 1 : 0,
+        newVal ? 1 : 0,
+        boundEmail,
+        '',
+        '',
+        user?.user_id,
+        isEmailVerified ? 1 : 0
+      );
+      setSaveStatus('Saved!');
+      setTimeout(() => setSaveStatus(''), 2500);
+    } catch (e) {
+      console.error('Failed to save Gmail notification setting:', e);
+      setSaveStatus('Error saving');
+    }
+  };
+
   const handleSaveSettings = async () => {
     try {
       setSaveStatus('Saving...');
@@ -102,14 +148,25 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
     }
     setBindStatus({ msg: 'Verifying code...', isError: false });
     try {
-      const res = await callApi('verify_and_bind_gmail', user?.user_id, inputGmail.trim(), code);
+      const targetEmail = inputGmail.trim();
+      const res = await callApi('verify_and_bind_gmail', user?.user_id, targetEmail, code);
       if (res.success) {
-        setBoundEmail(inputGmail.trim());
+        setBoundEmail(targetEmail);
         setIsEmailVerified(true);
         setEnableGmailNotifications(true);
         setCodeSent(false);
         setOtpCode('');
         setBindStatus({ msg: res.message || 'Gmail verified and bound successfully!', isError: false });
+        await callApi(
+          'save_settings',
+          enableOfflinePopups ? 1 : 0,
+          1,
+          targetEmail,
+          '',
+          '',
+          user?.user_id,
+          1
+        );
       } else {
         setBindStatus({ msg: res.message || 'Invalid code.', isError: true });
       }
@@ -215,7 +272,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
 
               <button
                 type="button"
-                onClick={() => setEnableOfflinePopups(!enableOfflinePopups)}
+                onClick={handleToggleOfflinePopups}
                 className={`w-11 h-6 rounded-full p-1 transition-colors ${enableOfflinePopups ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'}`}
               >
                 <div className={`w-4 h-4 rounded-full bg-white transition-transform ${enableOfflinePopups ? 'translate-x-5' : 'translate-x-0'}`} />
@@ -234,7 +291,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
 
               <button
                 type="button"
-                onClick={() => setEnableGmailNotifications(!enableGmailNotifications)}
+                onClick={handleToggleGmailNotifications}
                 className={`w-11 h-6 rounded-full p-1 transition-colors ${enableGmailNotifications ? 'bg-sky-600' : 'bg-slate-300 dark:bg-slate-700'}`}
               >
                 <div className={`w-4 h-4 rounded-full bg-white transition-transform ${enableGmailNotifications ? 'translate-x-5' : 'translate-x-0'}`} />

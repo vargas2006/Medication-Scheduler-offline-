@@ -1,7 +1,7 @@
 {
-  "version": "1.0.22",
+  "version": "1.0.23",
   "release_date": "2026-10-07",
-  "release_notes": "Version 1.0.22: Replaced browser confirmation dialog with custom native-feeling history deletion modal.",
+  "release_notes": "Version 1.0.23: Fixed notification toggle state persistence across navigation, component remounts, and app restarts.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }
