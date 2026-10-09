@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Pill, Check, Search, Calendar, Clock, Plus, X, AlertCircle, LayoutList, LayoutGrid, Trash2, CheckCircle2 } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
+import { User, Schedule, Medication } from '../types';
 
-function MedImage({ src, alt }) {
-  const [hasError, setHasError] = useState(false);
+interface MedImageProps {
+  src?: string | null;
+  alt?: string;
+}
+
+function MedImage({ src, alt }: MedImageProps): React.JSX.Element {
+  const [hasError, setHasError] = useState<boolean>(false);
 
   if (!src || hasError) {
     return <Pill className="w-5 h-5 text-purple-600 dark:text-purple-400" />;
@@ -21,7 +27,7 @@ function MedImage({ src, alt }) {
   );
 }
 
-function formatTime(timeStr) {
+function formatTime(timeStr?: string): string {
   if (!timeStr) return '';
   const str = timeStr.trim();
   if (/am|pm/i.test(str)) {
@@ -40,7 +46,7 @@ function formatTime(timeStr) {
   return str;
 }
 
-function timeToMinutes(timeStr) {
+function timeToMinutes(timeStr?: string): number {
   if (!timeStr) return 0;
   const str = timeStr.trim();
   let hours = 0;
@@ -61,32 +67,47 @@ function timeToMinutes(timeStr) {
   return hours * 60 + minutes;
 }
 
-export default function IntakeView({ user, onDataChange }) {
-  const [schedules, setSchedules] = useState([]);
-  const [medications, setMedications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [dateFilter, setDateFilter] = useState('today'); // 'today', 'upcoming', 'all'
-  const [medFilter, setMedFilter] = useState('all'); // 'all' or medicine name
-  const [statusFilter, setStatusFilter] = useState('active'); // 'active', 'paused', 'all'
-  const [sortBy, setSortBy] = useState('time'); // 'time', 'name'
-  const [message, setMessage] = useState({ text: '', schId: null });
+interface IntakeViewProps {
+  user: User | null;
+  onDataChange?: () => void;
+}
 
-  const [viewMode, setViewMode] = useState('grid');
+interface ActionMessage {
+  text: string;
+  schId: number | null;
+}
 
-  const [showModal, setShowModal] = useState(false);
-  const [selectedMedId, setSelectedMedId] = useState('');
-  const [dosePerIntake, setDosePerIntake] = useState('1');
-  const [doseUnit, setDoseUnit] = useState('tablet');
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [selectedTime, setSelectedTime] = useState('08:00');
-  const [frequency, setFrequency] = useState('Every day');
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState('');
-  const [instructions, setInstructions] = useState('');
+interface FormMessage {
+  text: string;
+  isError: boolean;
+}
 
-  const [formMsg, setFormMsg] = useState({ text: '', isError: false });
-  const [submitting, setSubmitting] = useState(false);
+export default function IntakeView({ user, onDataChange }: IntakeViewProps): React.JSX.Element {
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [medications, setMedications] = useState<Medication[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [dateFilter, setDateFilter] = useState<string>('today');
+  const [medFilter, setMedFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('active');
+  const [sortBy, setSortBy] = useState<string>('time');
+  const [message, setMessage] = useState<ActionMessage>({ text: '', schId: null });
+
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [selectedMedId, setSelectedMedId] = useState<string>('');
+  const [dosePerIntake, setDosePerIntake] = useState<string>('1');
+  const [doseUnit, setDoseUnit] = useState<string>('tablet');
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [selectedTime, setSelectedTime] = useState<string>('08:00');
+  const [frequency, setFrequency] = useState<string>('Every day');
+  const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState<string>('');
+  const [instructions, setInstructions] = useState<string>('');
+
+  const [formMsg, setFormMsg] = useState<FormMessage>({ text: '', isError: false });
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
   const fetchSchedulesAndInventory = async () => {
     if (!user?.user_id) return;
@@ -118,10 +139,10 @@ export default function IntakeView({ user, onDataChange }) {
     fetchSchedulesAndInventory();
   }, [user]);
 
-  const handleTakeDose = async (sch) => {
-    if ((sch.stock || 0) <= 0) return;
+  const handleTakeDose = async (sch: Schedule) => {
+    if (!user?.user_id || (sch.stock || 0) <= 0) return;
     try {
-      const amt = parseInt(sch.dose_per_intake) || 1;
+      const amt = (typeof sch.dose_per_intake === 'number' ? sch.dose_per_intake : parseInt(sch.dose_per_intake as any, 10)) || 1;
       const res = await callApi('take_dose', user.user_id, sch.med_id, amt);
       if (res.success) {
         setMessage({ text: `Dose of ${sch.med_name} logged as TAKEN!`, schId: sch.schedule_id });
@@ -134,7 +155,7 @@ export default function IntakeView({ user, onDataChange }) {
     }
   };
 
-  const [pendingDeleteSchedule, setPendingDeleteSchedule] = useState(null);
+  const [pendingDeleteSchedule, setPendingDeleteSchedule] = useState<Schedule | null>(null);
 
   const confirmDeleteSchedule = async () => {
     if (!pendingDeleteSchedule) return;
@@ -151,8 +172,9 @@ export default function IntakeView({ user, onDataChange }) {
     }
   };
 
-  const handleCreateIntakeSchedule = async (e) => {
+  const handleCreateIntakeSchedule = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user?.user_id) return;
     setFormMsg({ text: '', isError: false });
 
     if (!selectedMedId) {
@@ -169,7 +191,7 @@ export default function IntakeView({ user, onDataChange }) {
         selectedDate,
         selectedTime,
         'SCHEDULED',
-        parseInt(dosePerIntake) || 1,
+        parseInt(dosePerIntake, 10) || 1,
         doseUnit || 'tablet',
         frequency || 'Every day',
         startDate || selectedDate,
@@ -195,7 +217,7 @@ export default function IntakeView({ user, onDataChange }) {
     }
   };
 
-  const setQuickTime = (timeVal) => {
+  const setQuickTime = (timeVal: string) => {
     setSelectedTime(timeVal);
   };
 

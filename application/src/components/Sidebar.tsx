@@ -1,7 +1,15 @@
 import React from 'react';
-import { LayoutDashboard, Pill, History, Settings, LogOut, User, CheckCircle } from 'lucide-react';
+import { LayoutDashboard, Pill, History, Settings, LogOut, User as UserIcon, CheckCircle } from 'lucide-react';
+import { User } from '../types';
 
-export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
+interface SidebarProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  user: User | null;
+  onLogout: () => void;
+}
+
+export default function Sidebar({ activeTab, setActiveTab, user, onLogout }: SidebarProps): React.JSX.Element {
   const displayName = user?.name || user?.username || 'User';
 
   return (
@@ -103,7 +111,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
         <div className="bg-white dark:bg-[#151926] border border-slate-200 dark:border-[#222838] rounded-xl p-2.5 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-[#222838] flex items-center justify-center text-slate-600 dark:text-slate-300 shrink-0">
-              <User className="w-3.5 h-3.5" />
+              <UserIcon className="w-3.5 h-3.5" />
             </div>
             <div className="flex flex-col min-w-0">
               <span className="font-semibold text-slate-900 dark:text-white text-xs truncate">{displayName}</span>

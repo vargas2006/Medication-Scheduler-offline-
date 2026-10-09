@@ -1,27 +1,39 @@
 import React, { useState } from 'react';
-import { Pill, Lock, Mail, User, AlertCircle, CheckCircle, ArrowLeft, KeyRound, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { Lock, Mail, User as UserIcon, AlertCircle, CheckCircle, ArrowLeft, KeyRound, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
+import { User } from '../types';
 
-export default function LoginModal({ onLoginSuccess }) {
-  const [viewMode, setViewMode] = useState('auth');
-  const [isRegister, setIsRegister] = useState(false);
+interface LoginModalProps {
+  onLoginSuccess: (user: User) => void;
+}
 
-  const [name, setName] = useState('');
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+type ViewMode = 'auth' | 'forgot_request' | 'forgot_verify';
 
-  const [resetIdent, setResetIdent] = useState('');
-  const [resetEmail, setResetEmail] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+interface StatusMessage {
+  text: string;
+  isError: boolean;
+}
 
-  const [message, setMessage] = useState({ text: '', isError: false });
-  const [loading, setLoading] = useState(false);
+export default function LoginModal({ onLoginSuccess }: LoginModalProps): React.JSX.Element {
+  const [viewMode, setViewMode] = useState<ViewMode>('auth');
+  const [isRegister, setIsRegister] = useState<boolean>(false);
 
-  const handleSubmit = async (e) => {
+  const [name, setName] = useState<string>('');
+  const [identifier, setIdentifier] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const [resetIdent, setResetIdent] = useState<string>('');
+  const [resetEmail, setResetEmail] = useState<string>('');
+  const [otpCode, setOtpCode] = useState<string>('');
+  const [newPassword, setNewPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+
+  const [message, setMessage] = useState<StatusMessage>({ text: '', isError: false });
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage({ text: '', isError: false });
     setLoading(true);
@@ -37,14 +49,14 @@ export default function LoginModal({ onLoginSuccess }) {
         }
       } else {
         const res = await callApi('login', identifier, password);
-        if (res.success) {
+        if (res.success && res.user) {
           if (rememberMe) {
             const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
             localStorage.setItem('med_user_session', JSON.stringify({ user: res.user, expiry }));
             try {
               await callApi('save_remember_session', res.user.user_id);
-            } catch (e) {
-              console.error('Failed saving SQLite remember session:', e);
+            } catch (err) {
+              console.error('Failed saving SQLite remember session:', err);
             }
           } else {
             localStorage.removeItem('med_user_session');
@@ -61,9 +73,9 @@ export default function LoginModal({ onLoginSuccess }) {
     }
   };
 
-  const handleRequestReset = async (e) => {
+  const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!resetIdent.trim?.() && !resetIdent) {
+    if (!resetIdent.trim()) {
       setMessage({ text: 'Please enter your username or registered email.', isError: true });
       return;
     }
@@ -73,7 +85,7 @@ export default function LoginModal({ onLoginSuccess }) {
     try {
       const res = await callApi('request_password_reset', resetIdent);
       if (res.success) {
-        setResetEmail(res.email);
+        setResetEmail(res.email || '');
         setViewMode('forgot_verify');
         setMessage({ text: res.message || 'Verification code sent to your email address!', isError: false });
       } else {
@@ -86,7 +98,7 @@ export default function LoginModal({ onLoginSuccess }) {
     }
   };
 
-  const handleVerifyReset = async (e) => {
+  const handleVerifyReset = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otpCode || !newPassword || !confirmPassword) {
       setMessage({ text: 'Please fill in all fields.', isError: true });
@@ -177,7 +189,7 @@ export default function LoginModal({ onLoginSuccess }) {
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Full Name</label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <UserIcon className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                     <input
                       type="text"
                       required
@@ -221,7 +233,7 @@ export default function LoginModal({ onLoginSuccess }) {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none transition-colors"
-                    title={showPassword ? "Hide password" : "Show password"}
+                    title={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -372,7 +384,7 @@ export default function LoginModal({ onLoginSuccess }) {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none transition-colors"
-                    title={showPassword ? "Hide password" : "Show password"}
+                    title={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -395,7 +407,7 @@ export default function LoginModal({ onLoginSuccess }) {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none transition-colors"
-                    title={showPassword ? "Hide password" : "Show password"}
+                    title={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>

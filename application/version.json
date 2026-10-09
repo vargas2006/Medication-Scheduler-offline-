@@ -1,7 +1,7 @@
 {
-  "version": "1.0.31",
-  "release_date": "2026-10-08",
-  "release_notes": "Version 1.0.31: Added Search/Filters/Sort and readable 12-hour time format to Medication Schedule, and Restock Stock inventory functionality.",
+  "version": "1.1.2",
+  "release_date": "2026-10-09",
+  "release_notes": "Version 1.1.2: Converted application UI to TypeScript with explicit type definitions, enhanced Medication Schedule & Stock management, and updated application executable bundle.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }

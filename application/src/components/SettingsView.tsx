@@ -1,31 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { Moon, Sun, UserCheck, Shield, Bell, Mail, CheckCircle2, AlertCircle, Save, ShieldCheck } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
+import { User } from '../types';
 
-export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
+interface SettingsViewProps {
+  user: User | null;
+  theme?: 'dark' | 'light' | string;
+  onToggleTheme: () => void;
+}
+
+interface StatusMsg {
+  msg: string;
+  isError: boolean;
+}
+
+interface PwStatusMsg {
+  msg: string;
+  ok: boolean | null;
+}
+
+export default function SettingsView({ user, theme = 'dark', onToggleTheme }: SettingsViewProps): React.JSX.Element {
   const isDark = theme === 'dark';
 
-  const [enableOfflinePopups, setEnableOfflinePopups] = useState(false);
-  const [enableGmailNotifications, setEnableGmailNotifications] = useState(false);
-  const [boundEmail, setBoundEmail] = useState('');
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [enableOfflinePopups, setEnableOfflinePopups] = useState<boolean>(false);
+  const [enableGmailNotifications, setEnableGmailNotifications] = useState<boolean>(false);
+  const [boundEmail, setBoundEmail] = useState<string>('');
+  const [isEmailVerified, setIsEmailVerified] = useState<boolean>(false);
 
-  const [inputGmail, setInputGmail] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-  const [codeSent, setCodeSent] = useState(false);
+  const [inputGmail, setInputGmail] = useState<string>('');
+  const [otpCode, setOtpCode] = useState<string>('');
+  const [codeSent, setCodeSent] = useState<boolean>(false);
 
-  const [bindStatus, setBindStatus] = useState({ msg: '', isError: false });
-  const [saveStatus, setSaveStatus] = useState('');
+  const [bindStatus, setBindStatus] = useState<StatusMsg>({ msg: '', isError: false });
+  const [saveStatus, setSaveStatus] = useState<string>('');
 
-  const [currentPw, setCurrentPw] = useState('');
-  const [newPw, setNewPw] = useState('');
-  const [confirmPw, setConfirmPw] = useState('');
-  const [pwStatus, setPwStatus] = useState({ msg: '', ok: null });
+  const [currentPw, setCurrentPw] = useState<string>('');
+  const [newPw, setNewPw] = useState<string>('');
+  const [confirmPw, setConfirmPw] = useState<string>('');
+  const [pwStatus, setPwStatus] = useState<PwStatusMsg>({ msg: '', ok: null });
 
   const displayName = user?.name || user?.username || 'User';
   const emailInfo = user?.email ? ` (${user.email})` : '';
 
-  const [appVersion, setAppVersion] = useState('1.0.30');
+  const [appVersion, setAppVersion] = useState<string>('1.1.2');
 
   const loadSettings = async () => {
     try {
@@ -490,7 +507,7 @@ export default function SettingsView({ user, theme = 'dark', onToggleTheme }) {
                 <button
                   type="button"
                   onClick={async () => {
-                    const btn = document.getElementById('chk-update-btn');
+                    const btn = document.getElementById('chk-update-btn') as HTMLButtonElement | null;
                     const statusText = document.getElementById('chk-update-status');
                     if (btn) btn.disabled = true;
                     if (statusText) statusText.innerText = 'Checking remote manifest...';

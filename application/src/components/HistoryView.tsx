@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, FileSpreadsheet, Trash2, History } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
+import { User, HistoryLog } from '../types';
 
-export default function HistoryView({ user }) {
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [exportMsg, setExportMsg] = useState('');
-  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+interface HistoryViewProps {
+  user: User | null;
+}
 
-  const [dateFilter, setDateFilter] = useState('ALL');
-  const [customStart, setCustomStart] = useState('');
-  const [customEnd, setCustomEnd] = useState('');
+type DateFilterType = 'ALL' | 'TODAY' | 'YESTERDAY' | 'THIS_WEEK' | 'THIS_MONTH' | 'LAST_3_MONTHS' | 'CUSTOM';
+
+export default function HistoryView({ user }: HistoryViewProps): React.JSX.Element {
+  const [history, setHistory] = useState<HistoryLog[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [exportMsg, setExportMsg] = useState<string>('');
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+
+  const [dateFilter, setDateFilter] = useState<DateFilterType>('ALL');
+  const [customStart, setCustomStart] = useState<string>('');
+  const [customEnd, setCustomEnd] = useState<string>('');
 
   const fetchHistory = async () => {
     if (!user?.user_id) return;
@@ -37,6 +44,7 @@ export default function HistoryView({ user }) {
   }, [user]);
 
   const handleExportCSV = async () => {
+    if (!user?.user_id) return;
     setExportMsg('');
     const res = await callApi('export_csv', user.user_id);
     if (res.success) {
@@ -55,7 +63,7 @@ export default function HistoryView({ user }) {
 
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
-    const diffDays = (now - itemDate) / (1000 * 60 * 60 * 24);
+    const diffDays = (now.getTime() - itemDate.getTime()) / (1000 * 60 * 60 * 24);
 
     if (dateFilter === 'TODAY') {
       return itemDate.toISOString().split('T')[0] === todayStr;
@@ -109,7 +117,7 @@ export default function HistoryView({ user }) {
               <span className="text-slate-500 dark:text-slate-400 font-medium">Filter Timeline:</span>
               <select
                 value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
+                onChange={(e) => setDateFilter(e.target.value as DateFilterType)}
                 className="bg-transparent text-slate-900 dark:text-white font-bold focus:outline-none cursor-pointer"
               >
                 <option value="ALL" className="bg-white dark:bg-[#151926]">All Dates</option>

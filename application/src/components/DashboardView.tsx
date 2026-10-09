@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Pill, Bell, History, Check, Sparkles, BarChart3, Activity } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
+import { User, DashboardDataResponse } from '../types';
 
-export default function DashboardView({ user, onDataChange }) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+interface DashboardViewProps {
+  user: User | null;
+  onDataChange?: () => void;
+}
+
+export default function DashboardView({ user, onDataChange }: DashboardViewProps): React.JSX.Element {
+  const [data, setData] = useState<DashboardDataResponse | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const fetchDashboard = async () => {
     if (!user?.user_id) return;
     setLoading(true);
-    const res = await callApi('get_dashboard_data', user.user_id);
+    const res = await callApi<DashboardDataResponse>('get_dashboard_data', user.user_id);
     if (res.success) {
-      setData(res);
+      setData(res as DashboardDataResponse);
     }
     setLoading(false);
   };
@@ -20,7 +26,8 @@ export default function DashboardView({ user, onDataChange }) {
     fetchDashboard();
   }, [user]);
 
-  const handleTakeDose = async (medId) => {
+  const handleTakeDose = async (medId: number) => {
+    if (!user?.user_id) return;
     const res = await callApi('take_dose', user.user_id, medId);
     if (res.success) {
       fetchDashboard();
@@ -53,8 +60,8 @@ export default function DashboardView({ user, onDataChange }) {
     recent_history = []
   } = data || {};
 
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const maxWeekly = Math.max(...weekly_counts, 4);
+  const days: string[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const maxWeekly: number = Math.max(...weekly_counts, 4);
 
   return (
     <div className="p-5 space-y-5 overflow-y-auto h-full pr-6 transition-colors duration-150">
@@ -163,7 +170,7 @@ export default function DashboardView({ user, onDataChange }) {
                     </div>
                     <div>
                       <h4 className="font-semibold text-slate-900 dark:text-white text-xs leading-snug">
-                        {med.name} {med.dosage}
+                        {med.med_name || med.name} {med.strength || med.dosage}
                       </h4>
                       <p className="text-[11px] text-sky-600 dark:text-sky-400">Scheduled at: {med.time_value}</p>
                     </div>

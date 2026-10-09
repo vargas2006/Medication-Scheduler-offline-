@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-export default function AppLoadingScreen({ onFinish }) {
-  const [progress, setProgress] = useState(0);
-  const [fadingOut, setFadingOut] = useState(false);
+interface AppLoadingScreenProps {
+  onFinish?: () => void;
+}
+
+export default function AppLoadingScreen({ onFinish }: AppLoadingScreenProps): React.JSX.Element {
+  const [progress, setProgress] = useState<number>(0);
+  const [fadingOut, setFadingOut] = useState<boolean>(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -31,7 +35,6 @@ export default function AppLoadingScreen({ onFinish }) {
       }`}
     >
       <div className="flex flex-col items-center">
-
         <img
           src="/app_icon.png"
           alt="MedScheduler Logo"

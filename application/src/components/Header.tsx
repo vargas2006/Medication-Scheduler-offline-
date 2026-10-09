@@ -1,7 +1,21 @@
 import React from 'react';
 import { Calendar, Sun, Moon } from 'lucide-react';
+import { User } from '../types';
 
-export default function Header({ activeTab, user, theme = 'dark', onToggleTheme }) {
+interface HeaderProps {
+  activeTab: string;
+  user: User | null;
+  theme?: 'dark' | 'light' | string;
+  onToggleTheme: () => void;
+}
+
+interface HeaderMeta {
+  tag: string;
+  title: string;
+  subtitle: string;
+}
+
+export default function Header({ activeTab, user, theme = 'dark', onToggleTheme }: HeaderProps): React.JSX.Element {
   const displayName = user?.name || user?.username || 'User';
 
   const dateStr = new Date().toLocaleDateString('en-US', {
@@ -10,7 +24,7 @@ export default function Header({ activeTab, user, theme = 'dark', onToggleTheme 
     day: 'numeric'
   });
 
-  const getHeaderMeta = () => {
+  const getHeaderMeta = (): HeaderMeta => {
     switch (activeTab) {
       case 'MedicationFrame':
         return {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, X, Pill, Clock, Check, AlertCircle, Droplet } from 'lucide-react';
+import { Bell, X, Pill, Clock, Check, Droplet } from 'lucide-react';
 import AppLoadingScreen from './components/AppLoadingScreen';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -10,14 +10,15 @@ import IntakeView from './components/IntakeView';
 import HistoryView from './components/HistoryView';
 import SettingsView from './components/SettingsView';
 import { callApi } from './utils/pywebview';
+import { User, DueAlert } from './types';
 
-export default function App() {
-  const [appLoading, setAppLoading] = useState(true);
-  const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('DashboardFrame');
-  const [dataRefreshKey, setDataRefreshKey] = useState(0);
-  const [activeAlert, setActiveAlert] = useState(null);
-  const [theme, setTheme] = useState(() => {
+export default function App(): React.JSX.Element {
+  const [appLoading, setAppLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('DashboardFrame');
+  const [dataRefreshKey, setDataRefreshKey] = useState<number>(0);
+  const [activeAlert, setActiveAlert] = useState<DueAlert | null>(null);
+  const [theme, setTheme] = useState<string>(() => {
     return localStorage.getItem('med_app_theme') || 'dark';
   });
 
@@ -41,9 +42,10 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    const handleDueAlert = (e) => {
-      if (e.detail) {
-        setActiveAlert(e.detail);
+    const handleDueAlert = (e: Event) => {
+      const customEvent = e as CustomEvent<DueAlert>;
+      if (customEvent.detail) {
+        setActiveAlert(customEvent.detail);
       }
     };
     window.addEventListener('medication-due-alert', handleDueAlert);
@@ -82,7 +84,7 @@ export default function App() {
     setUser(null);
   };
 
-  const handleLoginSuccess = async (u) => {
+  const handleLoginSuccess = async (u: User) => {
     setUser(u);
     try {
       await callApi('set_active_user', u.user_id);
@@ -220,7 +222,7 @@ export default function App() {
                 setActiveAlert(null);
                 setActiveTab('IntakeFrame');
               }}
-              className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-xs shadow-sm flex items-center gap-1.5 transition-all"
+              className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-sm flex items-center gap-1.5 transition-all"
             >
               <Check className="w-3.5 h-3.5" />
               <span>Take Dose Now</span>

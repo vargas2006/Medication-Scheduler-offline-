@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, AlertCircle, AlertTriangle, Check, CheckCircle2, Search, ArrowUpDown, Boxes, X, LayoutList, LayoutGrid, Pill } from 'lucide-react';
 import { callApi } from '../utils/pywebview';
+import { User, Medication } from '../types';
 
-function MedImage({ src, alt }) {
-  const [hasError, setHasError] = useState(false);
+interface MedImageProps {
+  src?: string | null;
+  alt?: string;
+}
+
+function MedImage({ src, alt }: MedImageProps): React.JSX.Element {
+  const [hasError, setHasError] = useState<boolean>(false);
 
   if (!src || hasError) {
     return <Pill className="w-5 h-5 text-purple-600 dark:text-purple-400" />;
@@ -21,42 +27,55 @@ function MedImage({ src, alt }) {
   );
 }
 
-export default function MedicationsView({ user, onDataChange }) {
-  const [medications, setMedications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+interface MedicationsViewProps {
+  user: User | null;
+  onDataChange?: () => void;
+}
 
-  const [viewMode, setViewMode] = useState('grid');
-  const [stockFilter, setStockFilter] = useState('ALL');
-  const [sortBy, setSortBy] = useState('DEFAULT');
+interface StatusMsg {
+  text: string;
+  isError: boolean;
+}
 
-  const [showModal, setShowModal] = useState(false);
-  const [name, setName] = useState('');
-  const [strengthVal, setStrengthVal] = useState('500');
-  const [strengthUnit, setStrengthUnit] = useState('mg');
-  const [dosageForm, setDosageForm] = useState('Capsule');
-  const [stock, setStock] = useState('30');
-  const [stockUnit, setStockUnit] = useState('capsules');
-  const [threshold, setThreshold] = useState('10');
-  const [expirationDate, setExpirationDate] = useState('');
-  const [imagePath, setImagePath] = useState('');
-  const [formMsg, setFormMsg] = useState({ text: '', isError: false });
-  const [submitting, setSubmitting] = useState(false);
+type StockFilterType = 'ALL' | 'LOW_STOCK' | 'OUT_OF_STOCK' | 'IN_STOCK';
+type SortByType = 'DEFAULT' | 'STOCK_ASC' | 'STOCK_DESC' | 'NAME_AZ';
 
-  const [showRestockModal, setShowRestockModal] = useState(false);
-  const [restockMedObj, setRestockMedObj] = useState(null);
-  const [addStockAmount, setAddStockAmount] = useState('30');
-  const [restockMsg, setRestockMsg] = useState({ text: '', isError: false });
-  const [restocking, setRestocking] = useState(false);
+export default function MedicationsView({ user, onDataChange }: MedicationsViewProps): React.JSX.Element {
+  const [medications, setMedications] = useState<Medication[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const handleOpenRestockModal = (med) => {
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [stockFilter, setStockFilter] = useState<StockFilterType>('ALL');
+  const [sortBy, setSortBy] = useState<SortByType>('DEFAULT');
+
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [name, setName] = useState<string>('');
+  const [strengthVal, setStrengthVal] = useState<string>('500');
+  const [strengthUnit, setStrengthUnit] = useState<string>('mg');
+  const [dosageForm, setDosageForm] = useState<string>('Capsule');
+  const [stock, setStock] = useState<string>('30');
+  const [stockUnit, setStockUnit] = useState<string>('capsules');
+  const [threshold, setThreshold] = useState<string>('10');
+  const [expirationDate, setExpirationDate] = useState<string>('');
+  const [imagePath, setImagePath] = useState<string>('');
+  const [formMsg, setFormMsg] = useState<StatusMsg>({ text: '', isError: false });
+  const [submitting, setSubmitting] = useState<boolean>(false);
+
+  const [showRestockModal, setShowRestockModal] = useState<boolean>(false);
+  const [restockMedObj, setRestockMedObj] = useState<Medication | null>(null);
+  const [addStockAmount, setAddStockAmount] = useState<string>('30');
+  const [restockMsg, setRestockMsg] = useState<StatusMsg>({ text: '', isError: false });
+  const [restocking, setRestocking] = useState<boolean>(false);
+
+  const handleOpenRestockModal = (med: Medication) => {
     setRestockMedObj(med);
     setAddStockAmount('30');
     setRestockMsg({ text: '', isError: false });
     setShowRestockModal(true);
   };
 
-  const handleConfirmRestock = async (e) => {
+  const handleConfirmRestock = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!restockMedObj) return;
 
@@ -102,8 +121,9 @@ export default function MedicationsView({ user, onDataChange }) {
     fetchMeds();
   }, [user]);
 
-  const handleAddMedication = async (e) => {
+  const handleAddMedication = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user?.user_id) return;
     setFormMsg({ text: '', isError: false });
 
     if (!name.trim() || !strengthVal.trim()) {
@@ -121,8 +141,8 @@ export default function MedicationsView({ user, onDataChange }) {
         user.user_id,
         name.trim(),
         fullDosageStr,
-        parseInt(stock) || 0,
-        parseInt(threshold) || 0,
+        parseInt(stock, 10) || 0,
+        parseInt(threshold, 10) || 0,
         imagePath || null,
         computedStrength,
         dosageForm.trim(),
@@ -159,7 +179,7 @@ export default function MedicationsView({ user, onDataChange }) {
     }
   };
 
-  const [pendingDeleteMed, setPendingDeleteMed] = useState(null);
+  const [pendingDeleteMed, setPendingDeleteMed] = useState<Medication | null>(null);
 
   const confirmDeleteMedication = async () => {
     if (!pendingDeleteMed) return;
@@ -347,7 +367,7 @@ export default function MedicationsView({ user, onDataChange }) {
               <span className="text-slate-500 dark:text-slate-400 font-medium">Sort By:</span>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => setSortBy(e.target.value as SortByType)}
                 className="bg-transparent text-slate-900 dark:text-white font-bold focus:outline-none cursor-pointer"
               >
                 <option value="DEFAULT" className="bg-white dark:bg-[#151926]">Default</option>
@@ -800,7 +820,7 @@ export default function MedicationsView({ user, onDataChange }) {
         </div>
       )}
 
-      {/* Confirmation Modal for Deleting Medication from Stock */}
+      {/* Confirmation Modal for Deleting Medication */}
       {pendingDeleteMed && (
         <div
           className="fixed inset-0 bg-slate-900/40 dark:bg-[#090b12]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn"
@@ -811,9 +831,9 @@ export default function MedicationsView({ user, onDataChange }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Delete Medication from Stock?</h3>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Delete Medication?</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                Are you sure you want to delete <strong className="text-slate-900 dark:text-white">{pendingDeleteMed.name} ({pendingDeleteMed.strength || pendingDeleteMed.dosage})</strong> from your stock inventory? This action cannot be undone.
+                Are you sure you want to delete <strong className="text-slate-900 dark:text-white">{pendingDeleteMed.name}</strong> from stock inventory? This action cannot be undone.
               </p>
             </div>
 
