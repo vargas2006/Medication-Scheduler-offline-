@@ -1,7 +1,7 @@
 {
-  "version": "1.2.1",
-  "release_date": "2026-10-15",
-  "release_notes": "Version 1.2.1: Added medication images to dose recorded notifications and alerts, and improved schedule ordering so taken doses automatically move to the bottom while untaken doses stay at the top.",
+  "version": "1.2.2",
+  "release_date": "2026-10-27",
+  "release_notes": "Version 1.2.2: Fixed dashboard upcoming doses count and status indicators, ensuring real-time synchronization of today's schedule and taken doses.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }

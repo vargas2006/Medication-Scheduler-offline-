@@ -50,7 +50,7 @@ export default function SettingsView({ user, theme = 'light', onToggleTheme, onL
   const [bindStatus, setBindStatus] = useState<{ msg: string; isError: boolean }>({ msg: '', isError: false });
 
   // Software Update State
-  const [appVersion, setAppVersion] = useState<string>('1.2.1');
+  const [appVersion, setAppVersion] = useState<string>('1.2.2');
   const [checkingUpdate, setCheckingUpdate] = useState<boolean>(false);
   const [updateStatus, setUpdateStatus] = useState<{ msg: string; isError: boolean }>({ msg: '', isError: false });
 
