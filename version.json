@@ -1,7 +1,7 @@
 {
-  "version": "1.2.2",
-  "release_date": "2026-10-27",
-  "release_notes": "Version 1.2.2: Fixed dashboard upcoming doses count and status indicators, ensuring real-time synchronization of today's schedule and taken doses.",
+  "version": "1.2.3",
+  "release_date": "2026-10-30",
+  "release_notes": "Version 1.2.3: Fixed display images in My Medications and Schedule views; improved responsive scaling of image cards and guidelines panels for larger screen sizes.",
   "download_url": "https://raw.githubusercontent.com/vargas2006/Medication-Scheduler-offline-/main/SmartMedicationScheduler.zip",
   "mandatory": false
 }
